@@ -11,7 +11,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { Download, TrendingUp, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { storage } from "@/utils/storage";
-import { PipelineTrackInputs } from "@/domain/pipeline/types";
+import { CalculationMode } from "@/types/calculation";
 import {
   SENSITIVITY_PARAMETERS,
   generateSensitivitySweep,
@@ -21,33 +21,60 @@ import {
 
 const Sensitivity = () => {
   const { toast } = useToast();
-  const [selectedParameter, setSelectedParameter] = useState<keyof PipelineTrackInputs>('depthCover');
+  const [selectedMode, setSelectedMode] = useState<CalculationMode>('PIPELINE_TRACK');
+  const [selectedParameter, setSelectedParameter] = useState<string>('depthCover');
   const [sweepMode, setSweepMode] = useState<'absolute' | 'percentage'>('percentage');
   const [percentRange, setPercentRange] = useState(20);
   const [percentStep, setPercentStep] = useState(5);
   const [minValue, setMinValue] = useState<number>(0);
   const [maxValue, setMaxValue] = useState<number>(100);
   const [stepValue, setStepValue] = useState<number>(10);
-  const [baseInputs, setBaseInputs] = useState<PipelineTrackInputs | null>(null);
+  const [baseInputs, setBaseInputs] = useState<any | null>(null);
   const [results, setResults] = useState<SensitivityResult[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
 
-  // Load the most recent Pipeline Track run as base case
+  // Filter parameters based on selected mode
+  const availableParameters = useMemo(() => {
+    return SENSITIVITY_PARAMETERS.filter(p => p.modes.includes(selectedMode));
+  }, [selectedMode]);
+
+  // Reset parameter selection when mode changes
+  const handleModeChange = (newMode: CalculationMode) => {
+    setSelectedMode(newMode);
+    const newAvailableParams = SENSITIVITY_PARAMETERS.filter(p => p.modes.includes(newMode));
+    if (newAvailableParams.length > 0 && !newAvailableParams.find(p => p.key === selectedParameter)) {
+      setSelectedParameter(newAvailableParams[0].key);
+    }
+    setBaseInputs(null);
+    setResults([]);
+  };
+
+  const getModeLabel = (mode: CalculationMode) => {
+    switch (mode) {
+      case 'PIPELINE_TRACK': return 'Pipeline Track';
+      case '2_AXLE': return '2-Axle Vehicle';
+      case '3_AXLE': return '3-Axle Vehicle';
+      case 'GRID': return 'Grid Load';
+      default: return mode;
+    }
+  };
+
+  // Load the most recent run of selected mode as base case
   const loadBaseCase = () => {
     const runs = storage.getRuns();
-    const pipelineRuns = runs.filter(r => r.mode === 'PIPELINE_TRACK');
+    const modeRuns = runs.filter(r => r.mode === selectedMode);
     
-    if (pipelineRuns.length === 0) {
+    if (modeRuns.length === 0) {
       toast({
         title: "No Base Case",
-        description: "Please run a Pipeline Track calculation first",
+        description: `Please run a ${getModeLabel(selectedMode)} calculation first`,
         variant: "destructive",
       });
       return;
     }
 
-    const latestRun = pipelineRuns[0];
-    setBaseInputs(latestRun.input as PipelineTrackInputs);
+    const latestRun = modeRuns[0];
+    setBaseInputs(latestRun.input);
     
     toast({
       title: "Base Case Loaded",
@@ -72,7 +99,7 @@ const Sensitivity = () => {
         ? { mode: 'percentage' as const, percentRange, percentStep }
         : { mode: 'absolute' as const, min: minValue, max: maxValue, step: stepValue };
 
-      const sweepResults = generateSensitivitySweep(baseInputs, selectedParameter, config);
+      const sweepResults = generateSensitivitySweep(baseInputs, selectedParameter, config, selectedMode);
 
       if (sweepResults.length === 0) {
         throw new Error("No results generated");
@@ -112,7 +139,7 @@ const Sensitivity = () => {
       return;
     }
 
-    const param = SENSITIVITY_PARAMETERS.find(p => p.key === selectedParameter);
+    const param = availableParameters.find(p => p.key === selectedParameter);
     if (!param) return;
 
     const unit = baseInputs?.unitsSystem === 'SI' ? param.unitSI : param.unit;
@@ -142,7 +169,7 @@ const Sensitivity = () => {
     }));
   }, [results]);
 
-  const selectedParam = SENSITIVITY_PARAMETERS.find(p => p.key === selectedParameter);
+  const selectedParam = availableParameters.find(p => p.key === selectedParameter);
   const paramUnit = baseInputs?.unitsSystem === 'SI' ? selectedParam?.unitSI : selectedParam?.unit;
 
   return (
@@ -161,24 +188,42 @@ const Sensitivity = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Configuration</CardTitle>
-                <CardDescription>Select parameter and range</CardDescription>
+                <CardDescription>Select mode, parameter and range</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {!baseInputs && (
                   <Alert>
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
-                      Load a base case from your calculation history
+                      Select a calculation mode and load a base case
                     </AlertDescription>
                   </Alert>
                 )}
+
+                <div className="space-y-2">
+                  <Label>Calculation Mode</Label>
+                  <Select
+                    value={selectedMode}
+                    onValueChange={(v) => handleModeChange(v as CalculationMode)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PIPELINE_TRACK">Pipeline Track</SelectItem>
+                      <SelectItem value="2_AXLE">2-Axle Vehicle</SelectItem>
+                      <SelectItem value="3_AXLE">3-Axle Vehicle</SelectItem>
+                      <SelectItem value="GRID">Grid Load</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 <Button 
                   onClick={loadBaseCase} 
                   variant="outline" 
                   className="w-full"
                 >
-                  Load Base Case
+                  Load Base Case ({getModeLabel(selectedMode)})
                 </Button>
 
                 {baseInputs && (
@@ -186,6 +231,9 @@ const Sensitivity = () => {
                     <div className="font-medium">Base Case:</div>
                     <div className="text-muted-foreground">{baseInputs.calculationName}</div>
                     <div className="text-xs mt-1">
+                      Mode: {getModeLabel(selectedMode)}
+                    </div>
+                    <div className="text-xs">
                       Units: {baseInputs.unitsSystem === 'EN' ? 'English' : 'Metric'}
                     </div>
                   </div>
@@ -195,13 +243,13 @@ const Sensitivity = () => {
                   <Label>Parameter to Vary</Label>
                   <Select
                     value={selectedParameter}
-                    onValueChange={(v) => setSelectedParameter(v as keyof PipelineTrackInputs)}
+                    onValueChange={setSelectedParameter}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {SENSITIVITY_PARAMETERS.map(param => (
+                      {availableParameters.map(param => (
                         <SelectItem key={param.key} value={param.key}>
                           {param.label}
                         </SelectItem>
