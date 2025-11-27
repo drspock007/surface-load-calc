@@ -1,5 +1,13 @@
 import { CalculationInput, CalculationResult } from "@/types/calculation";
 
+// Re-export pipeline calculation
+export { calculatePipelineTrack } from "@/domain/pipeline";
+export type { PipelineTrackInputs, PipelineTrackResults } from "@/domain/pipeline";
+
+/**
+ * Legacy simple surface load calculation
+ * Kept for backward compatibility
+ */
 export const calculateStress = (input: CalculationInput): CalculationResult => {
   const { loadMagnitude, loadLength, loadWidth, depth, soilUnitWeight } = input;
 
