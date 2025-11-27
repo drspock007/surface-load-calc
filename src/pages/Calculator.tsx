@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CalculationInput, CalculationMode } from "@/types/calculation";
-import { calculateStress } from "@/utils/calculations";
+import { calculateStress, calculatePipelineTrack } from "@/utils/calculations";
 import { storage } from "@/utils/storage";
 import { Calculator as CalcIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PipelineTrackForm } from "@/components/PipelineTrackForm";
+import { PipelineTrackInputs } from "@/domain/pipeline/types";
 
 const Calculator = () => {
   const navigate = useNavigate();
@@ -73,6 +75,32 @@ const Calculator = () => {
       description: "Results have been saved",
     });
     navigate("/results", { state: { run } });
+  };
+
+  const handlePipelineCalculate = (inputs: PipelineTrackInputs) => {
+    try {
+      const result = calculatePipelineTrack(inputs);
+      const run = {
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        mode: 'PIPELINE_TRACK' as CalculationMode,
+        input: inputs,
+        result,
+      };
+
+      storage.saveRun(run);
+      toast({
+        title: "Pipeline Calculation Complete",
+        description: "Results have been saved",
+      });
+      navigate("/results", { state: { run } });
+    } catch (error) {
+      toast({
+        title: "Calculation Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -185,24 +213,7 @@ const Calculator = () => {
           </TabsContent>
 
           <TabsContent value="PIPELINE_TRACK">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pipeline Track Vehicle Load Analysis</CardTitle>
-                <CardDescription>
-                  Advanced pipeline stress calculation under track vehicle loading
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="p-8 text-center text-muted-foreground">
-                  <CalcIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-semibold mb-2">Pipeline Calculator Coming Soon</h3>
-                  <p className="max-w-md mx-auto">
-                    Full pipeline stress analysis with track vehicle loading will be available in the next update. 
-                    This will include Boussinesq theory, impact factors, and code compliance checks.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <PipelineTrackForm onCalculate={handlePipelineCalculate} />
           </TabsContent>
         </Tabs>
       </div>
