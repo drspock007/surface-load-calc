@@ -5,6 +5,7 @@ import {
   Compaction,
   StressResults,
   PassFailSummary,
+  DebugValues,
 } from './types';
 import { convertInputsToEN, convertOutputsFromEN } from './unitConversions';
 
@@ -365,7 +366,9 @@ export function calculatePipelineTrack(inputs: PipelineTrackInputs): PipelineTra
   // Determine allowable stress
   let allowableStress_psi: number;
   if (inputs.codeCheck === 'USER_DEFINED' && inputs.userDefinedStressLimit) {
-    allowableStress_psi = convertInputsToEN(inputs.userDefinedStressLimit, inputs.unitsSystem, 'pressure');
+    // User defined is in % of SMYS
+    const limitFraction = inputs.userDefinedStressLimit / 100;
+    allowableStress_psi = limitFraction * SMYS_psi;
   } else {
     const factor = CODE_ALLOWABLE_FACTORS[inputs.codeCheck];
     allowableStress_psi = factor * SMYS_psi;
@@ -394,6 +397,42 @@ export function calculatePipelineTrack(inputs: PipelineTrackInputs): PipelineTra
     passFailSummary.equivalentAtZero &&
     passFailSummary.equivalentAtMOP;
   
+  // Calculate debug values
+  const { maxPressure: boussinesqMax_psi } = calculateBoussinesqPressure(
+    trackWeight_lb,
+    trackLength_in,
+    trackWidth_in,
+    trackSeparation_in,
+    H_ft
+  );
+  
+  const contactArea_ft2 = (trackLength_in / 12) * (trackWidth_in / 12);
+  const contactPressure_psf = (trackWeight_lb / 2) / contactArea_ft2;
+  const influenceFactor = 1 / (1 + Math.pow(H_ft / Math.sqrt(contactArea_ft2), 2));
+  
+  const Kb = 0.1 + 0.9 * (inputs.beddingAngleDeg / 180);
+  const Kz = 0.9; // simplified
+  const Theta = inputs.beddingAngleDeg;
+  
+  const debugValues: DebugValues = {
+    soilPressure_psi: soilLoad_lbft / D_in * 12,
+    boussinesqMax_psi: boussinesqMax_psi,
+    impactFactorDepth: impactFactor,
+    Kb: Kb,
+    Kz: Kz,
+    Theta: Theta,
+    ePrime_psi: E_prime_psi,
+    hoopSoil_psi: stresses.atZeroPressure.hoop.components.earth,
+    hoopLive_psi: maxSurfacePressure_psi * D_in / (2 * t_in),
+    hoopInt_psi: (Pint_psi * D_in) / (2 * t_in),
+    longSoil_psi: stresses.atZeroPressure.longitudinal.components.earth,
+    longLive_psi: -inputs.kr * maxSurfacePressure_psi * D_in / (2 * t_in),
+    longInt_psi: (Pint_psi * D_in) / (4 * t_in),
+    longTherm_psi: stresses.atZeroPressure.longitudinal.components.thermal,
+    contactPressure_psf: contactPressure_psf,
+    influenceFactor: influenceFactor,
+  };
+
   // Convert outputs back to user's unit system
   const outputSystem = inputs.unitsSystem;
   
@@ -405,7 +444,8 @@ export function calculatePipelineTrack(inputs: PipelineTrackInputs): PipelineTra
     allowableStress: convertOutputsFromEN(allowableStress_psi, outputSystem, 'pressure'),
     passFailSummary,
     ePrimeUsed: convertOutputsFromEN(E_prime_psi, outputSystem, 'pressure'),
-    soilLoadOnPipe: soilLoad_lbft, // keeping in EN for now
+    soilLoadOnPipe: soilLoad_lbft,
     deflectionRatio: deflectionRatio,
+    debug: debugValues,
   };
 }

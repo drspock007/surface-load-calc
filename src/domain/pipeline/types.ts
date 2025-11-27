@@ -99,6 +99,25 @@ export interface PassFailSummary {
   overallPass: boolean;
 }
 
+export interface DebugValues {
+  soilPressure_psi: number;
+  boussinesqMax_psi: number;
+  impactFactorDepth: number;
+  Kb: number;
+  Kz: number;
+  Theta: number;
+  ePrime_psi: number;
+  hoopSoil_psi: number;
+  hoopLive_psi: number;
+  hoopInt_psi: number;
+  longSoil_psi: number;
+  longLive_psi: number;
+  longInt_psi: number;
+  longTherm_psi: number;
+  contactPressure_psf: number;
+  influenceFactor: number;
+}
+
 export interface PipelineTrackResults {
   maxSurfacePressureOnPipe: number; // Boussinesq max * impact factor
   locationMaxLoad: string; // description of location
@@ -111,4 +130,7 @@ export interface PipelineTrackResults {
   ePrimeUsed: number;
   soilLoadOnPipe: number;
   deflectionRatio: number;
+  
+  // Debug values
+  debug: DebugValues;
 }
