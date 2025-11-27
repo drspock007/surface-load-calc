@@ -23,7 +23,57 @@ const Results = () => {
     );
   }
 
-  const { input, result } = run;
+  const { input, result, mode } = run;
+  
+  // Handle pipeline mode (to be fully implemented)
+  if (mode === 'PIPELINE_TRACK') {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Pipeline Calculation Results</h1>
+              <p className="text-sm text-muted-foreground">
+                {new Date(run.timestamp).toLocaleString()}
+              </p>
+            </div>
+          </div>
+
+          <Card className="border-primary/20 bg-primary/5">
+            <CardHeader>
+              <CardTitle>Coming Next: Detailed Stress Breakdown</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Comprehensive pipeline stress analysis with hoop, longitudinal, and equivalent stresses 
+                will be displayed here when the pipeline calculator is fully implemented.
+              </p>
+            </CardContent>
+          </Card>
+
+          <div className="flex gap-4 justify-center">
+            <Link to="/calculator">
+              <Button variant="outline">
+                <Calculator className="w-4 h-4 mr-2" />
+                New Calculation
+              </Button>
+            </Link>
+            <Link to="/runs">
+              <Button variant="outline">
+                <History className="w-4 h-4 mr-2" />
+                View History
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Simple surface load mode (original)
 
   return (
     <Layout>

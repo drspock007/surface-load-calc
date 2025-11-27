@@ -1,3 +1,5 @@
+export type CalculationMode = 'SIMPLE' | 'PIPELINE_TRACK';
+
 export interface CalculationInput {
   loadMagnitude: number; // kN
   loadLength: number; // m
@@ -18,6 +20,7 @@ export interface CalculationResult {
 export interface CalculationRun {
   id: string;
   timestamp: number;
-  input: CalculationInput;
-  result: CalculationResult;
+  mode: CalculationMode;
+  input: CalculationInput | any; // can be PipelineTrackInputs for pipeline mode
+  result: CalculationResult | any; // can be PipelineTrackResults for pipeline mode
 }

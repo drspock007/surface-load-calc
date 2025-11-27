@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { storage } from "@/utils/storage";
 import { CalculationRun } from "@/types/calculation";
 import { Trash2, Download, Upload, Eye, Calculator, AlertCircle } from "lucide-react";
@@ -138,8 +139,13 @@ const Runs = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-lg">{run.input.calculationName}</CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <CardTitle className="text-lg">{run.input.calculationName}</CardTitle>
+                        <Badge variant={run.mode === 'PIPELINE_TRACK' ? 'default' : 'secondary'}>
+                          {run.mode === 'PIPELINE_TRACK' ? 'Pipeline' : 'Simple'}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
                         {new Date(run.timestamp).toLocaleString()}
                       </p>
                     </div>
@@ -164,24 +170,30 @@ const Runs = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Load</p>
-                      <p className="font-medium">{run.input.loadMagnitude} kN</p>
+                  {run.mode === 'SIMPLE' || !run.mode ? (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Load</p>
+                        <p className="font-medium">{run.input.loadMagnitude} kN</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Depth</p>
+                        <p className="font-medium">{run.input.depth} m</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Contact Pressure</p>
+                        <p className="font-medium text-primary">{run.result.contactPressure} kPa</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Total Stress</p>
+                        <p className="font-medium">{run.result.totalStress} kPa</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-muted-foreground">Depth</p>
-                      <p className="font-medium">{run.input.depth} m</p>
+                  ) : (
+                    <div className="text-sm text-muted-foreground italic">
+                      Pipeline calculation preview - click View for full results
                     </div>
-                    <div>
-                      <p className="text-muted-foreground">Contact Pressure</p>
-                      <p className="font-medium text-primary">{run.result.contactPressure} kPa</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Total Stress</p>
-                      <p className="font-medium">{run.result.totalStress} kPa</p>
-                    </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             ))}

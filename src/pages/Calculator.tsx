@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CalculationInput } from "@/types/calculation";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { CalculationInput, CalculationMode } from "@/types/calculation";
 import { calculateStress } from "@/utils/calculations";
 import { storage } from "@/utils/storage";
 import { Calculator as CalcIcon } from "lucide-react";
@@ -14,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 const Calculator = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [mode, setMode] = useState<CalculationMode>('SIMPLE');
   
   const [input, setInput] = useState<CalculationInput>({
     calculationName: "",
@@ -60,6 +62,7 @@ const Calculator = () => {
     const run = {
       id: Date.now().toString(),
       timestamp: Date.now(),
+      mode: 'SIMPLE' as CalculationMode,
       input,
       result,
     };
@@ -78,11 +81,18 @@ const Calculator = () => {
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">New Calculation</h1>
           <p className="text-muted-foreground">
-            Enter load parameters and soil properties to calculate stress distribution
+            Select calculation mode and enter parameters
           </p>
         </div>
 
-        <Card>
+        <Tabs value={mode} onValueChange={(v) => setMode(v as CalculationMode)} className="mb-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="SIMPLE">Simple Surface Load</TabsTrigger>
+            <TabsTrigger value="PIPELINE_TRACK">Pipeline Surface Load – Track</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="SIMPLE">
+            <Card>
           <CardHeader>
             <CardTitle>Input Parameters</CardTitle>
             <CardDescription>All measurements in SI units (kN, m, kN/m³, kPa)</CardDescription>
@@ -170,8 +180,31 @@ const Calculator = () => {
               <CalcIcon className="w-5 h-5 mr-2" />
               Calculate Stress Distribution
             </Button>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="PIPELINE_TRACK">
+            <Card>
+              <CardHeader>
+                <CardTitle>Pipeline Track Vehicle Load Analysis</CardTitle>
+                <CardDescription>
+                  Advanced pipeline stress calculation under track vehicle loading
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="p-8 text-center text-muted-foreground">
+                  <CalcIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-semibold mb-2">Pipeline Calculator Coming Soon</h3>
+                  <p className="max-w-md mx-auto">
+                    Full pipeline stress analysis with track vehicle loading will be available in the next update. 
+                    This will include Boussinesq theory, impact factors, and code compliance checks.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
