@@ -1,6 +1,8 @@
 import { UnitsSystem, BeddingAngleDeg, SoilLoadMethod, EPrimeMethod, SoilType, Compaction, EquivStressMethod, CodeCheck, PavementType, VehicleClass } from './types';
 import { StressResults, PassFailSummary, DebugValues } from './types';
 
+export type { UnitsSystem, BeddingAngleDeg, SoilLoadMethod, EPrimeMethod, SoilType, Compaction, EquivStressMethod, CodeCheck, PavementType, VehicleClass };
+
 export interface ThreeAxleInputs {
   // System
   unitsSystem: UnitsSystem;

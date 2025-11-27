@@ -8,11 +8,18 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CalculationInput, CalculationMode } from "@/types/calculation";
 import { calculateStress, calculatePipelineTrack } from "@/utils/calculations";
+import { calculate2AxleVehicleVBA, calculate3AxleVehicleVBA, calculateGridLoadVBA } from "@/domain/pipeline";
 import { storage } from "@/utils/storage";
 import { Calculator as CalcIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PipelineTrackForm } from "@/components/PipelineTrackForm";
+import { TwoAxleForm } from "@/components/TwoAxleForm";
+import { ThreeAxleForm } from "@/components/ThreeAxleForm";
+import { GridLoadForm } from "@/components/GridLoadForm";
 import { PipelineTrackInputs } from "@/domain/pipeline/types";
+import { TwoAxleInputs } from "@/domain/pipeline/types2Axle";
+import { ThreeAxleInputs } from "@/domain/pipeline/types3Axle";
+import { GridLoadInputs } from "@/domain/pipeline/typesGrid";
 
 const Calculator = () => {
   const navigate = useNavigate();
@@ -103,6 +110,84 @@ const Calculator = () => {
     }
   };
 
+  const handle2AxleCalculate = (inputs: TwoAxleInputs) => {
+    try {
+      const result = calculate2AxleVehicleVBA(inputs);
+      const run = {
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        mode: '2_AXLE' as CalculationMode,
+        input: inputs,
+        result,
+      };
+
+      storage.saveRun(run);
+      toast({
+        title: "2-Axle Calculation Complete",
+        description: "Results have been saved",
+      });
+      navigate("/results", { state: { run } });
+    } catch (error) {
+      toast({
+        title: "Calculation Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handle3AxleCalculate = (inputs: ThreeAxleInputs) => {
+    try {
+      const result = calculate3AxleVehicleVBA(inputs);
+      const run = {
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        mode: '3_AXLE' as CalculationMode,
+        input: inputs,
+        result,
+      };
+
+      storage.saveRun(run);
+      toast({
+        title: "3-Axle Calculation Complete",
+        description: "Results have been saved",
+      });
+      navigate("/results", { state: { run } });
+    } catch (error) {
+      toast({
+        title: "Calculation Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleGridCalculate = (inputs: GridLoadInputs) => {
+    try {
+      const result = calculateGridLoadVBA(inputs);
+      const run = {
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        mode: 'GRID' as CalculationMode,
+        input: inputs,
+        result,
+      };
+
+      storage.saveRun(run);
+      toast({
+        title: "Grid Load Calculation Complete",
+        description: "Results have been saved",
+      });
+      navigate("/results", { state: { run } });
+    } catch (error) {
+      toast({
+        title: "Calculation Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Layout>
       <div className="max-w-3xl mx-auto">
@@ -114,9 +199,12 @@ const Calculator = () => {
         </div>
 
         <Tabs value={mode} onValueChange={(v) => setMode(v as CalculationMode)} className="mb-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="SIMPLE">Simple Surface Load</TabsTrigger>
-            <TabsTrigger value="PIPELINE_TRACK">Pipeline Surface Load – Track</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="SIMPLE">Simple</TabsTrigger>
+            <TabsTrigger value="PIPELINE_TRACK">Track</TabsTrigger>
+            <TabsTrigger value="2_AXLE">2-Axle</TabsTrigger>
+            <TabsTrigger value="3_AXLE">3-Axle</TabsTrigger>
+            <TabsTrigger value="GRID">Grid</TabsTrigger>
           </TabsList>
 
           <TabsContent value="SIMPLE">
@@ -214,6 +302,18 @@ const Calculator = () => {
 
           <TabsContent value="PIPELINE_TRACK">
             <PipelineTrackForm onCalculate={handlePipelineCalculate} />
+          </TabsContent>
+
+          <TabsContent value="2_AXLE">
+            <TwoAxleForm onCalculate={handle2AxleCalculate} />
+          </TabsContent>
+
+          <TabsContent value="3_AXLE">
+            <ThreeAxleForm onCalculate={handle3AxleCalculate} />
+          </TabsContent>
+
+          <TabsContent value="GRID">
+            <GridLoadForm onCalculate={handleGridCalculate} />
           </TabsContent>
         </Tabs>
       </div>
