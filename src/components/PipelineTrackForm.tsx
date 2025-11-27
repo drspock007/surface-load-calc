@@ -35,7 +35,7 @@ const pipelineSchema = z.object({
   deltaT: z.number(),
   
   // Soil properties
-  soilDensity: z.number().positive(),
+  soilDensity: z.number().positive(), // lb/ft³ or kg/m³
   depthCover: z.number().min(0),
   beddingAngleDeg: z.number(),
   soilLoadMethod: z.enum(["PRISM", "TRAP_DOOR"]),
@@ -282,7 +282,7 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="soilDensity">Soil Density ({unitLabels.density}) *</Label>
+              <Label htmlFor="soilDensity">Soil Density ({unitsSystem === 'EN' ? 'lb/ft³' : 'kg/m³'}) *</Label>
               <Input
                 id="soilDensity"
                 type="number"
@@ -493,7 +493,7 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="trackVehicleWeight">Vehicle Weight ({unitLabels.force}) *</Label>
+              <Label htmlFor="trackVehicleWeight">Vehicle Weight ({unitsSystem === 'EN' ? 'lb' : 'kg'}) *</Label>
               <Input
                 id="trackVehicleWeight"
                 type="number"

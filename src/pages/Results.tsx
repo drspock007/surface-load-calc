@@ -82,47 +82,32 @@ const Results = () => {
               </CardContent>
             </Card>
 
-            <Card className="mb-6">
+          ) : run.mode === 'PIPELINE_TRACK' ? (
+            <Card>
               <CardHeader>
-                <CardTitle>Stress Distribution Results</CardTitle>
+                <CardTitle>Pipeline Track Results</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Contact Pressure</p>
-                    <p className="text-3xl font-bold text-primary">
-                      {run.result.contactPressure} kPa
-                    </p>
+                    <p className="text-sm text-muted-foreground">Max Surface Pressure</p>
+                    <p className="text-2xl font-bold">{run.result.maxSurfacePressureOnPipe?.toFixed(2)} {run.input.unitsSystem === 'EN' ? 'psi' : 'kPa'}</p>
                   </div>
-
-                  <div className="border-t pt-4">
-                    <h3 className="font-semibold mb-3">Detailed Breakdown</h3>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Load Area</p>
-                        <p className="text-lg font-semibold">{run.result.loadArea} m²</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Surface Stress</p>
-                        <p className="text-lg font-semibold">{run.result.surfaceStress} kPa</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Stress at Depth</p>
-                        <p className="text-lg font-semibold">{run.result.stressAtDepth} kPa</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Total Stress (incl. soil)</p>
-                        <p className="text-lg font-semibold">{run.result.totalStress} kPa</p>
-                      </div>
-                    </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Location</p>
+                    <p>{run.result.locationMaxLoad}</p>
                   </div>
-
-                  <div className="border-t pt-4 bg-muted/50 p-4 rounded-lg">
-                    <p className="text-sm italic">
-                      <FileText className="inline w-4 h-4 mr-2" />
-                      Note: These results use simplified Boussinesq theory for uniformly loaded
-                      rectangular areas. Values are approximate and should be verified by a
-                      professional engineer for design purposes.
+                  <div>
+                    <p className="text-sm text-muted-foreground">Pass/Fail</p>
+                    <Badge variant={run.result.passFailSummary?.overallPass ? "default" : "destructive"}>
+                      {run.result.passFailSummary?.overallPass ? "PASS" : "FAIL"}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="mb-6">
                     </p>
                   </div>
                 </div>

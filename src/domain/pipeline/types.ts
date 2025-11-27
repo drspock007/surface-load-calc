@@ -116,6 +116,15 @@ export interface DebugValues {
   longTherm_psi: number;
   contactPressure_psf: number;
   influenceFactor: number;
+  bsnqSUM1_psi?: number;
+  bsnqSUM2_psi?: number;
+  axleLoad_lb?: number;
+  pointLoad_lb?: number;
+  nW?: number;
+  nL?: number;
+  momentMAX_lbin?: number;
+  longLiveLocal_psi?: number;
+  longLiveBend_psi?: number;
 }
 
 export interface PipelineTrackResults {
