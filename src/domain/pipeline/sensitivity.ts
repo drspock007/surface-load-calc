@@ -1,5 +1,15 @@
 import { PipelineTrackInputs, PipelineTrackResults } from './types';
+import { TwoAxleInputs, TwoAxleResults } from './types2Axle';
+import { ThreeAxleInputs, ThreeAxleResults } from './types3Axle';
+import { GridLoadInputs, GridLoadResults } from './typesGrid';
 import { calculatePipelineTrack } from './calculations';
+import { calculate2AxleVehicleVBA } from './vba2AxleEngine';
+import { calculate3AxleVehicleVBA } from './vba3AxleEngine';
+import { calculateGridLoadVBA } from './vbaGridEngine';
+import { CalculationMode } from '@/types/calculation';
+
+type PipelineInputs = PipelineTrackInputs | TwoAxleInputs | ThreeAxleInputs | GridLoadInputs;
+type PipelineResults = PipelineTrackResults | TwoAxleResults | ThreeAxleResults | GridLoadResults;
 
 /**
  * Normalized result structure for sensitivity analysis
@@ -19,26 +29,44 @@ export interface SensitivityResult {
  * Run a single scenario by overriding one parameter
  * @param baseInputs - Base case inputs
  * @param overrides - Parameter overrides (only one should be modified)
+ * @param mode - Calculation mode (Track, 2-Axle, 3-Axle, Grid)
  * @returns Normalized sensitivity result
  */
 export function runScenario(
-  baseInputs: PipelineTrackInputs,
-  overrides: Partial<PipelineTrackInputs>
+  baseInputs: PipelineInputs,
+  overrides: Partial<PipelineInputs>,
+  mode: CalculationMode
 ): SensitivityResult {
   // Clone base inputs and apply overrides
-  const inputs: PipelineTrackInputs = {
+  const inputs = {
     ...baseInputs,
     ...overrides,
-  };
+  } as PipelineInputs;
 
-  // Run calculation
-  const result: PipelineTrackResults = calculatePipelineTrack(inputs);
+  // Run calculation based on mode
+  let result: PipelineResults;
+  switch (mode) {
+    case 'PIPELINE_TRACK':
+      result = calculatePipelineTrack(inputs as PipelineTrackInputs);
+      break;
+    case '2_AXLE':
+      result = calculate2AxleVehicleVBA(inputs as TwoAxleInputs);
+      break;
+    case '3_AXLE':
+      result = calculate3AxleVehicleVBA(inputs as ThreeAxleInputs);
+      break;
+    case 'GRID':
+      result = calculateGridLoadVBA(inputs as GridLoadInputs);
+      break;
+    default:
+      throw new Error(`Unsupported mode for sensitivity: ${mode}`);
+  }
 
   // Extract the parameter value (first override key)
-  const overrideKey = Object.keys(overrides)[0] as keyof PipelineTrackInputs;
-  const parameterValue = inputs[overrideKey] as number;
+  const overrideKey = Object.keys(overrides)[0];
+  const parameterValue = (inputs as any)[overrideKey] as number;
 
-  // Normalize results
+  // Normalize results (all pipeline modes have same structure)
   return {
     parameterValue,
     hoopPctSmysMopHigh: result.stresses.atMOP.hoop.high / result.allowableStress,
@@ -55,24 +83,47 @@ export function runScenario(
  * Parameter definition for sensitivity analysis
  */
 export interface SensitivityParameter {
-  key: keyof PipelineTrackInputs;
+  key: string;
   label: string;
   unit: string;
   unitSI: string;
+  modes: CalculationMode[]; // Which modes support this parameter
 }
 
 /**
- * Available parameters for sensitivity analysis
+ * Available parameters for sensitivity analysis by mode
  */
 export const SENSITIVITY_PARAMETERS: SensitivityParameter[] = [
-  { key: 'depthCover', label: 'Depth of Cover (H)', unit: 'ft', unitSI: 'm' },
-  { key: 'soilDensity', label: 'Soil Density (ρ)', unit: 'lb/ft³', unitSI: 'kg/m³' },
-  { key: 'MOP', label: 'Maximum Operating Pressure', unit: 'psi', unitSI: 'kPa' },
-  { key: 'pipeOD', label: 'Pipe Outer Diameter (D)', unit: 'in', unitSI: 'mm' },
-  { key: 'pipeWT', label: 'Pipe Wall Thickness (t)', unit: 'in', unitSI: 'mm' },
-  { key: 'deltaT', label: 'Temperature Differential (ΔT)', unit: '°F', unitSI: '°C' },
-  { key: 'ePrimeUserDefined', label: "E' (Modulus of Soil Reaction)", unit: 'psi', unitSI: 'kPa' },
-  { key: 'trackVehicleWeight', label: 'Vehicle Load', unit: 'lb', unitSI: 'kg' },
+  // Common parameters (all modes)
+  { key: 'depthCover', label: 'Depth of Cover (H)', unit: 'ft', unitSI: 'm', modes: ['PIPELINE_TRACK', '2_AXLE', '3_AXLE', 'GRID'] },
+  { key: 'soilDensity', label: 'Soil Density (ρ)', unit: 'lb/ft³', unitSI: 'kg/m³', modes: ['PIPELINE_TRACK', '2_AXLE', '3_AXLE', 'GRID'] },
+  { key: 'MOP', label: 'Maximum Operating Pressure', unit: 'psi', unitSI: 'kPa', modes: ['PIPELINE_TRACK', '2_AXLE', '3_AXLE', 'GRID'] },
+  { key: 'pipeOD', label: 'Pipe Outer Diameter (D)', unit: 'in', unitSI: 'mm', modes: ['PIPELINE_TRACK', '2_AXLE', '3_AXLE', 'GRID'] },
+  { key: 'pipeWT', label: 'Pipe Wall Thickness (t)', unit: 'in', unitSI: 'mm', modes: ['PIPELINE_TRACK', '2_AXLE', '3_AXLE', 'GRID'] },
+  { key: 'deltaT', label: 'Temperature Differential (ΔT)', unit: '°F', unitSI: '°C', modes: ['PIPELINE_TRACK', '2_AXLE', '3_AXLE', 'GRID'] },
+  { key: 'ePrimeUserDefined', label: "E' (Modulus of Soil Reaction)", unit: 'psi', unitSI: 'kPa', modes: ['PIPELINE_TRACK', '2_AXLE', '3_AXLE', 'GRID'] },
+  
+  // Track-specific
+  { key: 'trackVehicleWeight', label: 'Track Vehicle Weight', unit: 'lb', unitSI: 'kg', modes: ['PIPELINE_TRACK'] },
+  
+  // 2-Axle specific
+  { key: 'axleSpacing', label: 'Axle Spacing', unit: 'ft', unitSI: 'm', modes: ['2_AXLE'] },
+  { key: 'axle1Load', label: 'Front Axle Load', unit: 'lb', unitSI: 'kg', modes: ['2_AXLE', '3_AXLE'] },
+  { key: 'axle2Load', label: 'Rear Axle Load (2-Axle) / Middle Axle (3-Axle)', unit: 'lb', unitSI: 'kg', modes: ['2_AXLE', '3_AXLE'] },
+  { key: 'laneOffset', label: 'Lane Offset from Pipe', unit: 'ft', unitSI: 'm', modes: ['2_AXLE', '3_AXLE'] },
+  
+  // 3-Axle specific
+  { key: 'axle1To2Spacing', label: 'Axle 1 to 2 Spacing', unit: 'ft', unitSI: 'm', modes: ['3_AXLE'] },
+  { key: 'axle2To3Spacing', label: 'Axle 2 to 3 Spacing', unit: 'ft', unitSI: 'm', modes: ['3_AXLE'] },
+  { key: 'axle3Load', label: 'Rear Axle Load', unit: 'lb', unitSI: 'kg', modes: ['3_AXLE'] },
+  
+  // Grid specific
+  { key: 'totalLoad', label: 'Total Grid Load', unit: 'lb', unitSI: 'kg', modes: ['GRID'] },
+  { key: 'uniformPressure', label: 'Uniform Pressure', unit: 'psi', unitSI: 'kPa', modes: ['GRID'] },
+  { key: 'gridLength', label: 'Grid Length', unit: 'ft', unitSI: 'm', modes: ['GRID'] },
+  { key: 'gridWidth', label: 'Grid Width', unit: 'ft', unitSI: 'm', modes: ['GRID'] },
+  { key: 'gridOffsetX', label: 'Grid Offset X (Lateral)', unit: 'ft', unitSI: 'm', modes: ['GRID'] },
+  { key: 'gridOffsetY', label: 'Grid Offset Y (Longitudinal)', unit: 'ft', unitSI: 'm', modes: ['GRID'] },
 ];
 
 /**
@@ -80,11 +131,12 @@ export const SENSITIVITY_PARAMETERS: SensitivityParameter[] = [
  * @param baseInputs - Base case inputs
  * @param parameter - Parameter to vary
  * @param config - Sweep configuration (either absolute or percentage-based)
+ * @param mode - Calculation mode
  * @returns Array of sensitivity results
  */
 export function generateSensitivitySweep(
-  baseInputs: PipelineTrackInputs,
-  parameter: keyof PipelineTrackInputs,
+  baseInputs: PipelineInputs,
+  parameter: string,
   config: {
     mode: 'absolute' | 'percentage';
     min?: number;
@@ -92,10 +144,15 @@ export function generateSensitivitySweep(
     step?: number;
     percentRange?: number; // e.g., 20 for ±20%
     percentStep?: number; // e.g., 5 for steps of 5%
-  }
+  },
+  calcMode: CalculationMode
 ): SensitivityResult[] {
   const results: SensitivityResult[] = [];
-  const baseValue = baseInputs[parameter] as number;
+  const baseValue = (baseInputs as any)[parameter] as number;
+
+  if (baseValue === undefined || baseValue === null) {
+    throw new Error(`Parameter ${parameter} not found in base inputs`);
+  }
 
   let values: number[] = [];
 
@@ -127,7 +184,7 @@ export function generateSensitivitySweep(
   // Run scenarios
   for (const value of values) {
     try {
-      const result = runScenario(baseInputs, { [parameter]: value } as Partial<PipelineTrackInputs>);
+      const result = runScenario(baseInputs, { [parameter]: value }, calcMode);
       results.push(result);
     } catch (error) {
       console.error(`Error at ${parameter}=${value}:`, error);
