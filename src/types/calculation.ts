@@ -1,4 +1,4 @@
-export type CalculationMode = 'SIMPLE' | 'PIPELINE_TRACK';
+export type CalculationMode = 'SIMPLE' | 'PIPELINE_TRACK' | '2_AXLE' | '3_AXLE' | 'GRID';
 
 export interface CalculationInput {
   loadMagnitude: number; // kN
