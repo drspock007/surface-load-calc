@@ -7,6 +7,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { CalculationRun } from "@/types/calculation";
 import { PipelineTrackResults } from "@/domain/pipeline/types";
+import { TwoAxleResults } from "@/domain/pipeline/types2Axle";
+import { ThreeAxleResults } from "@/domain/pipeline/types3Axle";
+import { GridLoadResults } from "@/domain/pipeline/typesGrid";
 
 const Results = () => {
   const location = useLocation();
@@ -24,8 +27,18 @@ const Results = () => {
     );
   }
 
-  const isPipeline = run.mode === "PIPELINE_TRACK";
-  const pipelineResult = isPipeline ? (run.result as PipelineTrackResults) : null;
+  const isPipeline = ['PIPELINE_TRACK', '2_AXLE', '3_AXLE', 'GRID'].includes(run.mode);
+  const pipelineResult = isPipeline ? (run.result as PipelineTrackResults | TwoAxleResults | ThreeAxleResults | GridLoadResults) : null;
+  
+  const getModeLabel = (mode: string) => {
+    switch (mode) {
+      case 'PIPELINE_TRACK': return 'Pipeline Track';
+      case '2_AXLE': return '2-Axle Vehicle';
+      case '3_AXLE': return '3-Axle Vehicle';
+      case 'GRID': return 'Grid Load';
+      default: return 'Simple';
+    }
+  };
 
   const formatValue = (value: number, decimals = 2) => {
     if (value === undefined || value === null || isNaN(value)) return 'N/A';
@@ -43,7 +56,7 @@ const Results = () => {
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold text-foreground">Calculation Results</h1>
               <Badge variant={isPipeline ? "default" : "secondary"}>
-                {isPipeline ? "Pipeline Track" : "Simple"}
+                {getModeLabel(run.mode)}
               </Badge>
             </div>
             <p className="text-muted-foreground">{run.input.calculationName}</p>
