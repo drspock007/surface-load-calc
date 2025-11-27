@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Calculator, Home, History } from "lucide-react";
+import { Calculator, Home, History, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LayoutProps {
@@ -12,6 +12,7 @@ export const Layout = ({ children }: LayoutProps) => {
   const navItems = [
     { path: "/", label: "Home", icon: Home },
     { path: "/calculator", label: "Calculator", icon: Calculator },
+    { path: "/sensitivity", label: "Sensitivity", icon: TrendingUp },
     { path: "/runs", label: "History", icon: History },
   ];
 
