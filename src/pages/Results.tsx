@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ArrowLeft, FileText, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { CalculationRun } from "@/types/calculation";
 import { PipelineTrackResults } from "@/domain/pipeline/types";
 
@@ -28,6 +28,7 @@ const Results = () => {
   const pipelineResult = isPipeline ? (run.result as PipelineTrackResults) : null;
 
   const formatValue = (value: number, decimals = 2) => {
+    if (value === undefined || value === null || isNaN(value)) return 'N/A';
     return value.toFixed(decimals);
   };
 
@@ -82,39 +83,25 @@ const Results = () => {
               </CardContent>
             </Card>
 
-          ) : run.mode === 'PIPELINE_TRACK' ? (
-            <Card>
+            <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Pipeline Track Results</CardTitle>
+                <CardTitle>Results</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Max Surface Pressure</p>
-                    <p className="text-2xl font-bold">{run.result.maxSurfacePressureOnPipe?.toFixed(2)} {run.input.unitsSystem === 'EN' ? 'psi' : 'kPa'}</p>
+                    <p className="text-sm text-muted-foreground">Vertical Stress</p>
+                    <p className="text-2xl font-bold">{run.result.verticalStress?.toFixed(2)} kPa</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Location</p>
-                    <p>{run.result.locationMaxLoad}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Pass/Fail</p>
-                    <Badge variant={run.result.passFailSummary?.overallPass ? "default" : "destructive"}>
-                      {run.result.passFailSummary?.overallPass ? "PASS" : "FAIL"}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="mb-6">
-                    </p>
+                    <p className="text-sm text-muted-foreground">Total Stress at Depth</p>
+                    <p className="text-2xl font-bold">{run.result.totalStress?.toFixed(2)} kPa</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </>
-        ) : pipelineResult && (
+        ) : pipelineResult ? (
           <>
             <Card className="mb-6">
               <CardHeader>
@@ -124,7 +111,7 @@ const Results = () => {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Units System</p>
-                    <p className="text-lg font-semibold">{run.input.unitsSystem === 'EN' ? 'English (psi, in, ft, lb)' : 'Metric (kPa, mm, m, kN)'}</p>
+                    <p className="text-lg font-semibold">{run.input.unitsSystem === 'EN' ? 'English (psi, in, ft, lb)' : 'Metric (kPa, mm, m, kg)'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Impact Factor</p>
@@ -306,7 +293,7 @@ const Results = () => {
 
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Debug / Intermediate Values</CardTitle>
+                <CardTitle>Debug / Intermediate Values (VBA Parity)</CardTitle>
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full">
@@ -337,6 +324,42 @@ const Results = () => {
                               <span>Influence Factor</span>
                               <span>{formatValue(pipelineResult.debug.influenceFactor, 4)}</span>
                             </div>
+                            {pipelineResult.debug.bsnqSUM1_psi && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Boussinesq SUM1</span>
+                                <span>{formatValue(pipelineResult.debug.bsnqSUM1_psi)} psi</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.bsnqSUM2_psi && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Boussinesq SUM2</span>
+                                <span>{formatValue(pipelineResult.debug.bsnqSUM2_psi)} psi</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.axleLoad_lb && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Axle Load</span>
+                                <span>{formatValue(pipelineResult.debug.axleLoad_lb)} lb</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.pointLoad_lb && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Point Load</span>
+                                <span>{formatValue(pipelineResult.debug.pointLoad_lb)} lb</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.nW && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>nW (width points)</span>
+                                <span>{pipelineResult.debug.nW}</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.nL && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>nL (length points)</span>
+                                <span>{pipelineResult.debug.nL}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -393,8 +416,38 @@ const Results = () => {
                               <span>Long - Thermal</span>
                               <span>{formatValue(pipelineResult.debug.longTherm_psi)}</span>
                             </div>
+                            {pipelineResult.debug.longLiveLocal_psi && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Long Live - Local Bending</span>
+                                <span>{formatValue(pipelineResult.debug.longLiveLocal_psi)}</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.longLiveBend_psi && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Long Live - Axial Bending</span>
+                                <span>{formatValue(pipelineResult.debug.longLiveBend_psi)}</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.momentMAX_lbin && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Moment MAX</span>
+                                <span>{formatValue(pipelineResult.debug.momentMAX_lbin)} lb·in</span>
+                              </div>
+                            )}
                           </div>
                         </div>
+
+                        {/* Warning for invalid values */}
+                        {(isNaN(pipelineResult.debug.soilPressure_psi) || 
+                          isNaN(pipelineResult.debug.boussinesqMax_psi) ||
+                          !isFinite(pipelineResult.debug.ePrime_psi)) && (
+                          <div className="border-t pt-4">
+                            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded">
+                              <p className="text-sm font-semibold text-destructive">⚠️ Warning: Some values are NaN or Infinity</p>
+                              <p className="text-xs text-muted-foreground mt-1">Check input parameters for invalid values</p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -402,7 +455,7 @@ const Results = () => {
               </CardContent>
             </Card>
           </>
-        )}
+        ) : null}
 
         <div className="flex justify-center gap-4">
           <Button variant="outline" onClick={() => navigate("/calculator")}>
