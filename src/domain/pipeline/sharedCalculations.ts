@@ -4,6 +4,7 @@
  */
 
 import { SoilLoadMethod, EPrimeMethod, SoilType, Compaction, CodeCheck, PavementType, VehicleClass, EquivStressMethod } from './types';
+import { calculateEPrimeFromLookup } from './ePrimeLookup';
 
 export function calculateBeddingParams(beddingAngleDeg: number): { Kb: number; Kz: number; Theta: number } {
   switch (beddingAngleDeg) {
@@ -29,19 +30,10 @@ export function calculateEPrime(
     return { ePrime_psi: userDefined_psi };
   }
   
-  // Lookup method
-  let Epr1 = 1000, Epr2 = 1, Epr3 = 4.8;
-  
-  if (soilType === 'FINE') {
-    Epr1 = 1000; Epr2 = 1; Epr3 = 4.8;
-  } else if (soilType === 'COARSE_WITH_FINES') {
-    Epr1 = 2000; Epr2 = 1; Epr3 = 4.0;
-  } else if (soilType === 'COARSE_NO_FINES') {
-    Epr1 = 3000; Epr2 = 1; Epr3 = 3.3;
-  }
-  
-  const compact = compaction || 90;
-  const ePrime_psi = Epr1 * Math.pow(Epr2, H_ft) * Math.pow(compact / 100, Epr3);
+  // Use full lookup table
+  const soilTypeKey = soilType || 'COARSE_WITH_FINES';
+  const compactionValue = compaction || 90;
+  const ePrime_psi = calculateEPrimeFromLookup(soilTypeKey, compactionValue, H_ft);
   
   return { ePrime_psi };
 }

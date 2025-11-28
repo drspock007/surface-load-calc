@@ -135,18 +135,43 @@ export function calculateGridLoadVBA(inputs: GridLoadInputs): GridLoadResults {
   const equivZero = calculateEquivalentStress(inputs.equivStressMethod, hoopZeroHigh, hoopZeroLow, longZeroHigh, longZeroLow, inputsEN.SMYS_psi);
   const equivMOP = calculateEquivalentStress(inputs.equivStressMethod, hoopMOPHigh, hoopMOPLow, longMOPHigh, longMOPLow, inputsEN.SMYS_psi);
   
+  // B31.4 sustained longitudinal check (if applicable)
+  const longInt_Zero = 0;
+  const longInt_MOP = Poisson * stressMOP.hoopInt;
+  const longSoil_Zero = Poisson * stressZero.hoopSoil;
+  const longSoil_MOP = Poisson * stressMOP.hoopSoil;
+  
+  let sustainedLongMaxPct = 0;
+  if (inputs.codeCheck === 'B31_4') {
+    const sustainedZeroHigh = Math.abs(longInt_Zero + longSoil_Zero + longTherm_psi);
+    const sustainedZeroLow = Math.abs(longInt_Zero - longSoil_Zero + longTherm_psi);
+    const sustainedMOPHigh = Math.abs(longInt_MOP + longSoil_MOP + longTherm_psi);
+    const sustainedMOPLow = Math.abs(longInt_MOP - longSoil_MOP + longTherm_psi);
+    
+    const sustainedMax = Math.max(sustainedZeroHigh, sustainedZeroLow, sustainedMOPHigh, sustainedMOPLow);
+    sustainedLongMaxPct = (sustainedMax / inputsEN.SMYS_psi) * 100;
+  }
+  
+  const hoopMaxPct = Math.max(Math.abs(hoopZeroHigh), Math.abs(hoopMOPHigh)) / inputsEN.SMYS_psi * 100;
+  const longMaxPct = Math.max(
+    Math.abs(longZeroHigh), 
+    Math.abs(longMOPHigh),
+    sustainedLongMaxPct
+  ) / inputsEN.SMYS_psi * 100;
+  const equivMaxPct = Math.max(equivZero.pctSMYS, equivMOP.pctSMYS) * 100;
+  
   const passFailResult = calculatePassFailHelper(
     inputs.codeCheck,
     inputs.userDefinedLimits,
-    Math.max(Math.abs(hoopZeroHigh), Math.abs(hoopMOPHigh)) / inputsEN.SMYS_psi * 100,
-    Math.max(Math.abs(longZeroHigh), Math.abs(longMOPHigh)) / inputsEN.SMYS_psi * 100,
-    Math.max(equivZero.pctSMYS, equivMOP.pctSMYS)
+    hoopMaxPct,
+    longMaxPct,
+    equivMaxPct
   );
   
   const deflectionRatio = (soilLoad.Psoil_psi + BsnqIF) * Math.pow(inputsEN.D_in / inputsEN.t_in, 3) / ePrime.ePrime_psi;
   
   const results: GridLoadResults = {
-    maxSurfacePressureOnPipe: convertPressureToUserUnits(BsnqIF, inputs.unitsSystem),
+    maxSurfacePressureOnPipe: BsnqIF,
     locationMaxLoad: boussinesq.maxLocation,
     impactFactorUsed: impactResult.impactFactorDepth,
     stresses: {
@@ -211,5 +236,81 @@ export function calculateGridLoadVBA(inputs: GridLoadInputs): GridLoadResults {
     },
   };
   
-  return results;
+  // Convert all outputs to user units
+  return {
+    ...results,
+    maxSurfacePressureOnPipe: convertPressureToUserUnits(results.maxSurfacePressureOnPipe, inputs.unitsSystem),
+    allowableStress: convertPressureToUserUnits(results.allowableStress, inputs.unitsSystem),
+    ePrimeUsed: convertPressureToUserUnits(results.ePrimeUsed, inputs.unitsSystem),
+    soilLoadOnPipe: convertPressureToUserUnits(results.soilLoadOnPipe, inputs.unitsSystem),
+    stresses: {
+      atZeroPressure: {
+        hoop: {
+          high: convertPressureToUserUnits(results.stresses.atZeroPressure.hoop.high, inputs.unitsSystem),
+          low: convertPressureToUserUnits(results.stresses.atZeroPressure.hoop.low, inputs.unitsSystem),
+          components: {
+            pressure: convertPressureToUserUnits(results.stresses.atZeroPressure.hoop.components.pressure, inputs.unitsSystem),
+            earth: convertPressureToUserUnits(results.stresses.atZeroPressure.hoop.components.earth, inputs.unitsSystem),
+            thermal: convertPressureToUserUnits(results.stresses.atZeroPressure.hoop.components.thermal, inputs.unitsSystem),
+            total: convertPressureToUserUnits(results.stresses.atZeroPressure.hoop.components.total, inputs.unitsSystem),
+          },
+        },
+        longitudinal: {
+          high: convertPressureToUserUnits(results.stresses.atZeroPressure.longitudinal.high, inputs.unitsSystem),
+          low: convertPressureToUserUnits(results.stresses.atZeroPressure.longitudinal.low, inputs.unitsSystem),
+          components: {
+            pressure: convertPressureToUserUnits(results.stresses.atZeroPressure.longitudinal.components.pressure, inputs.unitsSystem),
+            earth: convertPressureToUserUnits(results.stresses.atZeroPressure.longitudinal.components.earth, inputs.unitsSystem),
+            thermal: convertPressureToUserUnits(results.stresses.atZeroPressure.longitudinal.components.thermal, inputs.unitsSystem),
+            total: convertPressureToUserUnits(results.stresses.atZeroPressure.longitudinal.components.total, inputs.unitsSystem),
+          },
+        },
+        equivalent: {
+          high: convertPressureToUserUnits(results.stresses.atZeroPressure.equivalent.high, inputs.unitsSystem),
+          low: convertPressureToUserUnits(results.stresses.atZeroPressure.equivalent.low, inputs.unitsSystem),
+          percentSMYS: results.stresses.atZeroPressure.equivalent.percentSMYS,
+        },
+      },
+      atMOP: {
+        hoop: {
+          high: convertPressureToUserUnits(results.stresses.atMOP.hoop.high, inputs.unitsSystem),
+          low: convertPressureToUserUnits(results.stresses.atMOP.hoop.low, inputs.unitsSystem),
+          components: {
+            pressure: convertPressureToUserUnits(results.stresses.atMOP.hoop.components.pressure, inputs.unitsSystem),
+            earth: convertPressureToUserUnits(results.stresses.atMOP.hoop.components.earth, inputs.unitsSystem),
+            thermal: convertPressureToUserUnits(results.stresses.atMOP.hoop.components.thermal, inputs.unitsSystem),
+            total: convertPressureToUserUnits(results.stresses.atMOP.hoop.components.total, inputs.unitsSystem),
+          },
+        },
+        longitudinal: {
+          high: convertPressureToUserUnits(results.stresses.atMOP.longitudinal.high, inputs.unitsSystem),
+          low: convertPressureToUserUnits(results.stresses.atMOP.longitudinal.low, inputs.unitsSystem),
+          components: {
+            pressure: convertPressureToUserUnits(results.stresses.atMOP.longitudinal.components.pressure, inputs.unitsSystem),
+            earth: convertPressureToUserUnits(results.stresses.atMOP.longitudinal.components.earth, inputs.unitsSystem),
+            thermal: convertPressureToUserUnits(results.stresses.atMOP.longitudinal.components.thermal, inputs.unitsSystem),
+            total: convertPressureToUserUnits(results.stresses.atMOP.longitudinal.components.total, inputs.unitsSystem),
+          },
+        },
+        equivalent: {
+          high: convertPressureToUserUnits(results.stresses.atMOP.equivalent.high, inputs.unitsSystem),
+          low: convertPressureToUserUnits(results.stresses.atMOP.equivalent.low, inputs.unitsSystem),
+          percentSMYS: results.stresses.atMOP.equivalent.percentSMYS,
+        },
+      },
+    },
+    debug: {
+      ...results.debug,
+      soilPressure_psi: convertPressureToUserUnits(results.debug.soilPressure_psi, inputs.unitsSystem),
+      boussinesqMax_psi: convertPressureToUserUnits(results.debug.boussinesqMax_psi, inputs.unitsSystem),
+      ePrime_psi: convertPressureToUserUnits(results.debug.ePrime_psi, inputs.unitsSystem),
+      hoopSoil_psi: convertPressureToUserUnits(results.debug.hoopSoil_psi, inputs.unitsSystem),
+      hoopLive_psi: convertPressureToUserUnits(results.debug.hoopLive_psi, inputs.unitsSystem),
+      hoopInt_psi: convertPressureToUserUnits(results.debug.hoopInt_psi, inputs.unitsSystem),
+      longSoil_psi: convertPressureToUserUnits(results.debug.longSoil_psi, inputs.unitsSystem),
+      longLive_psi: convertPressureToUserUnits(results.debug.longLive_psi, inputs.unitsSystem),
+      longInt_psi: convertPressureToUserUnits(results.debug.longInt_psi, inputs.unitsSystem),
+      longTherm_psi: convertPressureToUserUnits(results.debug.longTherm_psi, inputs.unitsSystem),
+    },
+  };
 }
