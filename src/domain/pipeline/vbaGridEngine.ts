@@ -135,7 +135,13 @@ export function calculateGridLoadVBA(inputs: GridLoadInputs): GridLoadResults {
   const equivZero = calculateEquivalentStress(inputs.equivStressMethod, hoopZeroHigh, hoopZeroLow, longZeroHigh, longZeroLow, inputsEN.SMYS_psi);
   const equivMOP = calculateEquivalentStress(inputs.equivStressMethod, hoopMOPHigh, hoopMOPLow, longMOPHigh, longMOPLow, inputsEN.SMYS_psi);
   
-  const passFailResult = calculatePassFail(inputs.codeCheck, inputs.userDefinedLimits, hoopZeroHigh, hoopMOPHigh, longZeroHigh, longMOPHigh, equivZero.pctSMYS, equivMOP.pctSMYS, inputsEN.SMYS_psi);
+  const passFailResult = calculatePassFailHelper(
+    inputs.codeCheck,
+    inputs.userDefinedLimits,
+    Math.max(Math.abs(hoopZeroHigh), Math.abs(hoopMOPHigh)) / inputsEN.SMYS_psi * 100,
+    Math.max(Math.abs(longZeroHigh), Math.abs(longMOPHigh)) / inputsEN.SMYS_psi * 100,
+    Math.max(equivZero.pctSMYS, equivMOP.pctSMYS)
+  );
   
   const deflectionRatio = (soilLoad.Psoil_psi + BsnqIF) * Math.pow(inputsEN.D_in / inputsEN.t_in, 3) / ePrime.ePrime_psi;
   
@@ -171,8 +177,17 @@ export function calculateGridLoadVBA(inputs: GridLoadInputs): GridLoadResults {
         equivalent: { high: equivMOP.high, low: equivMOP.low, percentSMYS: equivMOP.pctSMYS },
       },
     },
-    allowableStress: passFailResult.allowableStress,
-    passFailSummary: passFailResult.passFailSummary,
+    allowableStress: passFailResult.allowableStress_psi,
+    passFailSummary: {
+      hoopAtZero: passFailResult.hoopPass,
+      hoopAtMOP: passFailResult.hoopPass,
+      longitudinalAtZero: passFailResult.longPass,
+      longitudinalAtMOP: passFailResult.longPass,
+      equivalentAtZero: passFailResult.equivPass,
+      equivalentAtMOP: passFailResult.equivPass,
+      overallPass: passFailResult.overallPass,
+    },
+    limitsUsed: passFailResult.limitsUsed,
     ePrimeUsed: ePrime.ePrime_psi,
     soilLoadOnPipe: soilLoad.Psoil_psi,
     deflectionRatio,

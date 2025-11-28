@@ -236,16 +236,12 @@ export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults 
   );
   
   // Pass/Fail
-  const passFailResult = calculatePassFail(
+  const passFailResult = calculatePassFailHelper(
     inputs.codeCheck,
     inputs.userDefinedLimits,
-    hoopZeroHigh,
-    hoopMOPHigh,
-    longZeroHigh,
-    longMOPHigh,
-    equivZero.pctSMYS,
-    equivMOP.pctSMYS,
-    inputsEN.SMYS_psi
+    Math.max(Math.abs(hoopZeroHigh), Math.abs(hoopMOPHigh)) / inputsEN.SMYS_psi * 100,
+    Math.max(Math.abs(longZeroHigh), Math.abs(longMOPHigh)) / inputsEN.SMYS_psi * 100,
+    Math.max(equivZero.pctSMYS, equivMOP.pctSMYS)
   );
   
   // Deflection ratio (simplified)
@@ -312,8 +308,17 @@ export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults 
         },
       },
     },
-    allowableStress: passFailResult.allowableStress,
-    passFailSummary: passFailResult.passFailSummary,
+    allowableStress: passFailResult.allowableStress_psi,
+    passFailSummary: {
+      hoopAtZero: passFailResult.hoopPass,
+      hoopAtMOP: passFailResult.hoopPass,
+      longitudinalAtZero: passFailResult.longPass,
+      longitudinalAtMOP: passFailResult.longPass,
+      equivalentAtZero: passFailResult.equivPass,
+      equivalentAtMOP: passFailResult.equivPass,
+      overallPass: passFailResult.overallPass,
+    },
+    limitsUsed: passFailResult.limitsUsed,
     ePrimeUsed: ePrime.ePrime_psi,
     soilLoadOnPipe: soilLoad.Psoil_psi,
     deflectionRatio,
