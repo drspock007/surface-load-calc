@@ -13,3 +13,11 @@ export type { ThreeAxleInputs, ThreeAxleResults } from './types3Axle';
 export type { GridLoadInputs, GridLoadResults } from './typesGrid';
 
 export * from './sensitivity';
+
+// Unified entry point
+export { computeSurfaceLoad, isPassingCalculation } from './computeSurfaceLoad';
+export type { SurfaceLoadInputs, SurfaceLoadResults } from './computeSurfaceLoad';
+
+// E' lookup table
+export { getEPrimeCoefficients, calculateEPrimeFromLookup, E_PRIME_TABLE } from './ePrimeLookup';
+export type { EPrimeCoefficients, SoilTypeKey, CompactionLevel } from './ePrimeLookup';
