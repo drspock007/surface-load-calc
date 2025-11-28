@@ -12,6 +12,7 @@ import { Calculator as CalcIcon } from "lucide-react";
 import { ThreeAxleInputs, UnitsSystem, SoilLoadMethod, EPrimeMethod, BeddingAngleDeg, EquivStressMethod, CodeCheck, SoilType, Compaction, PavementType, VehicleClass } from "@/domain/pipeline/types3Axle";
 import { PipeSelector } from "./PipelineTrackForm/PipeSelector";
 import { AnalysisParametersSection } from "./AnalysisParametersSection";
+import { convertFormValue } from "@/domain/pipeline/unitConversions";
 
 const threeAxleSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),
@@ -149,6 +150,33 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
 
   const toggleUnits = (checked: boolean) => {
     const newSystem: UnitsSystem = checked ? "SI" : "EN";
+    const oldSystem = unitsSystem;
+    
+    const currentValues = watch();
+    setValue("pipeOD", convertFormValue(currentValues.pipeOD, oldSystem, newSystem, 'length') ?? currentValues.pipeOD);
+    setValue("pipeWT", convertFormValue(currentValues.pipeWT, oldSystem, newSystem, 'length') ?? currentValues.pipeWT);
+    setValue("MOP", convertFormValue(currentValues.MOP, oldSystem, newSystem, 'pressure') ?? currentValues.MOP);
+    setValue("SMYS", convertFormValue(currentValues.SMYS, oldSystem, newSystem, 'smys') ?? currentValues.SMYS);
+    setValue("deltaT", convertFormValue(currentValues.deltaT, oldSystem, newSystem, 'temp') ?? currentValues.deltaT);
+    setValue("soilDensity", convertFormValue(currentValues.soilDensity, oldSystem, newSystem, 'density') ?? currentValues.soilDensity);
+    setValue("depthCover", convertFormValue(currentValues.depthCover, oldSystem, newSystem, 'depth') ?? currentValues.depthCover);
+    setValue("axle1To2Spacing", convertFormValue(currentValues.axle1To2Spacing, oldSystem, newSystem, 'depth') ?? currentValues.axle1To2Spacing);
+    setValue("axle2To3Spacing", convertFormValue(currentValues.axle2To3Spacing, oldSystem, newSystem, 'depth') ?? currentValues.axle2To3Spacing);
+    setValue("laneOffset", convertFormValue(currentValues.laneOffset, oldSystem, newSystem, 'depth') ?? currentValues.laneOffset);
+    setValue("axle1Load", convertFormValue(currentValues.axle1Load, oldSystem, newSystem, 'force') ?? currentValues.axle1Load);
+    setValue("axle2Load", convertFormValue(currentValues.axle2Load, oldSystem, newSystem, 'force') ?? currentValues.axle2Load);
+    setValue("axle3Load", convertFormValue(currentValues.axle3Load, oldSystem, newSystem, 'force') ?? currentValues.axle3Load);
+    setValue("tireWidth", convertFormValue(currentValues.tireWidth, oldSystem, newSystem, 'length') ?? currentValues.tireWidth);
+    setValue("tireLength", convertFormValue(currentValues.tireLength, oldSystem, newSystem, 'length') ?? currentValues.tireLength);
+    setValue("axleWidth", convertFormValue(currentValues.axleWidth, oldSystem, newSystem, 'length') ?? currentValues.axleWidth);
+    
+    if (currentValues.ePrimeUserDefined) {
+      setValue("ePrimeUserDefined", convertFormValue(currentValues.ePrimeUserDefined, oldSystem, newSystem, 'pressure'));
+    }
+    if (currentValues.soilCohesion) {
+      setValue("soilCohesion", convertFormValue(currentValues.soilCohesion, oldSystem, newSystem, 'pressure') ?? 0);
+    }
+    
     setUnitsSystem(newSystem);
     setValue("unitsSystem", newSystem);
   };
