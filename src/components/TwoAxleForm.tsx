@@ -128,7 +128,13 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
       vehicleClass: data.vehicleClass,
       equivStressMethod: data.equivStressMethod,
       codeCheck: data.codeCheck,
-      userDefinedLimits: data.userDefinedLimits,
+      ...(data.userDefinedLimits && 
+        data.userDefinedLimits.hoopLimitPct !== undefined && 
+        data.userDefinedLimits.longLimitPct !== undefined && 
+        data.userDefinedLimits.equivLimitPct !== undefined
+        ? { userDefinedLimits: data.userDefinedLimits as { hoopLimitPct: number; longLimitPct: number; equivLimitPct: number } }
+        : {}
+      ),
     };
     onCalculate(inputs);
   };
