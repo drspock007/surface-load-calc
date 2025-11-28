@@ -89,40 +89,40 @@ export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults 
   if (inputs.contactPatchMode === 'AUTO' && inputs.tirePressure) {
     const tiresPerAxle = inputs.tiresPerAxle || 2;
     
-    // Calculate for axle 1
-    let patch1;
+    // Use user-provided tire width (already converted to inches)
+    tireWidth_in = inputsEN.tireWidth_in;
+    
+    // Calculate tire length for each axle using the VBA formula
+    let patch1, patch2;
     if (inputs.unitsSystem === 'SI') {
       patch1 = convertContactPatchToEN(
         inputs.axle1Load,
         inputs.tirePressure,
-        tiresPerAxle
+        tiresPerAxle,
+        inputs.tireWidth  // mm
+      );
+      patch2 = convertContactPatchToEN(
+        inputs.axle2Load,
+        inputs.tirePressure,
+        tiresPerAxle,
+        inputs.tireWidth  // mm
       );
     } else {
       patch1 = calculateContactPatch(
         inputsEN.axle1Load_lb,
         inputs.tirePressure,
-        tiresPerAxle
+        tiresPerAxle,
+        inputs.tireWidth  // inches
       );
-    }
-    
-    // Calculate for axle 2
-    let patch2;
-    if (inputs.unitsSystem === 'SI') {
-      patch2 = convertContactPatchToEN(
-        inputs.axle2Load,
-        inputs.tirePressure,
-        tiresPerAxle
-      );
-    } else {
       patch2 = calculateContactPatch(
         inputsEN.axle2Load_lb,
         inputs.tirePressure,
-        tiresPerAxle
+        tiresPerAxle,
+        inputs.tireWidth  // inches
       );
     }
     
-    // Use the larger dimensions for conservative analysis
-    tireWidth_in = Math.max(patch1.contactWidth_in, patch2.contactWidth_in);
+    // Use the larger length for conservative analysis
     tireLength_in = Math.max(patch1.contactLength_in, patch2.contactLength_in);
   }
   

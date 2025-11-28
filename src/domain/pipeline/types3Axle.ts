@@ -42,8 +42,8 @@ export interface ThreeAxleInputs {
   tirePressure?: number; // tire inflation pressure (psi or kPa) - used in AUTO mode
   tiresPerAxle?: number; // number of tires per axle (2 or 4) - used in AUTO mode
   
-  tireWidth: number; // tire contact width (in or mm) - MANUAL mode or calculated in AUTO mode
-  tireLength: number; // tire contact length (in or mm) - MANUAL mode or calculated in AUTO mode
+  tireWidth: number; // tire contact width (in or mm) - INPUT in both modes
+  tireLength: number; // tire contact length (in or mm) - INPUT in MANUAL mode, CALCULATED in AUTO mode
   axleWidth: number; // track width / lateral spacing (in or mm)
   laneOffset: number; // offset from pipe centerline (ft or m)
   

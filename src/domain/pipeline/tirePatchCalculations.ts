@@ -10,22 +10,23 @@ export interface TireContactPatch {
 }
 
 /**
- * Calculate tire contact patch dimensions from axle load and tire pressure
+ * Calculate tire contact patch dimensions from axle load, tire pressure, and tire width
+ * (Matches original VBA logic)
  * 
  * @param axleLoad_lb - Total load on the axle (pounds)
  * @param tirePressure_psi - Tire inflation pressure (psi)
  * @param tiresPerAxle - Number of tires on the axle (typically 2 for single, 4 for dual)
- * @param aspectRatio - Width/Length ratio of contact patch (typically 0.8)
+ * @param tireWidth_in - Tire contact width (inches) - user input
  * @returns Contact patch dimensions
  */
 export function calculateContactPatch(
   axleLoad_lb: number,
   tirePressure_psi: number,
-  tiresPerAxle: number = 2,
-  aspectRatio: number = 0.8
+  tiresPerAxle: number,
+  tireWidth_in: number
 ): TireContactPatch {
   // Validate inputs
-  if (axleLoad_lb <= 0 || tirePressure_psi <= 0 || tiresPerAxle <= 0) {
+  if (axleLoad_lb <= 0 || tirePressure_psi <= 0 || tiresPerAxle <= 0 || tireWidth_in <= 0) {
     throw new Error('Invalid input values for contact patch calculation');
   }
 
@@ -35,17 +36,14 @@ export function calculateContactPatch(
   // Contact area = Load / Pressure (assumes uniform pressure distribution)
   const contactArea_in2 = loadPerTire_lb / tirePressure_psi;
   
-  // Calculate contact dimensions assuming rectangular patch with aspect ratio
-  // width * length = area
-  // width / length = aspectRatio
-  // Therefore: length = sqrt(area / aspectRatio)
-  //            width = area / length
-  const contactLength_in = Math.sqrt(contactArea_in2 / aspectRatio);
-  const contactWidth_in = contactArea_in2 / contactLength_in;
+  // Calculate contact length from area and width (VBA formula)
+  // Area = Width * Length
+  // Therefore: Length = Area / Width
+  const contactLength_in = contactArea_in2 / tireWidth_in;
   
   return {
     contactLength_in,
-    contactWidth_in,
+    contactWidth_in: tireWidth_in,
     contactArea_in2,
   };
 }
@@ -56,12 +54,13 @@ export function calculateContactPatch(
 export function convertContactPatchToEN(
   axleLoad_kg: number,
   tirePressure_kPa: number,
-  tiresPerAxle: number = 2,
-  aspectRatio: number = 0.8
+  tiresPerAxle: number,
+  tireWidth_mm: number
 ): TireContactPatch {
   // Convert to English units
   const axleLoad_lb = axleLoad_kg * 2.2046226218;
   const tirePressure_psi = tirePressure_kPa * 0.1450378911491;
+  const tireWidth_in = tireWidth_mm * 0.03937007874016;
   
-  return calculateContactPatch(axleLoad_lb, tirePressure_psi, tiresPerAxle, aspectRatio);
+  return calculateContactPatch(axleLoad_lb, tirePressure_psi, tiresPerAxle, tireWidth_in);
 }
