@@ -17,7 +17,7 @@ import {
 import { PipelineInputsSection } from "./PipelineInputsSection";
 import { SoilLoadSection } from "./SoilLoadSection";
 import { TrackVehicleSection } from "./TrackVehicleSection";
-import { AnalysisParametersSection } from "./AnalysisParametersSection";
+import { AnalysisParametersSection } from "../AnalysisParametersSection";
 
 const pipelineSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),

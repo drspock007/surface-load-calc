@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Calculator as CalcIcon } from "lucide-react";
 import { ThreeAxleInputs, UnitsSystem, SoilLoadMethod, EPrimeMethod, BeddingAngleDeg, EquivStressMethod, CodeCheck, SoilType, Compaction, PavementType, VehicleClass } from "@/domain/pipeline/types3Axle";
 import { PipeSelector } from "./PipelineTrackForm/PipeSelector";
+import { AnalysisParametersSection } from "./AnalysisParametersSection";
 
 const threeAxleSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),
@@ -288,36 +289,13 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Analysis Parameters</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Vehicle Class</Label>
-              <Select value={watch("vehicleClass")} onValueChange={(v) => setValue("vehicleClass", v as VehicleClass)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="HIGHWAY">Highway</SelectItem>
-                  <SelectItem value="FARM">Farm/Construction</SelectItem>
-                  <SelectItem value="TRACK">Track</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Pavement Type</Label>
-              <Select value={watch("pavementType")} onValueChange={(v) => setValue("pavementType", v as PavementType)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="RIGID">Rigid</SelectItem>
-                  <SelectItem value="FLEXIBLE">Flexible</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <AnalysisParametersSection
+        register={register}
+        errors={errors}
+        watch={watch}
+        setValue={setValue}
+        unitsSystem={unitsSystem}
+      />
 
       <Button type="submit" className="w-full" size="lg">
         <CalcIcon className="w-5 h-5 mr-2" />
