@@ -36,6 +36,9 @@ const twoAxleSchema = z.object({
   axleSpacing: z.number().positive(),
   axle1Load: z.number().positive(),
   axle2Load: z.number().positive(),
+  contactPatchMode: z.enum(["MANUAL", "AUTO"]),
+  tirePressure: z.number().positive().optional(),
+  tiresPerAxle: z.number().int().positive().optional(),
   tireWidth: z.number().positive(),
   tireLength: z.number().positive(),
   axleWidth: z.number().positive(),
@@ -81,6 +84,9 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
     axleSpacing: 14,
     axle1Load: 12000,
     axle2Load: 18000,
+    contactPatchMode: "MANUAL",
+    tirePressure: 80,
+    tiresPerAxle: 2,
     tireWidth: 8,
     tireLength: 10,
     axleWidth: 72,
@@ -99,6 +105,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
   const ePrimeMethod = watch("ePrimeMethod");
   const soilLoadMethod = watch("soilLoadMethod");
   const codeCheck = watch("codeCheck");
+  const contactPatchMode = watch("contactPatchMode");
 
   const onSubmit = (data: TwoAxleFormData) => {
     const inputs: TwoAxleInputs = {
@@ -123,6 +130,9 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
       axleSpacing: data.axleSpacing,
       axle1Load: data.axle1Load,
       axle2Load: data.axle2Load,
+      contactPatchMode: data.contactPatchMode,
+      tirePressure: data.tirePressure,
+      tiresPerAxle: data.tiresPerAxle,
       tireWidth: data.tireWidth,
       tireLength: data.tireLength,
       axleWidth: data.axleWidth,
@@ -158,6 +168,9 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
     setValue("laneOffset", convertFormValue(currentValues.laneOffset, oldSystem, newSystem, 'depth') ?? currentValues.laneOffset);
     setValue("axle1Load", convertFormValue(currentValues.axle1Load, oldSystem, newSystem, 'force') ?? currentValues.axle1Load);
     setValue("axle2Load", convertFormValue(currentValues.axle2Load, oldSystem, newSystem, 'force') ?? currentValues.axle2Load);
+    if (currentValues.tirePressure) {
+      setValue("tirePressure", convertFormValue(currentValues.tirePressure, oldSystem, newSystem, 'tirePressure'));
+    }
     setValue("tireWidth", convertFormValue(currentValues.tireWidth, oldSystem, newSystem, 'length') ?? currentValues.tireWidth);
     setValue("tireLength", convertFormValue(currentValues.tireLength, oldSystem, newSystem, 'length') ?? currentValues.tireLength);
     setValue("axleWidth", convertFormValue(currentValues.axleWidth, oldSystem, newSystem, 'length') ?? currentValues.axleWidth);
@@ -284,14 +297,63 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
               <Input type="number" step="any" {...register("axle2Load", { valueAsNumber: true })} />
             </div>
           </div>
+          
+          {/* Contact Patch Mode Toggle */}
+          <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="contact-mode" className="text-sm font-medium">Contact Patch Method</Label>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">
+                  {contactPatchMode === "MANUAL" ? "Manual Entry" : "From Tire Pressure"}
+                </span>
+                <Switch 
+                  id="contact-mode"
+                  checked={contactPatchMode === "AUTO"} 
+                  onCheckedChange={(checked) => setValue("contactPatchMode", checked ? "AUTO" : "MANUAL")} 
+                />
+              </div>
+            </div>
+            
+            {contactPatchMode === "AUTO" ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Tire Pressure ({unitLabels.pressure})</Label>
+                  <Input type="number" step="any" {...register("tirePressure", { valueAsNumber: true })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Tires Per Axle</Label>
+                  <Select value={watch("tiresPerAxle")?.toString()} onValueChange={(v) => setValue("tiresPerAxle", parseInt(v))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2">2 (Single)</SelectItem>
+                      <SelectItem value="4">4 (Dual)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            ) : null}
+          </div>
+          
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>Tire Width ({unitLabels.length})</Label>
-              <Input type="number" step="any" {...register("tireWidth", { valueAsNumber: true })} />
+              <Label>Tire Width ({unitLabels.length}) {contactPatchMode === "AUTO" && <span className="text-xs text-muted-foreground">(calculated)</span>}</Label>
+              <Input 
+                type="number" 
+                step="any" 
+                {...register("tireWidth", { valueAsNumber: true })} 
+                disabled={contactPatchMode === "AUTO"}
+                className={contactPatchMode === "AUTO" ? "bg-muted" : ""}
+              />
             </div>
             <div className="space-y-2">
-              <Label>Tire Length ({unitLabels.length})</Label>
-              <Input type="number" step="any" {...register("tireLength", { valueAsNumber: true })} />
+              <Label>Tire Length ({unitLabels.length}) {contactPatchMode === "AUTO" && <span className="text-xs text-muted-foreground">(calculated)</span>}</Label>
+              <Input 
+                type="number" 
+                step="any" 
+                {...register("tireLength", { valueAsNumber: true })} 
+                disabled={contactPatchMode === "AUTO"}
+                className={contactPatchMode === "AUTO" ? "bg-muted" : ""}
+              />
             </div>
             <div className="space-y-2">
               <Label>Axle Width ({unitLabels.length})</Label>

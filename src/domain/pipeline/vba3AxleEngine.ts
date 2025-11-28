@@ -11,6 +11,7 @@ import {
   generateStandardMeasurementPoints,
   PointLoad 
 } from './boussinesqHelpers';
+import { calculateContactPatch, convertContactPatchToEN } from './tirePatchCalculations';
 import {
   calculateBeddingParams,
   calculateEPrime,
@@ -74,6 +75,30 @@ function convertInputsToEN(inputs: ThreeAxleInputs): any {
 export function calculate3AxleVehicleVBA(inputs: ThreeAxleInputs): ThreeAxleResults {
   const inputsEN = convertInputsToEN(inputs);
   
+  // Calculate tire contact dimensions if AUTO mode
+  let tireWidth_in = inputsEN.tireWidth_in;
+  let tireLength_in = inputsEN.tireLength_in;
+  
+  if (inputs.contactPatchMode === 'AUTO' && inputs.tirePressure) {
+    const tiresPerAxle = inputs.tiresPerAxle || 2;
+    
+    // Calculate for each axle
+    const patches = [inputs.axle1Load, inputs.axle2Load, inputs.axle3Load].map(axleLoad => {
+      if (inputs.unitsSystem === 'SI') {
+        return convertContactPatchToEN(axleLoad, inputs.tirePressure!, tiresPerAxle);
+      } else {
+        const axleLoad_lb = inputs.unitsSystem === 'EN' 
+          ? axleLoad 
+          : axleLoad * 2.2046226218;
+        return calculateContactPatch(axleLoad_lb, inputs.tirePressure!, tiresPerAxle);
+      }
+    });
+    
+    // Use the largest dimensions for conservative analysis
+    tireWidth_in = Math.max(...patches.map(p => p.contactWidth_in));
+    tireLength_in = Math.max(...patches.map(p => p.contactLength_in));
+  }
+  
   const pointLoads: PointLoad[] = [];
   
   // Axle 1 (front)
@@ -81,8 +106,8 @@ export function calculate3AxleVehicleVBA(inputs: ThreeAxleInputs): ThreeAxleResu
   const axle1Loads = generateRectangularGrid(
     inputsEN.laneOffset_ft * 12,
     axle1_Y,
-    inputsEN.tireWidth_in * 2,
-    inputsEN.tireLength_in,
+    tireWidth_in * 2,
+    tireLength_in,
     inputsEN.axle1Load_lb,
     6
   );
@@ -92,8 +117,8 @@ export function calculate3AxleVehicleVBA(inputs: ThreeAxleInputs): ThreeAxleResu
   const axle2Loads = generateRectangularGrid(
     inputsEN.laneOffset_ft * 12,
     axle2_Y,
-    inputsEN.tireWidth_in * 2,
-    inputsEN.tireLength_in,
+    tireWidth_in * 2,
+    tireLength_in,
     inputsEN.axle2Load_lb,
     6
   );
@@ -103,8 +128,8 @@ export function calculate3AxleVehicleVBA(inputs: ThreeAxleInputs): ThreeAxleResu
   const axle3Loads = generateRectangularGrid(
     inputsEN.laneOffset_ft * 12,
     axle3_Y,
-    inputsEN.tireWidth_in * 2,
-    inputsEN.tireLength_in,
+    tireWidth_in * 2,
+    tireLength_in,
     inputsEN.axle3Load_lb,
     6
   );

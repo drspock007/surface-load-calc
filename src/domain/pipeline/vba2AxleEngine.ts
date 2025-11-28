@@ -12,6 +12,7 @@ import {
   generateStandardMeasurementPoints,
   PointLoad 
 } from './boussinesqHelpers';
+import { calculateContactPatch, convertContactPatchToEN } from './tirePatchCalculations';
 
 // Import shared calculation functions
 import { 
@@ -81,6 +82,50 @@ function convertInputsToEN(inputs: TwoAxleInputs): any {
 export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults {
   const inputsEN = convertInputsToEN(inputs);
   
+  // Calculate tire contact dimensions if AUTO mode
+  let tireWidth_in = inputsEN.tireWidth_in;
+  let tireLength_in = inputsEN.tireLength_in;
+  
+  if (inputs.contactPatchMode === 'AUTO' && inputs.tirePressure) {
+    const tiresPerAxle = inputs.tiresPerAxle || 2;
+    
+    // Calculate for axle 1
+    let patch1;
+    if (inputs.unitsSystem === 'SI') {
+      patch1 = convertContactPatchToEN(
+        inputs.axle1Load,
+        inputs.tirePressure,
+        tiresPerAxle
+      );
+    } else {
+      patch1 = calculateContactPatch(
+        inputsEN.axle1Load_lb,
+        inputs.tirePressure,
+        tiresPerAxle
+      );
+    }
+    
+    // Calculate for axle 2
+    let patch2;
+    if (inputs.unitsSystem === 'SI') {
+      patch2 = convertContactPatchToEN(
+        inputs.axle2Load,
+        inputs.tirePressure,
+        tiresPerAxle
+      );
+    } else {
+      patch2 = calculateContactPatch(
+        inputsEN.axle2Load_lb,
+        inputs.tirePressure,
+        tiresPerAxle
+      );
+    }
+    
+    // Use the larger dimensions for conservative analysis
+    tireWidth_in = Math.max(patch1.contactWidth_in, patch2.contactWidth_in);
+    tireLength_in = Math.max(patch1.contactLength_in, patch2.contactLength_in);
+  }
+  
   // Generate point loads for both axles
   const pointLoads: PointLoad[] = [];
   
@@ -89,8 +134,8 @@ export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults 
   const axle1Loads = generateRectangularGrid(
     inputsEN.laneOffset_ft * 12, // lateral offset in inches
     axle1_Y,
-    inputsEN.tireWidth_in * 2, // two tires per axle (left + right)
-    inputsEN.tireLength_in,
+    tireWidth_in * 2, // two tires per axle (left + right)
+    tireLength_in,
     inputsEN.axle1Load_lb,
     6 // 6-inch grid spacing
   );
@@ -100,8 +145,8 @@ export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults 
   const axle2Loads = generateRectangularGrid(
     inputsEN.laneOffset_ft * 12,
     axle2_Y,
-    inputsEN.tireWidth_in * 2,
-    inputsEN.tireLength_in,
+    tireWidth_in * 2,
+    tireLength_in,
     inputsEN.axle2Load_lb,
     6
   );
