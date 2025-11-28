@@ -82,20 +82,29 @@ export function calculate3AxleVehicleVBA(inputs: ThreeAxleInputs): ThreeAxleResu
   if (inputs.contactPatchMode === 'AUTO' && inputs.tirePressure) {
     const tiresPerAxle = inputs.tiresPerAxle || 2;
     
-    // Calculate for each axle
+    // Use user-provided tire width (already converted to inches)
+    tireWidth_in = inputsEN.tireWidth_in;
+    
+    // Calculate tire length for each axle using the VBA formula
     const patches = [inputs.axle1Load, inputs.axle2Load, inputs.axle3Load].map(axleLoad => {
       if (inputs.unitsSystem === 'SI') {
-        return convertContactPatchToEN(axleLoad, inputs.tirePressure!, tiresPerAxle);
+        return convertContactPatchToEN(
+          axleLoad, 
+          inputs.tirePressure!, 
+          tiresPerAxle,
+          inputs.tireWidth  // mm
+        );
       } else {
-        const axleLoad_lb = inputs.unitsSystem === 'EN' 
-          ? axleLoad 
-          : axleLoad * 2.2046226218;
-        return calculateContactPatch(axleLoad_lb, inputs.tirePressure!, tiresPerAxle);
+        return calculateContactPatch(
+          axleLoad, 
+          inputs.tirePressure!, 
+          tiresPerAxle,
+          inputs.tireWidth  // inches
+        );
       }
     });
     
-    // Use the largest dimensions for conservative analysis
-    tireWidth_in = Math.max(...patches.map(p => p.contactWidth_in));
+    // Use the largest length for conservative analysis
     tireLength_in = Math.max(...patches.map(p => p.contactLength_in));
   }
   

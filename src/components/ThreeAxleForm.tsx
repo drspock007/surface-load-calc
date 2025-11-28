@@ -331,7 +331,11 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
             </div>
             
             {contactPatchMode === "AUTO" ? (
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-2">
+                  <Label>Tire Width ({unitLabels.length})</Label>
+                  <Input type="number" step="any" {...register("tireWidth", { valueAsNumber: true })} />
+                </div>
                 <div className="space-y-2">
                   <Label>Tire Pressure ({unitLabels.pressure})</Label>
                   <Input type="number" step="any" {...register("tirePressure", { valueAsNumber: true })} />
@@ -350,32 +354,39 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
             ) : null}
           </div>
           
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <Label>Tire Width ({unitLabels.length}) {contactPatchMode === "AUTO" && <span className="text-xs text-muted-foreground">(calculated)</span>}</Label>
-              <Input 
-                type="number" 
-                step="any" 
-                {...register("tireWidth", { valueAsNumber: true })} 
-                disabled={contactPatchMode === "AUTO"}
-                className={contactPatchMode === "AUTO" ? "bg-muted" : ""}
-              />
+          {contactPatchMode === "MANUAL" ? (
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="space-y-2">
+                <Label>Tire Width ({unitLabels.length})</Label>
+                <Input type="number" step="any" {...register("tireWidth", { valueAsNumber: true })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Tire Length ({unitLabels.length})</Label>
+                <Input type="number" step="any" {...register("tireLength", { valueAsNumber: true })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Axle Width ({unitLabels.length})</Label>
+                <Input type="number" step="any" {...register("axleWidth", { valueAsNumber: true })} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Tire Length ({unitLabels.length}) {contactPatchMode === "AUTO" && <span className="text-xs text-muted-foreground">(calculated)</span>}</Label>
-              <Input 
-                type="number" 
-                step="any" 
-                {...register("tireLength", { valueAsNumber: true })} 
-                disabled={contactPatchMode === "AUTO"}
-                className={contactPatchMode === "AUTO" ? "bg-muted" : ""}
-              />
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Tire Length ({unitLabels.length}) <span className="text-xs text-muted-foreground">(calculated)</span></Label>
+                <Input 
+                  type="number" 
+                  step="any" 
+                  {...register("tireLength", { valueAsNumber: true })} 
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Axle Width ({unitLabels.length})</Label>
+                <Input type="number" step="any" {...register("axleWidth", { valueAsNumber: true })} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Axle Width ({unitLabels.length})</Label>
-              <Input type="number" step="any" {...register("axleWidth", { valueAsNumber: true })} />
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
