@@ -14,6 +14,7 @@ import {
   BeddingAngleDeg,
   Compaction
 } from "@/domain/pipeline/types";
+import { convertFormValue } from "@/domain/pipeline/unitConversions";
 import { PipelineInputsSection } from "./PipelineInputsSection";
 import { SoilLoadSection } from "./SoilLoadSection";
 import { TrackVehicleSection } from "./TrackVehicleSection";
@@ -136,6 +137,29 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
 
   const toggleUnits = (checked: boolean) => {
     const newSystem: UnitsSystem = checked ? "SI" : "EN";
+    const oldSystem = unitsSystem;
+    
+    // Convert all form values
+    const currentValues = watch();
+    setValue("pipeOD", convertFormValue(currentValues.pipeOD, oldSystem, newSystem, 'length') ?? currentValues.pipeOD);
+    setValue("pipeWT", convertFormValue(currentValues.pipeWT, oldSystem, newSystem, 'length') ?? currentValues.pipeWT);
+    setValue("MOP", convertFormValue(currentValues.MOP, oldSystem, newSystem, 'pressure') ?? currentValues.MOP);
+    setValue("SMYS", convertFormValue(currentValues.SMYS, oldSystem, newSystem, 'smys') ?? currentValues.SMYS);
+    setValue("deltaT", convertFormValue(currentValues.deltaT, oldSystem, newSystem, 'temp') ?? currentValues.deltaT);
+    setValue("soilDensity", convertFormValue(currentValues.soilDensity, oldSystem, newSystem, 'density') ?? currentValues.soilDensity);
+    setValue("depthCover", convertFormValue(currentValues.depthCover, oldSystem, newSystem, 'depth') ?? currentValues.depthCover);
+    setValue("trackSeparation", convertFormValue(currentValues.trackSeparation, oldSystem, newSystem, 'length') ?? currentValues.trackSeparation);
+    setValue("trackLength", convertFormValue(currentValues.trackLength, oldSystem, newSystem, 'length') ?? currentValues.trackLength);
+    setValue("trackVehicleWeight", convertFormValue(currentValues.trackVehicleWeight, oldSystem, newSystem, 'force') ?? currentValues.trackVehicleWeight);
+    setValue("trackWidth", convertFormValue(currentValues.trackWidth, oldSystem, newSystem, 'length') ?? currentValues.trackWidth);
+    
+    if (currentValues.ePrimeUserDefined) {
+      setValue("ePrimeUserDefined", convertFormValue(currentValues.ePrimeUserDefined, oldSystem, newSystem, 'pressure'));
+    }
+    if (currentValues.soilCohesion) {
+      setValue("soilCohesion", convertFormValue(currentValues.soilCohesion, oldSystem, newSystem, 'pressure') ?? 0);
+    }
+    
     setUnitsSystem(newSystem);
     setValue("unitsSystem", newSystem);
   };

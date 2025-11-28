@@ -12,6 +12,7 @@ import { Calculator as CalcIcon } from "lucide-react";
 import { GridLoadInputs, UnitsSystem, SoilLoadMethod, EPrimeMethod, BeddingAngleDeg, EquivStressMethod, CodeCheck, SoilType, Compaction, PavementType, VehicleClass } from "@/domain/pipeline/typesGrid";
 import { PipeSelector } from "./PipelineTrackForm/PipeSelector";
 import { AnalysisParametersSection } from "./AnalysisParametersSection";
+import { convertFormValue } from "@/domain/pipeline/unitConversions";
 
 const gridLoadSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),
@@ -149,6 +150,34 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
 
   const toggleUnits = (checked: boolean) => {
     const newSystem: UnitsSystem = checked ? "SI" : "EN";
+    const oldSystem = unitsSystem;
+    
+    const currentValues = watch();
+    setValue("pipeOD", convertFormValue(currentValues.pipeOD, oldSystem, newSystem, 'length') ?? currentValues.pipeOD);
+    setValue("pipeWT", convertFormValue(currentValues.pipeWT, oldSystem, newSystem, 'length') ?? currentValues.pipeWT);
+    setValue("MOP", convertFormValue(currentValues.MOP, oldSystem, newSystem, 'pressure') ?? currentValues.MOP);
+    setValue("SMYS", convertFormValue(currentValues.SMYS, oldSystem, newSystem, 'smys') ?? currentValues.SMYS);
+    setValue("deltaT", convertFormValue(currentValues.deltaT, oldSystem, newSystem, 'temp') ?? currentValues.deltaT);
+    setValue("soilDensity", convertFormValue(currentValues.soilDensity, oldSystem, newSystem, 'density') ?? currentValues.soilDensity);
+    setValue("depthCover", convertFormValue(currentValues.depthCover, oldSystem, newSystem, 'depth') ?? currentValues.depthCover);
+    setValue("gridLength", convertFormValue(currentValues.gridLength, oldSystem, newSystem, 'depth') ?? currentValues.gridLength);
+    setValue("gridWidth", convertFormValue(currentValues.gridWidth, oldSystem, newSystem, 'depth') ?? currentValues.gridWidth);
+    setValue("gridOffsetX", convertFormValue(currentValues.gridOffsetX, oldSystem, newSystem, 'depth') ?? currentValues.gridOffsetX);
+    setValue("gridOffsetY", convertFormValue(currentValues.gridOffsetY, oldSystem, newSystem, 'depth') ?? currentValues.gridOffsetY);
+    
+    if (currentValues.totalLoad) {
+      setValue("totalLoad", convertFormValue(currentValues.totalLoad, oldSystem, newSystem, 'force'));
+    }
+    if (currentValues.uniformPressure) {
+      setValue("uniformPressure", convertFormValue(currentValues.uniformPressure, oldSystem, newSystem, 'pressure'));
+    }
+    if (currentValues.ePrimeUserDefined) {
+      setValue("ePrimeUserDefined", convertFormValue(currentValues.ePrimeUserDefined, oldSystem, newSystem, 'pressure'));
+    }
+    if (currentValues.soilCohesion) {
+      setValue("soilCohesion", convertFormValue(currentValues.soilCohesion, oldSystem, newSystem, 'pressure') ?? 0);
+    }
+    
     setUnitsSystem(newSystem);
     setValue("unitsSystem", newSystem);
   };
