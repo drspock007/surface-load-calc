@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Calculator as CalcIcon } from "lucide-react";
 import { GridLoadInputs, UnitsSystem, SoilLoadMethod, EPrimeMethod, BeddingAngleDeg, EquivStressMethod, CodeCheck, SoilType, Compaction, PavementType, VehicleClass } from "@/domain/pipeline/typesGrid";
+import { PipeSelector } from "./PipelineTrackForm/PipeSelector";
 
 const gridLoadSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),
@@ -152,8 +153,8 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
   };
 
   const unitLabels = unitsSystem === "EN" 
-    ? { length: "in", depth: "ft", pressure: "psi", density: "lb/ft³", force: "lb", temp: "°F" }
-    : { length: "mm", depth: "m", pressure: "kPa", density: "kg/m³", force: "kg", temp: "°C" };
+    ? { length: "in", depth: "ft", pressure: "psi", smys: "psi", density: "lb/ft³", force: "lb", temp: "°F" }
+    : { length: "mm", depth: "m", pressure: "kPa", smys: "MPa", density: "kg/m³", force: "kg", temp: "°C" };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -189,24 +190,20 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
           <CardTitle>Pipeline Properties</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Pipe Selection with Presets */}
+          <PipeSelector
+            register={register}
+            setValue={setValue}
+            watch={watch}
+            errors={errors}
+            unitsSystem={unitsSystem}
+          />
+
+          {/* MOP, ΔT, Soil Density */}
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <Label>Outer Diameter ({unitLabels.length})</Label>
-              <Input type="number" step="any" {...register("pipeOD", { valueAsNumber: true })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Wall Thickness ({unitLabels.length})</Label>
-              <Input type="number" step="any" {...register("pipeWT", { valueAsNumber: true })} />
-            </div>
             <div className="space-y-2">
               <Label>MOP ({unitLabels.pressure})</Label>
               <Input type="number" step="any" {...register("MOP", { valueAsNumber: true })} />
-            </div>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <Label>SMYS ({unitLabels.pressure})</Label>
-              <Input type="number" step="any" {...register("SMYS", { valueAsNumber: true })} />
             </div>
             <div className="space-y-2">
               <Label>ΔT ({unitLabels.temp})</Label>

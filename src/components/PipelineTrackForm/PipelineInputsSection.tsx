@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UnitsSystem } from "@/domain/pipeline/types";
+import { PipeSelector } from "./PipeSelector";
 
 interface PipelineInputsSectionProps {
   register: UseFormRegister<any>;
@@ -21,8 +22,8 @@ export const PipelineInputsSection = ({
   unitsSystem 
 }: PipelineInputsSectionProps) => {
   const unitLabels = unitsSystem === "EN" 
-    ? { length: "in", depth: "ft", pressure: "psi", density: "lb/ft³", temp: "°F" }
-    : { length: "mm", depth: "m", pressure: "kPa", density: "kg/m³", temp: "°C" };
+    ? { length: "in", depth: "ft", pressure: "psi", smys: "psi", density: "lb/ft³", temp: "°F" }
+    : { length: "mm", depth: "m", pressure: "kPa", smys: "MPa", density: "kg/m³", temp: "°C" };
 
   return (
     <Card>
@@ -31,29 +32,17 @@ export const PipelineInputsSection = ({
         <CardDescription>Pipe dimensions, pressures, and soil parameters</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Pipe Selection with Presets */}
+        <PipeSelector
+          register={register}
+          setValue={setValue}
+          watch={watch}
+          errors={errors}
+          unitsSystem={unitsSystem}
+        />
+
+        {/* MOP, ΔT, Soil Density */}
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="space-y-2">
-            <Label htmlFor="pipeOD">Outer Diameter ({unitLabels.length}) *</Label>
-            <Input
-              id="pipeOD"
-              type="number"
-              step="any"
-              {...register("pipeOD", { valueAsNumber: true })}
-            />
-            {errors.pipeOD && <p className="text-sm text-destructive">{String(errors.pipeOD.message)}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="pipeWT">Wall Thickness ({unitLabels.length}) *</Label>
-            <Input
-              id="pipeWT"
-              type="number"
-              step="any"
-              {...register("pipeWT", { valueAsNumber: true })}
-            />
-            {errors.pipeWT && <p className="text-sm text-destructive">{String(errors.pipeWT.message)}</p>}
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="MOP">MOP ({unitLabels.pressure}) *</Label>
             <Input
@@ -63,19 +52,6 @@ export const PipelineInputsSection = ({
               {...register("MOP", { valueAsNumber: true })}
             />
             {errors.MOP && <p className="text-sm text-destructive">{String(errors.MOP.message)}</p>}
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="space-y-2">
-            <Label htmlFor="SMYS">SMYS ({unitLabels.pressure}) *</Label>
-            <Input
-              id="SMYS"
-              type="number"
-              step="any"
-              {...register("SMYS", { valueAsNumber: true })}
-            />
-            {errors.SMYS && <p className="text-sm text-destructive">{String(errors.SMYS.message)}</p>}
           </div>
 
           <div className="space-y-2">
