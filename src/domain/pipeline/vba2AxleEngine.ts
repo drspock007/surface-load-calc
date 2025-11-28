@@ -39,8 +39,10 @@ function convertInputsToEN(inputs: TwoAxleInputs): any {
       axleSpacing_ft: inputs.axleSpacing,
       axle1Load_lb: inputs.axle1Load,
       axle2Load_lb: inputs.axle2Load,
-      tireWidth_in: inputs.tireWidth,
-      tireLength_in: inputs.tireLength,
+      axle1TireWidth_in: inputs.axle1TireWidth,
+      axle1TireLength_in: inputs.axle1TireLength,
+      axle2TireWidth_in: inputs.axle2TireWidth,
+      axle2TireLength_in: inputs.axle2TireLength,
       axleWidth_in: inputs.axleWidth,
       laneOffset_ft: inputs.laneOffset,
       // Pipe properties already in EN
@@ -61,8 +63,10 @@ function convertInputsToEN(inputs: TwoAxleInputs): any {
     axleSpacing_ft: inputs.axleSpacing * 3.280839895013, // m -> ft
     axle1Load_lb: inputs.axle1Load * 2.2046226218, // kg -> lb
     axle2Load_lb: inputs.axle2Load * 2.2046226218,
-    tireWidth_in: inputs.tireWidth * 0.03937007874016, // mm -> in
-    tireLength_in: inputs.tireLength * 0.03937007874016,
+    axle1TireWidth_in: inputs.axle1TireWidth * 0.03937007874016, // mm -> in
+    axle1TireLength_in: inputs.axle1TireLength * 0.03937007874016,
+    axle2TireWidth_in: inputs.axle2TireWidth * 0.03937007874016,
+    axle2TireLength_in: inputs.axle2TireLength * 0.03937007874016,
     axleWidth_in: inputs.axleWidth * 0.03937007874016,
     laneOffset_ft: inputs.laneOffset * 3.280839895013, // m -> ft
     D_in: inputs.pipeOD * 0.03937007874016, // mm -> in
@@ -82,71 +86,71 @@ function convertInputsToEN(inputs: TwoAxleInputs): any {
 export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults {
   const inputsEN = convertInputsToEN(inputs);
   
-  // Calculate tire contact dimensions if AUTO mode
-  let tireWidth_in = inputsEN.tireWidth_in;
-  let tireLength_in = inputsEN.tireLength_in;
+  // Calculate tire contact dimensions if AUTO mode (per-axle)
+  let axle1TireWidth_in = inputsEN.axle1TireWidth_in;
+  let axle1TireLength_in = inputsEN.axle1TireLength_in;
+  let axle2TireWidth_in = inputsEN.axle2TireWidth_in;
+  let axle2TireLength_in = inputsEN.axle2TireLength_in;
   
-  if (inputs.contactPatchMode === 'AUTO' && inputs.tirePressure) {
-    const tiresPerAxle = inputs.tiresPerAxle || 2;
-    
-    // Use user-provided tire width (already converted to inches)
-    tireWidth_in = inputsEN.tireWidth_in;
-    
-    // Calculate tire length for each axle using the VBA formula
-    let patch1, patch2;
-    if (inputs.unitsSystem === 'SI') {
-      patch1 = convertContactPatchToEN(
-        inputs.axle1Load,
-        inputs.tirePressure,
-        tiresPerAxle,
-        inputs.tireWidth  // mm
-      );
-      patch2 = convertContactPatchToEN(
-        inputs.axle2Load,
-        inputs.tirePressure,
-        tiresPerAxle,
-        inputs.tireWidth  // mm
-      );
-    } else {
-      patch1 = calculateContactPatch(
-        inputsEN.axle1Load_lb,
-        inputs.tirePressure,
-        tiresPerAxle,
-        inputs.tireWidth  // inches
-      );
-      patch2 = calculateContactPatch(
-        inputsEN.axle2Load_lb,
-        inputs.tirePressure,
-        tiresPerAxle,
-        inputs.tireWidth  // inches
-      );
+  if (inputs.contactPatchMode === 'AUTO') {
+    // Axle 1 - calculate contact patch
+    if (inputs.axle1TirePressure && inputs.axle1TiresPerAxle) {
+      const patch1 = inputs.unitsSystem === 'SI'
+        ? convertContactPatchToEN(
+            inputs.axle1Load,
+            inputs.axle1TirePressure,
+            inputs.axle1TiresPerAxle,
+            inputs.axle1TireWidth
+          )
+        : calculateContactPatch(
+            inputsEN.axle1Load_lb,
+            inputs.axle1TirePressure,
+            inputs.axle1TiresPerAxle,
+            inputs.axle1TireWidth
+          );
+      axle1TireLength_in = patch1.contactLength_in;
     }
     
-    // Use the larger length for conservative analysis
-    tireLength_in = Math.max(patch1.contactLength_in, patch2.contactLength_in);
+    // Axle 2 - calculate contact patch
+    if (inputs.axle2TirePressure && inputs.axle2TiresPerAxle) {
+      const patch2 = inputs.unitsSystem === 'SI'
+        ? convertContactPatchToEN(
+            inputs.axle2Load,
+            inputs.axle2TirePressure,
+            inputs.axle2TiresPerAxle,
+            inputs.axle2TireWidth
+          )
+        : calculateContactPatch(
+            inputsEN.axle2Load_lb,
+            inputs.axle2TirePressure,
+            inputs.axle2TiresPerAxle,
+            inputs.axle2TireWidth
+          );
+      axle2TireLength_in = patch2.contactLength_in;
+    }
   }
   
   // Generate point loads for both axles
   const pointLoads: PointLoad[] = [];
   
-  // Axle 1 (front) - assume centered on pipe initially
+  // Axle 1 (front) - use axle-specific tire dimensions
   const axle1_Y = -inputsEN.axleSpacing_ft * 12 / 2; // convert ft to inches, place before centerline
   const axle1Loads = generateRectangularGrid(
     inputsEN.laneOffset_ft * 12, // lateral offset in inches
     axle1_Y,
-    tireWidth_in * 2, // two tires per axle (left + right)
-    tireLength_in,
+    axle1TireWidth_in * 2, // two tires per axle (left + right) - axle 1 specific
+    axle1TireLength_in, // axle 1 specific
     inputsEN.axle1Load_lb,
     6 // 6-inch grid spacing
   );
   
-  // Axle 2 (rear)
+  // Axle 2 (rear) - use axle-specific tire dimensions
   const axle2_Y = inputsEN.axleSpacing_ft * 12 / 2;
   const axle2Loads = generateRectangularGrid(
     inputsEN.laneOffset_ft * 12,
     axle2_Y,
-    tireWidth_in * 2,
-    tireLength_in,
+    axle2TireWidth_in * 2, // axle 2 specific
+    axle2TireLength_in, // axle 2 specific
     inputsEN.axle2Load_lb,
     6
   );
