@@ -82,7 +82,7 @@ export const tempConv = {
 export function convertInputsToEN(
   value: number,
   fromSystem: UnitsSystem,
-  conversionType: 'length' | 'depth' | 'pressure' | 'smys' | 'force' | 'density' | 'temp'
+  conversionType: 'length' | 'depth' | 'pressure' | 'smys' | 'force' | 'density' | 'temp' | 'tirePressure'
 ): number {
   if (fromSystem === 'EN') return value;
   
@@ -92,6 +92,7 @@ export function convertInputsToEN(
     case 'depth':
       return depthConv.toEN(value);
     case 'pressure':
+    case 'tirePressure':
       return pressureConv.toEN(value);
     case 'smys':
       return smysConv.toEN(value);
@@ -112,7 +113,7 @@ export function convertInputsToEN(
 export function convertOutputsFromEN(
   value: number,
   toSystem: UnitsSystem,
-  conversionType: 'length' | 'depth' | 'pressure' | 'smys' | 'force' | 'density' | 'temp'
+  conversionType: 'length' | 'depth' | 'pressure' | 'smys' | 'force' | 'density' | 'temp' | 'tirePressure'
 ): number {
   if (toSystem === 'EN') return value;
   
@@ -122,6 +123,7 @@ export function convertOutputsFromEN(
     case 'depth':
       return depthConv.toSI(value);
     case 'pressure':
+    case 'tirePressure':
       return pressureConv.toSI(value);
     case 'smys':
       return smysConv.toSI(value);
@@ -150,7 +152,7 @@ export function convertFormValue(
   value: number | undefined,
   fromSystem: UnitsSystem,
   toSystem: UnitsSystem,
-  fieldType: 'length' | 'depth' | 'pressure' | 'smys' | 'force' | 'density' | 'temp'
+  fieldType: 'length' | 'depth' | 'pressure' | 'smys' | 'force' | 'density' | 'temp' | 'tirePressure'
 ): number | undefined {
   if (value === undefined || fromSystem === toSystem) return value;
   

@@ -34,8 +34,14 @@ export interface TwoAxleInputs {
   axleSpacing: number; // distance between axles (ft or m)
   axle1Load: number; // front axle load (lb or kg)
   axle2Load: number; // rear axle load (lb or kg)
-  tireWidth: number; // tire contact width (in or mm)
-  tireLength: number; // tire contact length (in or mm)
+  
+  // Contact patch method
+  contactPatchMode: 'MANUAL' | 'AUTO';
+  tirePressure?: number; // tire inflation pressure (psi or kPa) - used in AUTO mode
+  tiresPerAxle?: number; // number of tires per axle (2 or 4) - used in AUTO mode
+  
+  tireWidth: number; // tire contact width (in or mm) - MANUAL mode or calculated in AUTO mode
+  tireLength: number; // tire contact length (in or mm) - MANUAL mode or calculated in AUTO mode
   axleWidth: number; // track width / lateral spacing (in or mm)
   laneOffset: number; // offset from pipe centerline (ft or m)
   
