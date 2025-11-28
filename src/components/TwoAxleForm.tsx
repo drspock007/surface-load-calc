@@ -37,10 +37,16 @@ const twoAxleSchema = z.object({
   axle1Load: z.number().positive(),
   axle2Load: z.number().positive(),
   contactPatchMode: z.enum(["MANUAL", "AUTO"]),
-  tirePressure: z.number().positive().optional(),
-  tiresPerAxle: z.number().int().positive().optional(),
-  tireWidth: z.number().positive(),
-  tireLength: z.number().positive(),
+  // Axle 1 tire properties
+  axle1TireWidth: z.number().positive(),
+  axle1TireLength: z.number().positive(),
+  axle1TirePressure: z.number().positive().optional(),
+  axle1TiresPerAxle: z.number().int().positive().optional(),
+  // Axle 2 tire properties
+  axle2TireWidth: z.number().positive(),
+  axle2TireLength: z.number().positive(),
+  axle2TirePressure: z.number().positive().optional(),
+  axle2TiresPerAxle: z.number().int().positive().optional(),
   axleWidth: z.number().positive(),
   laneOffset: z.number(),
   pavementType: z.enum(["RIGID", "FLEXIBLE"]),
@@ -85,10 +91,16 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
     axle1Load: 12000,
     axle2Load: 18000,
     contactPatchMode: "MANUAL",
-    tirePressure: 80,
-    tiresPerAxle: 2,
-    tireWidth: 8,
-    tireLength: 10,
+    // Axle 1 defaults
+    axle1TireWidth: 8,
+    axle1TireLength: 10,
+    axle1TirePressure: 80,
+    axle1TiresPerAxle: 2,
+    // Axle 2 defaults (dual tires typical for rear)
+    axle2TireWidth: 8,
+    axle2TireLength: 10,
+    axle2TirePressure: 80,
+    axle2TiresPerAxle: 4,
     axleWidth: 72,
     laneOffset: 0,
     pavementType: "FLEXIBLE",
@@ -131,10 +143,16 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
       axle1Load: data.axle1Load,
       axle2Load: data.axle2Load,
       contactPatchMode: data.contactPatchMode,
-      tirePressure: data.tirePressure,
-      tiresPerAxle: data.tiresPerAxle,
-      tireWidth: data.tireWidth,
-      tireLength: data.tireLength,
+      // Axle 1 tire properties
+      axle1TireWidth: data.axle1TireWidth,
+      axle1TireLength: data.axle1TireLength,
+      axle1TirePressure: data.axle1TirePressure,
+      axle1TiresPerAxle: data.axle1TiresPerAxle,
+      // Axle 2 tire properties
+      axle2TireWidth: data.axle2TireWidth,
+      axle2TireLength: data.axle2TireLength,
+      axle2TirePressure: data.axle2TirePressure,
+      axle2TiresPerAxle: data.axle2TiresPerAxle,
       axleWidth: data.axleWidth,
       laneOffset: data.laneOffset,
       pavementType: data.pavementType,
@@ -168,11 +186,18 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
     setValue("laneOffset", convertFormValue(currentValues.laneOffset, oldSystem, newSystem, 'depth') ?? currentValues.laneOffset);
     setValue("axle1Load", convertFormValue(currentValues.axle1Load, oldSystem, newSystem, 'force') ?? currentValues.axle1Load);
     setValue("axle2Load", convertFormValue(currentValues.axle2Load, oldSystem, newSystem, 'force') ?? currentValues.axle2Load);
-    if (currentValues.tirePressure) {
-      setValue("tirePressure", convertFormValue(currentValues.tirePressure, oldSystem, newSystem, 'tirePressure'));
+    // Axle 1 tire properties
+    setValue("axle1TireWidth", convertFormValue(currentValues.axle1TireWidth, oldSystem, newSystem, 'length') ?? currentValues.axle1TireWidth);
+    setValue("axle1TireLength", convertFormValue(currentValues.axle1TireLength, oldSystem, newSystem, 'length') ?? currentValues.axle1TireLength);
+    if (currentValues.axle1TirePressure) {
+      setValue("axle1TirePressure", convertFormValue(currentValues.axle1TirePressure, oldSystem, newSystem, 'tirePressure'));
     }
-    setValue("tireWidth", convertFormValue(currentValues.tireWidth, oldSystem, newSystem, 'length') ?? currentValues.tireWidth);
-    setValue("tireLength", convertFormValue(currentValues.tireLength, oldSystem, newSystem, 'length') ?? currentValues.tireLength);
+    // Axle 2 tire properties
+    setValue("axle2TireWidth", convertFormValue(currentValues.axle2TireWidth, oldSystem, newSystem, 'length') ?? currentValues.axle2TireWidth);
+    setValue("axle2TireLength", convertFormValue(currentValues.axle2TireLength, oldSystem, newSystem, 'length') ?? currentValues.axle2TireLength);
+    if (currentValues.axle2TirePressure) {
+      setValue("axle2TirePressure", convertFormValue(currentValues.axle2TirePressure, oldSystem, newSystem, 'tirePressure'));
+    }
     setValue("axleWidth", convertFormValue(currentValues.axleWidth, oldSystem, newSystem, 'length') ?? currentValues.axleWidth);
     
     if (currentValues.ePrimeUserDefined) {
@@ -314,63 +339,97 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
               </div>
             </div>
             
-            {contactPatchMode === "AUTO" ? (
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label>Tire Width ({unitLabels.length})</Label>
-                  <Input type="number" step="any" {...register("tireWidth", { valueAsNumber: true })} />
+            {contactPatchMode === "MANUAL" ? (
+              <>
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium">Axle 1 (Front) Contact Patch</h4>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Tire Width ({unitLabels.length})</Label>
+                      <Input type="number" step="any" {...register("axle1TireWidth", { valueAsNumber: true })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Tire Length ({unitLabels.length})</Label>
+                      <Input type="number" step="any" {...register("axle1TireLength", { valueAsNumber: true })} />
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Tire Pressure ({unitLabels.pressure})</Label>
-                  <Input type="number" step="any" {...register("tirePressure", { valueAsNumber: true })} />
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium">Axle 2 (Rear) Contact Patch</h4>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Tire Width ({unitLabels.length})</Label>
+                      <Input type="number" step="any" {...register("axle2TireWidth", { valueAsNumber: true })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Tire Length ({unitLabels.length})</Label>
+                      <Input type="number" step="any" {...register("axle2TireLength", { valueAsNumber: true })} />
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Tires Per Axle</Label>
-                  <Select value={watch("tiresPerAxle")?.toString()} onValueChange={(v) => setValue("tiresPerAxle", parseInt(v))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="2">2 (Single)</SelectItem>
-                      <SelectItem value="4">4 (Dual)</SelectItem>
-                    </SelectContent>
-                  </Select>
+              </>
+            ) : (
+              <>
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium">Axle 1 (Front) Contact Patch</h4>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="space-y-2">
+                      <Label>Tire Width ({unitLabels.length})</Label>
+                      <Input type="number" step="any" {...register("axle1TireWidth", { valueAsNumber: true })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Tire Pressure ({unitLabels.pressure})</Label>
+                      <Input type="number" step="any" {...register("axle1TirePressure", { valueAsNumber: true })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Tires Per Axle</Label>
+                      <Select value={watch("axle1TiresPerAxle")?.toString()} onValueChange={(v) => setValue("axle1TiresPerAxle", parseInt(v))}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="2">2 (Single)</SelectItem>
+                          <SelectItem value="4">4 (Dual)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Tire Length: <span className="font-mono">{watch("axle1TireLength")?.toFixed(2) || "—"} {unitLabels.length}</span> (calculated)
+                  </div>
                 </div>
-              </div>
-            ) : null}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium">Axle 2 (Rear) Contact Patch</h4>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="space-y-2">
+                      <Label>Tire Width ({unitLabels.length})</Label>
+                      <Input type="number" step="any" {...register("axle2TireWidth", { valueAsNumber: true })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Tire Pressure ({unitLabels.pressure})</Label>
+                      <Input type="number" step="any" {...register("axle2TirePressure", { valueAsNumber: true })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Tires Per Axle</Label>
+                      <Select value={watch("axle2TiresPerAxle")?.toString()} onValueChange={(v) => setValue("axle2TiresPerAxle", parseInt(v))}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="2">2 (Single)</SelectItem>
+                          <SelectItem value="4">4 (Dual)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Tire Length: <span className="font-mono">{watch("axle2TireLength")?.toFixed(2) || "—"} {unitLabels.length}</span> (calculated)
+                  </div>
+                </div>
+              </>
+            )}
           </div>
           
-          {contactPatchMode === "MANUAL" ? (
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2">
-                <Label>Tire Width ({unitLabels.length})</Label>
-                <Input type="number" step="any" {...register("tireWidth", { valueAsNumber: true })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Tire Length ({unitLabels.length})</Label>
-                <Input type="number" step="any" {...register("tireLength", { valueAsNumber: true })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Axle Width ({unitLabels.length})</Label>
-                <Input type="number" step="any" {...register("axleWidth", { valueAsNumber: true })} />
-              </div>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Tire Length ({unitLabels.length}) <span className="text-xs text-muted-foreground">(calculated)</span></Label>
-                <Input 
-                  type="number" 
-                  step="any" 
-                  {...register("tireLength", { valueAsNumber: true })} 
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Axle Width ({unitLabels.length})</Label>
-                <Input type="number" step="any" {...register("axleWidth", { valueAsNumber: true })} />
-              </div>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label>Axle Width ({unitLabels.length})</Label>
+            <Input type="number" step="any" {...register("axleWidth", { valueAsNumber: true })} />
+          </div>
         </CardContent>
       </Card>
 
