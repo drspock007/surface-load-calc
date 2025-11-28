@@ -227,14 +227,42 @@ const Results = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded">
-                    <span className="font-medium">Code Check</span>
-                    <span className="text-sm">{run.input.codeCheck}</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded">
-                    <span className="font-medium">Allowable Stress Limit</span>
-                    <span className="text-sm">{formatValue(pipelineResult.allowableStress)} {run.input.unitsSystem === 'EN' ? 'psi' : 'kPa'}</span>
-                  </div>
+                  {(() => {
+                    const trackResult = pipelineResult as PipelineTrackResults;
+                    return trackResult.limitsUsed ? (
+                      <div className="space-y-2 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">Code Reference</span>
+                          <Badge variant="outline">{trackResult.limitsUsed.codeLabel}</Badge>
+                        </div>
+                        <div className="text-sm space-y-1">
+                          <p className="text-muted-foreground">
+                            <span className="font-medium">Limits Used (% SMYS):</span>
+                          </p>
+                          <div className="grid grid-cols-3 gap-2 mt-2">
+                            <div className="p-2 bg-background rounded">
+                              <p className="text-xs text-muted-foreground">Hoop</p>
+                              <p className="font-mono font-semibold">{formatValue(trackResult.limitsUsed.hoopLimitPct, 1)}%</p>
+                            </div>
+                            <div className="p-2 bg-background rounded">
+                              <p className="text-xs text-muted-foreground">Longitudinal</p>
+                              <p className="font-mono font-semibold">{formatValue(trackResult.limitsUsed.longLimitPct, 1)}%</p>
+                            </div>
+                            <div className="p-2 bg-background rounded">
+                              <p className="text-xs text-muted-foreground">Equivalent</p>
+                              <p className="font-mono font-semibold">{formatValue(trackResult.limitsUsed.equivLimitPct, 1)}%</p>
+                            </div>
+                          </div>
+                          {trackResult.limitsUsed.usesSustainedLongCheck && (
+                            <p className="text-xs text-amber-600 dark:text-amber-500 mt-2 flex items-start gap-1">
+                              <span>⚠️</span>
+                              <span>B31.4 sustained longitudinal check applied (internal + thermal ± earth stress components verified separately)</span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
                   
                   <div className="grid gap-3">
                     <div className="flex items-center justify-between p-3 bg-muted/50 rounded">

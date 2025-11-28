@@ -48,7 +48,11 @@ export interface PipelineTrackInputs {
   vehicleClass: VehicleClass;
   equivStressMethod: EquivStressMethod;
   codeCheck: CodeCheck;
-  userDefinedStressLimit?: number; // if USER_DEFINED
+  userDefinedLimits?: {
+    hoopLimitPct: number; // % SMYS
+    longLimitPct: number; // % SMYS
+    equivLimitPct: number; // % SMYS
+  }; // if USER_DEFINED
 }
 
 export interface StressComponents {
@@ -127,6 +131,15 @@ export interface DebugValues {
   longLiveBend_psi?: number;
 }
 
+export interface LimitsUsed {
+  code: CodeCheck;
+  codeLabel: string;
+  hoopLimitPct: number;
+  longLimitPct: number;
+  equivLimitPct: number;
+  usesSustainedLongCheck: boolean;
+}
+
 export interface PipelineTrackResults {
   maxSurfacePressureOnPipe: number; // Boussinesq max * impact factor
   locationMaxLoad: string; // description of location
@@ -134,6 +147,7 @@ export interface PipelineTrackResults {
   stresses: StressResults;
   allowableStress: number;
   passFailSummary: PassFailSummary;
+  limitsUsed: LimitsUsed;
   
   // Intermediate values for reference
   ePrimeUsed: number;

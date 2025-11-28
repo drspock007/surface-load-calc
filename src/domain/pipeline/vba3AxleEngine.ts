@@ -4,6 +4,7 @@
  */
 
 import { ThreeAxleInputs, ThreeAxleResults } from './types3Axle';
+import { calculatePassFail as calculatePassFailHelper } from './passFailHelpers';
 import { 
   calculateBoussinesqFromPoints, 
   generateRectangularGrid, 
@@ -143,7 +144,7 @@ export function calculate3AxleVehicleVBA(inputs: ThreeAxleInputs): ThreeAxleResu
   const equivZero = calculateEquivalentStress(inputs.equivStressMethod, hoopZeroHigh, hoopZeroLow, longZeroHigh, longZeroLow, inputsEN.SMYS_psi);
   const equivMOP = calculateEquivalentStress(inputs.equivStressMethod, hoopMOPHigh, hoopMOPLow, longMOPHigh, longMOPLow, inputsEN.SMYS_psi);
   
-  const passFailResult = calculatePassFail(inputs.codeCheck, inputs.userDefinedStressLimit, hoopZeroHigh, hoopMOPHigh, longZeroHigh, longMOPHigh, equivZero.pctSMYS, equivMOP.pctSMYS, inputsEN.SMYS_psi);
+  const passFailResult = calculatePassFail(inputs.codeCheck, inputs.userDefinedLimits, hoopZeroHigh, hoopMOPHigh, longZeroHigh, longMOPHigh, equivZero.pctSMYS, equivMOP.pctSMYS, inputsEN.SMYS_psi);
   
   const deflectionRatio = (soilLoad.Psoil_psi + BsnqIF) * Math.pow(inputsEN.D_in / inputsEN.t_in, 3) / ePrime.ePrime_psi;
   

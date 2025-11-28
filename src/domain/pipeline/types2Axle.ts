@@ -1,5 +1,5 @@
 import { UnitsSystem, BeddingAngleDeg, SoilLoadMethod, EPrimeMethod, SoilType, Compaction, EquivStressMethod, CodeCheck, PavementType, VehicleClass } from './types';
-import { StressResults, PassFailSummary, DebugValues } from './types';
+import { StressResults, PassFailSummary, DebugValues, LimitsUsed } from './types';
 
 export type { UnitsSystem, BeddingAngleDeg, SoilLoadMethod, EPrimeMethod, SoilType, Compaction, EquivStressMethod, CodeCheck, PavementType, VehicleClass };
 
@@ -44,7 +44,11 @@ export interface TwoAxleInputs {
   vehicleClass: VehicleClass;
   equivStressMethod: EquivStressMethod;
   codeCheck: CodeCheck;
-  userDefinedStressLimit?: number;
+  userDefinedLimits?: {
+    hoopLimitPct: number;
+    longLimitPct: number;
+    equivLimitPct: number;
+  };
 }
 
 export interface TwoAxleResults {
@@ -54,6 +58,7 @@ export interface TwoAxleResults {
   stresses: StressResults;
   allowableStress: number;
   passFailSummary: PassFailSummary;
+  limitsUsed: LimitsUsed;
   ePrimeUsed: number;
   soilLoadOnPipe: number;
   deflectionRatio: number;
