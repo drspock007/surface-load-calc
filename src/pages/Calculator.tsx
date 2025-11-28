@@ -12,7 +12,7 @@ import { calculate2AxleVehicleVBA, calculate3AxleVehicleVBA, calculateGridLoadVB
 import { storage } from "@/utils/storage";
 import { Calculator as CalcIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { PipelineTrackForm } from "@/components/PipelineTrackForm";
+import { PipelineTrackForm } from "@/components/PipelineTrackForm/index";
 import { TwoAxleForm } from "@/components/TwoAxleForm";
 import { ThreeAxleForm } from "@/components/ThreeAxleForm";
 import { GridLoadForm } from "@/components/GridLoadForm";
@@ -199,13 +199,24 @@ const Calculator = () => {
         </div>
 
         <Tabs value={mode} onValueChange={(v) => setMode(v as CalculationMode)} className="mb-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="SIMPLE">Simple</TabsTrigger>
-            <TabsTrigger value="PIPELINE_TRACK">Track</TabsTrigger>
-            <TabsTrigger value="2_AXLE">2-Axle</TabsTrigger>
-            <TabsTrigger value="3_AXLE">3-Axle</TabsTrigger>
-            <TabsTrigger value="GRID">Grid</TabsTrigger>
-          </TabsList>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-2 px-1">Vehicle Loading</h3>
+              <TabsList className="grid w-full grid-cols-1">
+                <TabsTrigger value="SIMPLE">Simple Rectangular Load</TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-2 px-1">Pipeline Loading Analysis</h3>
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="PIPELINE_TRACK">Track Vehicle</TabsTrigger>
+                <TabsTrigger value="2_AXLE">2-Axle</TabsTrigger>
+                <TabsTrigger value="3_AXLE">3-Axle</TabsTrigger>
+                <TabsTrigger value="GRID">Grid Load</TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
 
           <TabsContent value="SIMPLE">
             <Card>
