@@ -5,6 +5,7 @@
  */
 
 import { TwoAxleInputs, TwoAxleResults } from './types2Axle';
+import { calculatePassFail as calculatePassFailHelper } from './passFailHelpers';
 import { 
   calculateBoussinesqFromPoints, 
   generateRectangularGrid, 
@@ -237,7 +238,7 @@ export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults 
   // Pass/Fail
   const passFailResult = calculatePassFail(
     inputs.codeCheck,
-    inputs.userDefinedStressLimit,
+    inputs.userDefinedLimits,
     hoopZeroHigh,
     hoopMOPHigh,
     longZeroHigh,

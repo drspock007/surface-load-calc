@@ -43,7 +43,11 @@ const gridLoadSchema = z.object({
   vehicleClass: z.enum(["HIGHWAY", "FARM", "TRACK"]),
   equivStressMethod: z.enum(["TRESCA", "VON_MISES"]),
   codeCheck: z.enum(["B31_4", "B31_8", "CSA_Z662", "USER_DEFINED"]),
-  userDefinedStressLimit: z.number().positive().optional(),
+  userDefinedLimits: z.object({
+    hoopLimitPct: z.number().min(0).max(100),
+    longLimitPct: z.number().min(0).max(100),
+    equivLimitPct: z.number().min(0).max(100),
+  }).optional(),
 });
 
 type GridLoadFormData = z.infer<typeof gridLoadSchema>;
@@ -130,7 +134,7 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
       vehicleClass: data.vehicleClass,
       equivStressMethod: data.equivStressMethod,
       codeCheck: data.codeCheck,
-      userDefinedStressLimit: data.userDefinedStressLimit,
+      userDefinedLimits: data.userDefinedLimits,
     };
     onCalculate(inputs);
   };

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PavementType, VehicleClass, EquivStressMethod, CodeCheck, UnitsSystem } from "@/domain/pipeline/types";
+import { getCodeLabel, getCodeDescription, CODE_PROFILES } from "@/domain/pipeline/codeProfiles";
 
 interface AnalysisParametersSectionProps {
   register: UseFormRegister<any>;
@@ -95,24 +96,85 @@ export const AnalysisParametersSection = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="B31_4">B31.4</SelectItem>
-                <SelectItem value="B31_8">B31.8</SelectItem>
-                <SelectItem value="CSA_Z662">CSA Z662</SelectItem>
+                <SelectItem value="B31_4">{getCodeLabel('B31_4')}</SelectItem>
+                <SelectItem value="B31_8">{getCodeLabel('B31_8')}</SelectItem>
+                <SelectItem value="CSA_Z662">{getCodeLabel('CSA_Z662')}</SelectItem>
                 <SelectItem value="USER_DEFINED">User Defined</SelectItem>
               </SelectContent>
             </Select>
+            {codeCheck !== "USER_DEFINED" && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Default limits: {CODE_PROFILES[codeCheck as keyof typeof CODE_PROFILES]?.hoopLimitPct}% SMYS for Hoop, Longitudinal, and Equivalent stresses. 
+                Choose 'User Defined' to customize.
+              </p>
+            )}
           </div>
         </div>
 
         {codeCheck === "USER_DEFINED" && (
-          <div className="space-y-2">
-            <Label htmlFor="userDefinedStressLimit">Allowable Stress Limit ({unitLabels.pressure}) *</Label>
-            <Input
-              id="userDefinedStressLimit"
-              type="number"
-              step="any"
-              {...register("userDefinedStressLimit", { valueAsNumber: true })}
-            />
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Define custom stress limits as percentage of SMYS (0-100%)
+            </p>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="space-y-2">
+                <Label htmlFor="userDefinedLimits.hoopLimitPct">Hoop Limit (% SMYS) *</Label>
+                <Input
+                  id="userDefinedLimits.hoopLimitPct"
+                  type="number"
+                  step="1"
+                  min="0"
+                  max="100"
+                  defaultValue={90}
+                  {...register("userDefinedLimits.hoopLimitPct", { 
+                    valueAsNumber: true,
+                    min: { value: 0, message: "Must be >= 0" },
+                    max: { value: 100, message: "Must be <= 100" }
+                  })}
+                />
+                {errors.userDefinedLimits && 'hoopLimitPct' in errors.userDefinedLimits && errors.userDefinedLimits.hoopLimitPct && (
+                  <p className="text-xs text-destructive">{String(errors.userDefinedLimits.hoopLimitPct.message)}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="userDefinedLimits.longLimitPct">Longitudinal Limit (% SMYS) *</Label>
+                <Input
+                  id="userDefinedLimits.longLimitPct"
+                  type="number"
+                  step="1"
+                  min="0"
+                  max="100"
+                  defaultValue={90}
+                  {...register("userDefinedLimits.longLimitPct", { 
+                    valueAsNumber: true,
+                    min: { value: 0, message: "Must be >= 0" },
+                    max: { value: 100, message: "Must be <= 100" }
+                  })}
+                />
+                {errors.userDefinedLimits && 'longLimitPct' in errors.userDefinedLimits && errors.userDefinedLimits.longLimitPct && (
+                  <p className="text-xs text-destructive">{String(errors.userDefinedLimits.longLimitPct.message)}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="userDefinedLimits.equivLimitPct">Equivalent Limit (% SMYS) *</Label>
+                <Input
+                  id="userDefinedLimits.equivLimitPct"
+                  type="number"
+                  step="1"
+                  min="0"
+                  max="100"
+                  defaultValue={90}
+                  {...register("userDefinedLimits.equivLimitPct", { 
+                    valueAsNumber: true,
+                    min: { value: 0, message: "Must be >= 0" },
+                    max: { value: 100, message: "Must be <= 100" }
+                  })}
+                />
+                {errors.userDefinedLimits && 'equivLimitPct' in errors.userDefinedLimits && errors.userDefinedLimits.equivLimitPct && (
+                  <p className="text-xs text-destructive">{String(errors.userDefinedLimits.equivLimitPct.message)}</p>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </CardContent>

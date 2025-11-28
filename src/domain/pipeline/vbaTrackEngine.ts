@@ -3,7 +3,8 @@
  * All calculations performed in ENGLISH units (inches, feet, psi, lb, lb/ft³)
  */
 
-import { PipelineTrackInputs, PipelineTrackResults, DebugValues } from './types';
+import { PipelineTrackInputs, PipelineTrackResults, DebugValues, LimitsUsed } from './types';
+import { getCodeProfile, getCodeLabel } from './codeProfiles';
 
 // VBA Constants
 const PI = Math.PI;
@@ -507,10 +508,12 @@ export function calculateTrackVehicleVBA(inputs: PipelineTrackInputs): PipelineT
     inputsEN.equivStressMethod
   );
   
-  // (11) Pass/Fail
+  // (11) Pass/Fail with limits info
   const passFailSummary = calculatePassFail(
     hoopZeroHigh, hoopZeroLow, hoopMOPHigh, hoopMOPLow,
     longZeroHigh, longZeroLow, longMOPHigh, longMOPLow,
+    hoopSoil_Zero, longSoil_Zero, longTherm, // For B31.4 sustained check at zero
+    hoopSoil_MOP, longSoil_MOP, hoopInt_MOP, longInt_MOP, // For B31.4 sustained check at MOP
     equivZero.high, equivZero.low, equivMOP.high, equivMOP.low,
     inputsEN.SMYS_psi,
     inputsEN.codeCheck,
@@ -627,6 +630,7 @@ export function calculateTrackVehicleVBA(inputs: PipelineTrackInputs): PipelineT
       equivalentAtMOP: passFailSummary.equivalentAtMOP,
       overallPass: passFailSummary.overallPass,
     },
+    limitsUsed: passFailSummary.limitsUsed,
     ePrimeUsed: convertPressureToUserUnits(ePrime_psi, inputs.unitsSystem),
     soilLoadOnPipe: convertPressureToUserUnits(soilPressure_psi, inputs.unitsSystem),
     deflectionRatio,
@@ -666,9 +670,9 @@ function convertInputsToEN(inputs: PipelineTrackInputs): InputsEN {
     vehicleClass: inputs.vehicleClass,
     equivStressMethod: inputs.equivStressMethod,
     codeCheck: inputs.codeCheck,
-    userDefinedHoopLimit: inputs.userDefinedStressLimit, // Will be expanded to 3 limits in UI
-    userDefinedLongLimit: inputs.userDefinedStressLimit,
-    userDefinedEquivLimit: inputs.userDefinedStressLimit,
+    userDefinedHoopLimit: inputs.userDefinedLimits ? inputs.userDefinedLimits.hoopLimitPct / 100 : undefined,
+    userDefinedLongLimit: inputs.userDefinedLimits ? inputs.userDefinedLimits.longLimitPct / 100 : undefined,
+    userDefinedEquivLimit: inputs.userDefinedLimits ? inputs.userDefinedLimits.equivLimitPct / 100 : undefined,
   };
 }
 
@@ -774,14 +778,16 @@ function calculateEquivalentStress(
 }
 
 /**
- * Calculate pass/fail summary
- * Ported from VBA - uses 3 separate limits for USER_DEFINED
+ * Calculate pass/fail summary with B31.4 sustained longitudinal check
+ * Uses 3 separate limits (hoop/long/equiv) and proper B31.4 logic
  */
 function calculatePassFail(
   hoopZeroHigh: number, hoopZeroLow: number,
   hoopMOPHigh: number, hoopMOPLow: number,
   longZeroHigh: number, longZeroLow: number,
   longMOPHigh: number, longMOPLow: number,
+  hoopSoil_Zero: number, longSoil_Zero: number, longTherm: number,
+  hoopSoil_MOP: number, longSoil_MOP: number, hoopInt_MOP: number, longInt_MOP: number,
   equivZeroHigh: number, equivZeroLow: number,
   equivMOPHigh: number, equivMOPLow: number,
   SMYS_psi: number,
@@ -798,37 +804,72 @@ function calculatePassFail(
   equivalentAtMOP: boolean;
   overallPass: boolean;
   allowableStress_psi: number;
+  limitsUsed: LimitsUsed;
 } {
-  // Determine limits (as fraction of SMYS)
-  let hoopLimit = 0.9;
-  let longLimit = 0.9;
-  let equivLimit = 0.9;
+  // Get code profile or use user-defined limits
+  const profile = codeCheck === 'USER_DEFINED' ? null : getCodeProfile(codeCheck);
   
-  if (codeCheck === 'B31_4' || codeCheck === 'B31_8' || codeCheck === 'CSA_Z662') {
-    hoopLimit = 0.9;
-    longLimit = 0.9;
-    equivLimit = 0.9;
-  } else if (codeCheck === 'USER_DEFINED') {
+  let hoopLimit: number;
+  let longLimit: number;
+  let equivLimit: number;
+  let usesSustainedLongCheck: boolean;
+  
+  if (profile) {
+    hoopLimit = profile.hoopLimitPct / 100;
+    longLimit = profile.longLimitPct / 100;
+    equivLimit = profile.equivLimitPct / 100;
+    usesSustainedLongCheck = profile.usesSustainedLongCheck;
+  } else {
     hoopLimit = userDefinedHoopLimit || 0.9;
     longLimit = userDefinedLongLimit || 0.9;
     equivLimit = userDefinedEquivLimit || 0.9;
+    usesSustainedLongCheck = false;
   }
   
   const hoopAllowable_psi = hoopLimit * SMYS_psi;
   const longAllowable_psi = longLimit * SMYS_psi;
   const equivAllowable_psi = equivLimit * SMYS_psi;
   
-  // Check pass/fail
+  // Check hoop pass/fail
   const hoopAtZero = Math.max(Math.abs(hoopZeroHigh), Math.abs(hoopZeroLow)) <= hoopAllowable_psi;
   const hoopAtMOP = Math.max(Math.abs(hoopMOPHigh), Math.abs(hoopMOPLow)) <= hoopAllowable_psi;
   
-  const longitudinalAtZero = Math.max(Math.abs(longZeroHigh), Math.abs(longZeroLow)) <= longAllowable_psi;
-  const longitudinalAtMOP = Math.max(Math.abs(longMOPHigh), Math.abs(longMOPLow)) <= longAllowable_psi;
+  // Check longitudinal pass/fail
+  let longitudinalAtZero = Math.max(Math.abs(longZeroHigh), Math.abs(longZeroLow)) <= longAllowable_psi;
+  let longitudinalAtMOP = Math.max(Math.abs(longMOPHigh), Math.abs(longMOPLow)) <= longAllowable_psi;
   
+  // B31.4 applies sustained longitudinal check (internal + thermal ± earth)
+  if (usesSustainedLongCheck) {
+    // At zero pressure: sustained = thermal ± earth (no internal pressure)
+    const sustainedZeroHigh = Math.abs(longTherm + longSoil_Zero);
+    const sustainedZeroLow = Math.abs(longTherm - longSoil_Zero);
+    const sustainedZeroMax = Math.max(sustainedZeroHigh, sustainedZeroLow);
+    const sustainedZeroPass = sustainedZeroMax <= longAllowable_psi;
+    longitudinalAtZero = longitudinalAtZero && sustainedZeroPass;
+    
+    // At MOP: sustained = internal + thermal ± earth
+    const sustainedMOPHigh = Math.abs(longInt_MOP + longTherm + longSoil_MOP);
+    const sustainedMOPLow = Math.abs(longInt_MOP + longTherm - longSoil_MOP);
+    const sustainedMOPMax = Math.max(sustainedMOPHigh, sustainedMOPLow);
+    const sustainedMOPPass = sustainedMOPMax <= longAllowable_psi;
+    longitudinalAtMOP = longitudinalAtMOP && sustainedMOPPass;
+  }
+  
+  // Check equivalent pass/fail
   const equivalentAtZero = Math.max(Math.abs(equivZeroHigh), Math.abs(equivZeroLow)) <= equivAllowable_psi;
   const equivalentAtMOP = Math.max(Math.abs(equivMOPHigh), Math.abs(equivMOPLow)) <= equivAllowable_psi;
   
   const overallPass = hoopAtZero && hoopAtMOP && longitudinalAtZero && longitudinalAtMOP && equivalentAtZero && equivalentAtMOP;
+  
+  // Assemble limits info
+  const limitsUsed: LimitsUsed = {
+    code: codeCheck,
+    codeLabel: getCodeLabel(codeCheck),
+    hoopLimitPct: hoopLimit * 100,
+    longLimitPct: longLimit * 100,
+    equivLimitPct: equivLimit * 100,
+    usesSustainedLongCheck,
+  };
   
   return {
     hoopAtZero,
@@ -838,6 +879,7 @@ function calculatePassFail(
     equivalentAtZero,
     equivalentAtMOP,
     overallPass,
-    allowableStress_psi: equivAllowable_psi, // Report the equivalent stress limit
+    allowableStress_psi: equivAllowable_psi,
+    limitsUsed,
   };
 }

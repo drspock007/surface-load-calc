@@ -46,7 +46,11 @@ const pipelineSchema = z.object({
   vehicleClass: z.enum(["HIGHWAY", "FARM", "TRACK"]),
   equivStressMethod: z.enum(["TRESCA", "VON_MISES"]),
   codeCheck: z.enum(["B31_4", "B31_8", "CSA_Z662", "USER_DEFINED"]),
-  userDefinedStressLimit: z.number().positive().optional(),
+  userDefinedLimits: z.object({
+    hoopLimitPct: z.number().min(0).max(100),
+    longLimitPct: z.number().min(0).max(100),
+    equivLimitPct: z.number().min(0).max(100),
+  }).optional(),
 });
 
 type PipelineFormData = z.infer<typeof pipelineSchema>;
@@ -119,7 +123,13 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
       vehicleClass: data.vehicleClass,
       equivStressMethod: data.equivStressMethod,
       codeCheck: data.codeCheck,
-      userDefinedStressLimit: data.userDefinedStressLimit,
+      ...(data.userDefinedLimits && 
+        data.userDefinedLimits.hoopLimitPct !== undefined && 
+        data.userDefinedLimits.longLimitPct !== undefined && 
+        data.userDefinedLimits.equivLimitPct !== undefined
+        ? { userDefinedLimits: data.userDefinedLimits as { hoopLimitPct: number; longLimitPct: number; equivLimitPct: number } }
+        : {}
+      ),
     };
     onCalculate(inputs);
   };
