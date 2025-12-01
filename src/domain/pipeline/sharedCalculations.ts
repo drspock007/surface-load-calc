@@ -6,16 +6,19 @@
 import { SoilLoadMethod, EPrimeMethod, SoilType, Compaction, CodeCheck, PavementType, VehicleClass, EquivStressMethod } from './types';
 import { calculateEPrimeFromLookup } from './ePrimeLookup';
 
+/**
+ * CEPA Manual Table 2-1: Spangler Stress Formula Parameters
+ */
 export function calculateBeddingParams(beddingAngleDeg: number): { Kb: number; Kz: number; Theta: number } {
   switch (beddingAngleDeg) {
-    case 0: return { Kb: 0.11, Kz: 0.083, Theta: 135 };
-    case 30: return { Kb: 0.108, Kz: 0.088, Theta: 130 };
-    case 60: return { Kb: 0.105, Kz: 0.1, Theta: 120 };
-    case 90: return { Kb: 0.103, Kz: 0.108, Theta: 105 };
-    case 120: return { Kb: 0.101, Kz: 0.116, Theta: 90 };
-    case 150: return { Kb: 0.1, Kz: 0.12, Theta: 75 };
-    case 180: return { Kb: 0.096, Kz: 0.127, Theta: 60 };
-    default: return { Kb: 0.103, Kz: 0.108, Theta: 105 };
+    case 0: return { Kb: 0.294, Kz: 0.110, Theta: 135 };
+    case 30: return { Kb: 0.235, Kz: 0.108, Theta: 130 };
+    case 60: return { Kb: 0.189, Kz: 0.103, Theta: 120 };
+    case 90: return { Kb: 0.157, Kz: 0.096, Theta: 105 };
+    case 120: return { Kb: 0.138, Kz: 0.089, Theta: 90 };
+    case 150: return { Kb: 0.128, Kz: 0.085, Theta: 75 };
+    case 180: return { Kb: 0.125, Kz: 0.083, Theta: 60 };
+    default: return { Kb: 0.157, Kz: 0.096, Theta: 105 };
   }
 }
 

@@ -5,13 +5,13 @@
 
 import { PipelineTrackInputs, PipelineTrackResults, DebugValues, LimitsUsed } from './types';
 import { getCodeProfile, getCodeLabel } from './codeProfiles';
+import { calculateEPrimeFromLookup } from './ePrimeLookup';
 
 // VBA Constants
 const PI = Math.PI;
 const E_STEEL = 30e6; // psi
 const POISSON = 0.3;
 const ALPHA = 6.5e-6; // thermal expansion coefficient (1/°F)
-const KR = 1; // coefficient of lateral earth pressure
 
 interface InputsEN {
   // Pipe properties (EN units)
@@ -49,6 +49,7 @@ interface InputsEN {
   userDefinedHoopLimit?: number; // fraction of SMYS
   userDefinedLongLimit?: number;
   userDefinedEquivLimit?: number;
+  kr: number; // coefficient of lateral earth pressure
 }
 
 interface DebugEN extends DebugValues {
@@ -65,63 +66,44 @@ interface DebugEN extends DebugValues {
 
 /**
  * Calculate bedding parameters based on bedding angle
- * Ported from VBA
+ * CEPA Manual Table 2-1: Spangler Stress Formula Parameters
  */
 function calculateBeddingParams(beddingAngleDeg: number): { Kb: number; Kz: number; Theta: number } {
   switch (beddingAngleDeg) {
     case 0:
-      return { Kb: 0.11, Kz: 0.083, Theta: 135 };
+      return { Kb: 0.294, Kz: 0.110, Theta: 135 };
     case 30:
-      return { Kb: 0.108, Kz: 0.088, Theta: 130 };
+      return { Kb: 0.235, Kz: 0.108, Theta: 130 };
     case 60:
-      return { Kb: 0.105, Kz: 0.1, Theta: 120 };
+      return { Kb: 0.189, Kz: 0.103, Theta: 120 };
     case 90:
-      return { Kb: 0.103, Kz: 0.108, Theta: 105 };
+      return { Kb: 0.157, Kz: 0.096, Theta: 105 };
     case 120:
-      return { Kb: 0.101, Kz: 0.116, Theta: 90 };
+      return { Kb: 0.138, Kz: 0.089, Theta: 90 };
     case 150:
-      return { Kb: 0.1, Kz: 0.12, Theta: 75 };
+      return { Kb: 0.128, Kz: 0.085, Theta: 75 };
     case 180:
-      return { Kb: 0.096, Kz: 0.127, Theta: 60 };
+      return { Kb: 0.125, Kz: 0.083, Theta: 60 };
     default:
       // Default to 90 degrees
-      return { Kb: 0.103, Kz: 0.108, Theta: 105 };
+      return { Kb: 0.157, Kz: 0.096, Theta: 105 };
   }
 }
 
 /**
- * Calculate E' (modulus of soil reaction) using lookup table or user-defined
- * Ported from VBA
+ * Calculate E' (modulus of soil reaction) using CEPA Table 2-3 or user-defined
  */
 function calculateEPrime(inputs: InputsEN): number {
   if (inputs.ePrimeMethod === 'USER_DEFINED' && inputs.ePrimeUserDefined_psi) {
     return inputs.ePrimeUserDefined_psi;
   }
   
-  // Lookup method
+  // Use CEPA Table 2-3 lookup
   const soilType = inputs.soilType || 'COARSE_WITH_FINES';
   const compaction = inputs.compaction || 90;
   const H_ft = inputs.H_ft;
   
-  let Epr1: number, Epr2: number, Epr3: number;
-  
-  // Coefficients from VBA lookup table
-  if (soilType === 'FINE') {
-    Epr1 = 500;
-    Epr2 = 1;
-    Epr3 = 2;
-  } else if (soilType === 'COARSE_WITH_FINES') {
-    Epr1 = 1000;
-    Epr2 = 1;
-    Epr3 = 2;
-  } else { // COARSE_NO_FINES
-    Epr1 = 1500;
-    Epr2 = 1;
-    Epr3 = 2;
-  }
-  
-  // Formula: Eprime = Epr1 * (Epr2 ^ H_ft) * (Compact/100) ^ Epr3
-  const ePrime = Epr1 * Math.pow(Epr2, H_ft) * Math.pow(compaction / 100, Epr3);
+  const ePrime = calculateEPrimeFromLookup(soilType, compaction, H_ft);
   
   return ePrime;
 }
@@ -322,7 +304,8 @@ function calculateHoopStress(
   t_in: number,
   Kb: number,
   Kz: number,
-  ePrime_psi: number
+  ePrime_psi: number,
+  kr: number
 ): number {
   const denominator = 1 + 3 * Kz * (Pint_psi / E_STEEL) * Math.pow(D_in / t_in, 3) 
                        + 0.0915 * (ePrime_psi / E_STEEL) * Math.pow(D_in / t_in, 3);
@@ -441,16 +424,16 @@ export function calculateTrackVehicleVBA(inputs: PipelineTrackInputs): PipelineT
   const bsnqIF_psi = impactFactorDepth * boussinesq.bsnqMax_psi;
   
   // (6) Hoop stresses - AT ZERO PRESSURE
-  const hoopSoil_Zero = calculateHoopStress(soilPressure_psi, 0, inputsEN.D_in, inputsEN.t_in, Kb, Kz, ePrime_psi);
-  const hoopLive_Zero = calculateHoopStress(bsnqIF_psi, 0, inputsEN.D_in, inputsEN.t_in, Kb, Kz, ePrime_psi);
+  const hoopSoil_Zero = calculateHoopStress(soilPressure_psi, 0, inputsEN.D_in, inputsEN.t_in, Kb, Kz, ePrime_psi, inputsEN.kr);
+  const hoopLive_Zero = calculateHoopStress(bsnqIF_psi, 0, inputsEN.D_in, inputsEN.t_in, Kb, Kz, ePrime_psi, inputsEN.kr);
   const hoopInt_Zero = 0; // no internal pressure
   
   const hoopZeroHigh = hoopSoil_Zero + hoopLive_Zero + hoopInt_Zero;
   const hoopZeroLow = hoopSoil_Zero - hoopLive_Zero + hoopInt_Zero;
   
   // (7) Hoop stresses - AT MOP
-  const hoopSoil_MOP = calculateHoopStress(soilPressure_psi, inputsEN.MOP_psi, inputsEN.D_in, inputsEN.t_in, Kb, Kz, ePrime_psi);
-  const hoopLive_MOP = calculateHoopStress(bsnqIF_psi, inputsEN.MOP_psi, inputsEN.D_in, inputsEN.t_in, Kb, Kz, ePrime_psi);
+  const hoopSoil_MOP = calculateHoopStress(soilPressure_psi, inputsEN.MOP_psi, inputsEN.D_in, inputsEN.t_in, Kb, Kz, ePrime_psi, inputsEN.kr);
+  const hoopLive_MOP = calculateHoopStress(bsnqIF_psi, inputsEN.MOP_psi, inputsEN.D_in, inputsEN.t_in, Kb, Kz, ePrime_psi, inputsEN.kr);
   const hoopInt_MOP = inputsEN.MOP_psi * inputsEN.D_in / (2 * inputsEN.t_in);
   
   const hoopMOPHigh = hoopSoil_MOP + hoopLive_MOP + hoopInt_MOP;
@@ -673,6 +656,7 @@ function convertInputsToEN(inputs: PipelineTrackInputs): InputsEN {
     userDefinedHoopLimit: inputs.userDefinedLimits ? inputs.userDefinedLimits.hoopLimitPct / 100 : undefined,
     userDefinedLongLimit: inputs.userDefinedLimits ? inputs.userDefinedLimits.longLimitPct / 100 : undefined,
     userDefinedEquivLimit: inputs.userDefinedLimits ? inputs.userDefinedLimits.equivLimitPct / 100 : undefined,
+    kr: inputs.kr,
   };
 }
 
