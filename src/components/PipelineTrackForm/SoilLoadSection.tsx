@@ -117,9 +117,9 @@ export const SoilLoadSection = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="FINE">Fine</SelectItem>
-                      <SelectItem value="COARSE_WITH_FINES">Coarse with Fines</SelectItem>
-                      <SelectItem value="COARSE_NO_FINES">Coarse no Fines</SelectItem>
+                      <SelectItem value="FINE">Fine-grained with less than 25% sand content</SelectItem>
+                      <SelectItem value="COARSE_WITH_FINES">Coarse-grained with fines</SelectItem>
+                      <SelectItem value="COARSE_NO_FINES">Coarse-grained with little or no fines</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
