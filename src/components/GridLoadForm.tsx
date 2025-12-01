@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Calculator as CalcIcon } from "lucide-react";
 import { GridLoadInputs, UnitsSystem, SoilLoadMethod, EPrimeMethod, BeddingAngleDeg, EquivStressMethod, CodeCheck, SoilType, Compaction, PavementType, VehicleClass } from "@/domain/pipeline/typesGrid";
 import { PipeSelector } from "./PipelineTrackForm/PipeSelector";
+import { SoilLoadSection } from "./PipelineTrackForm/SoilLoadSection";
 import { AnalysisParametersSection } from "./AnalysisParametersSection";
 import { convertFormValue } from "@/domain/pipeline/unitConversions";
 
@@ -60,11 +61,11 @@ interface GridLoadFormProps {
 }
 
 export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
-  const [unitsSystem, setUnitsSystem] = useState<UnitsSystem>("EN");
+  const [unitsSystem, setUnitsSystem] = useState<UnitsSystem>("SI");
   
   const defaultValues: GridLoadFormData = {
     calculationName: "",
-    unitsSystem: "EN",
+    unitsSystem: "SI",
     pipeOD: 36,
     pipeWT: 0.5,
     MOP: 1000,
@@ -267,6 +268,14 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
           </div>
         </CardContent>
       </Card>
+
+      <SoilLoadSection
+        register={register}
+        errors={errors}
+        watch={watch}
+        setValue={setValue}
+        unitsSystem={unitsSystem}
+      />
 
       <Card>
         <CardHeader>

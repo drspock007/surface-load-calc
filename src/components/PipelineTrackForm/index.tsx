@@ -61,11 +61,11 @@ interface PipelineTrackFormProps {
 }
 
 export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
-  const [unitsSystem, setUnitsSystem] = useState<UnitsSystem>("EN");
+  const [unitsSystem, setUnitsSystem] = useState<UnitsSystem>("SI");
   
   const defaultValues: PipelineFormData = {
     calculationName: "",
-    unitsSystem: "EN",
+    unitsSystem: "SI",
     pipeOD: 36,
     pipeWT: 0.5,
     MOP: 1000,
