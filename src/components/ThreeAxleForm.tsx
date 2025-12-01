@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Calculator as CalcIcon } from "lucide-react";
 import { ThreeAxleInputs, UnitsSystem, SoilLoadMethod, EPrimeMethod, BeddingAngleDeg, EquivStressMethod, CodeCheck, SoilType, Compaction, PavementType, VehicleClass } from "@/domain/pipeline/types3Axle";
 import { PipeSelector } from "./PipelineTrackForm/PipeSelector";
+import { SoilLoadSection } from "./PipelineTrackForm/SoilLoadSection";
 import { AnalysisParametersSection } from "./AnalysisParametersSection";
 import { convertFormValue } from "@/domain/pipeline/unitConversions";
 
@@ -74,11 +75,11 @@ interface ThreeAxleFormProps {
 }
 
 export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
-  const [unitsSystem, setUnitsSystem] = useState<UnitsSystem>("EN");
+  const [unitsSystem, setUnitsSystem] = useState<UnitsSystem>("SI");
   
   const defaultValues: ThreeAxleFormData = {
     calculationName: "",
-    unitsSystem: "EN",
+    unitsSystem: "SI",
     pipeOD: 36,
     pipeWT: 0.5,
     MOP: 1000,
@@ -325,6 +326,14 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
           </div>
         </CardContent>
       </Card>
+
+      <SoilLoadSection
+        register={register}
+        errors={errors}
+        watch={watch}
+        setValue={setValue}
+        unitsSystem={unitsSystem}
+      />
 
       <Card>
         <CardHeader>
