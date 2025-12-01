@@ -108,7 +108,7 @@ export const PipelineInputsSection = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="kr">Kr (lateral earth pressure) *</Label>
+            <Label htmlFor="kr">Kr (Coefficient of Lateral Earth Pressure) *</Label>
             <Input
               id="kr"
               type="number"

@@ -19,8 +19,8 @@ export { computeSurfaceLoad, isPassingCalculation } from './computeSurfaceLoad';
 export type { SurfaceLoadInputs, SurfaceLoadResults } from './computeSurfaceLoad';
 
 // E' lookup table
-export { getEPrimeCoefficients, calculateEPrimeFromLookup, E_PRIME_TABLE } from './ePrimeLookup';
-export type { EPrimeCoefficients, SoilTypeKey, CompactionLevel } from './ePrimeLookup';
+export { calculateEPrimeFromLookup } from './ePrimeLookup';
+export type { SoilTypeKey, CompactionLevel, DepthRange } from './ePrimeLookup';
 
 // Tire contact patch calculations
 export { calculateContactPatch, convertContactPatchToEN } from './tirePatchCalculations';
