@@ -23,6 +23,16 @@ const TIRE_PRESSURE_TO_PSI: Record<TirePressureUnit, number> = {
 };
 
 /**
+ * Conversion factors from psi to various tire pressure units
+ */
+const PSI_TO_TIRE_PRESSURE: Record<TirePressureUnit, number> = {
+  'kPa': 6.894757293168,       // 1 psi = 6.895 kPa
+  'kg/m2': 703.0696,           // 1 psi = 703 kg/m² (1 / 0.001422335835237)
+  'bar': 0.0689476,            // 1 psi = 0.0689 bar
+  'psig': 1.0,                 // identical
+};
+
+/**
  * Convert tire pressure from any supported unit to psi
  */
 export function convertTirePressureToPsi(
@@ -30,6 +40,19 @@ export function convertTirePressureToPsi(
   fromUnit: TirePressureUnit
 ): number {
   return pressure * TIRE_PRESSURE_TO_PSI[fromUnit];
+}
+
+/**
+ * Convert tire pressure between any two supported units
+ */
+export function convertTirePressureBetweenUnits(
+  value: number,
+  fromUnit: TirePressureUnit,
+  toUnit: TirePressureUnit
+): number {
+  if (fromUnit === toUnit) return value;
+  const valueInPsi = value * TIRE_PRESSURE_TO_PSI[fromUnit];
+  return valueInPsi * PSI_TO_TIRE_PRESSURE[toUnit];
 }
 
 /**
