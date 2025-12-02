@@ -1,7 +1,7 @@
-import { UnitsSystem, BeddingAngleDeg, SoilLoadMethod, EPrimeMethod, SoilType, Compaction, EquivStressMethod, CodeCheck, PavementType, VehicleClass } from './types';
+import { UnitsSystem, BeddingAngleDeg, SoilLoadMethod, EPrimeMethod, SoilType, Compaction, EquivStressMethod, CodeCheck, PavementType, VehicleClass, TirePressureUnit } from './types';
 import { StressResults, PassFailSummary, DebugValues, LimitsUsed } from './types';
 
-export type { UnitsSystem, BeddingAngleDeg, SoilLoadMethod, EPrimeMethod, SoilType, Compaction, EquivStressMethod, CodeCheck, PavementType, VehicleClass };
+export type { UnitsSystem, BeddingAngleDeg, SoilLoadMethod, EPrimeMethod, SoilType, Compaction, EquivStressMethod, CodeCheck, PavementType, VehicleClass, TirePressureUnit };
 
 export interface ThreeAxleInputs {
   // System
@@ -43,19 +43,22 @@ export interface ThreeAxleInputs {
   // Axle 1 (front) tire properties
   axle1TireWidth: number; // tire contact width (in or mm)
   axle1TireLength: number; // tire contact length (in or mm) - INPUT in MANUAL, CALCULATED in AUTO
-  axle1TirePressure?: number; // tire inflation pressure (psi or kPa) - used in AUTO mode
+  axle1TirePressure?: number; // tire inflation pressure - used in AUTO mode
+  axle1TirePressureUnit?: TirePressureUnit; // unit for tire pressure (kPa, kg/m2, bar, psig)
   axle1TiresPerAxle?: number; // number of tires (2 or 4) - used in AUTO mode
   
   // Axle 2 (middle) tire properties
   axle2TireWidth: number; // tire contact width (in or mm)
   axle2TireLength: number; // tire contact length (in or mm) - INPUT in MANUAL, CALCULATED in AUTO
-  axle2TirePressure?: number; // tire inflation pressure (psi or kPa) - used in AUTO mode
+  axle2TirePressure?: number; // tire inflation pressure - used in AUTO mode
+  axle2TirePressureUnit?: TirePressureUnit; // unit for tire pressure (kPa, kg/m2, bar, psig)
   axle2TiresPerAxle?: number; // number of tires (2 or 4) - used in AUTO mode
   
   // Axle 3 (rear) tire properties
   axle3TireWidth: number; // tire contact width (in or mm)
   axle3TireLength: number; // tire contact length (in or mm) - INPUT in MANUAL, CALCULATED in AUTO
-  axle3TirePressure?: number; // tire inflation pressure (psi or kPa) - used in AUTO mode
+  axle3TirePressure?: number; // tire inflation pressure - used in AUTO mode
+  axle3TirePressureUnit?: TirePressureUnit; // unit for tire pressure (kPa, kg/m2, bar, psig)
   axle3TiresPerAxle?: number; // number of tires (2 or 4) - used in AUTO mode
   
   axleWidth: number; // track width / lateral spacing (in or mm)
