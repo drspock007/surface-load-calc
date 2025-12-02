@@ -309,7 +309,8 @@ export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults 
     Math.abs(longMOPHigh),
     sustainedLongMaxPct
   ) / inputsEN.SMYS_psi * 100;
-  const equivMaxPct = Math.max(equivZero.pctSMYS, equivMOP.pctSMYS) * 100;
+  // pctSMYS already returns percentage (0-100)
+  const equivMaxPct = Math.max(equivZero.pctSMYS, equivMOP.pctSMYS);
   
   const passFailResult = calculatePassFailHelper(
     inputs.codeCheck,
