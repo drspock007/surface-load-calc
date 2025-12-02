@@ -11,7 +11,7 @@ import {
   generateStandardMeasurementPoints,
   PointLoad 
 } from './boussinesqHelpers';
-import { calculateContactPatch, convertContactPatchToEN } from './tirePatchCalculations';
+import { calculateContactPatch, convertTirePressureToPsi } from './tirePatchCalculations';
 import {
   calculateBeddingParams,
   calculateEPrime,
@@ -92,57 +92,48 @@ export function calculate3AxleVehicleVBA(inputs: ThreeAxleInputs): ThreeAxleResu
   let axle3TireLength_in = inputsEN.axle3TireLength_in;
   
   if (inputs.contactPatchMode === 'AUTO') {
-    // Axle 1 - calculate contact patch
+    // Axle 1 - calculate contact patch using tire pressure unit conversion
     if (inputs.axle1TirePressure && inputs.axle1TiresPerAxle) {
-      const patch1 = inputs.unitsSystem === 'SI'
-        ? convertContactPatchToEN(
-            inputs.axle1Load,
-            inputs.axle1TirePressure,
-            inputs.axle1TiresPerAxle,
-            inputs.axle1TireWidth
-          )
-        : calculateContactPatch(
-            inputsEN.axle1Load_lb,
-            inputs.axle1TirePressure,
-            inputs.axle1TiresPerAxle,
-            inputs.axle1TireWidth
-          );
+      const tirePressure1_psi = convertTirePressureToPsi(
+        inputs.axle1TirePressure,
+        inputs.axle1TirePressureUnit || 'kPa'
+      );
+      const patch1 = calculateContactPatch(
+        inputsEN.axle1Load_lb,
+        tirePressure1_psi,
+        inputs.axle1TiresPerAxle,
+        axle1TireWidth_in
+      );
       axle1TireLength_in = patch1.contactLength_in;
     }
     
-    // Axle 2 - calculate contact patch
+    // Axle 2 - calculate contact patch using tire pressure unit conversion
     if (inputs.axle2TirePressure && inputs.axle2TiresPerAxle) {
-      const patch2 = inputs.unitsSystem === 'SI'
-        ? convertContactPatchToEN(
-            inputs.axle2Load,
-            inputs.axle2TirePressure,
-            inputs.axle2TiresPerAxle,
-            inputs.axle2TireWidth
-          )
-        : calculateContactPatch(
-            inputsEN.axle2Load_lb,
-            inputs.axle2TirePressure,
-            inputs.axle2TiresPerAxle,
-            inputs.axle2TireWidth
-          );
+      const tirePressure2_psi = convertTirePressureToPsi(
+        inputs.axle2TirePressure,
+        inputs.axle2TirePressureUnit || 'kPa'
+      );
+      const patch2 = calculateContactPatch(
+        inputsEN.axle2Load_lb,
+        tirePressure2_psi,
+        inputs.axle2TiresPerAxle,
+        axle2TireWidth_in
+      );
       axle2TireLength_in = patch2.contactLength_in;
     }
     
-    // Axle 3 - calculate contact patch
+    // Axle 3 - calculate contact patch using tire pressure unit conversion
     if (inputs.axle3TirePressure && inputs.axle3TiresPerAxle) {
-      const patch3 = inputs.unitsSystem === 'SI'
-        ? convertContactPatchToEN(
-            inputs.axle3Load,
-            inputs.axle3TirePressure,
-            inputs.axle3TiresPerAxle,
-            inputs.axle3TireWidth
-          )
-        : calculateContactPatch(
-            inputsEN.axle3Load_lb,
-            inputs.axle3TirePressure,
-            inputs.axle3TiresPerAxle,
-            inputs.axle3TireWidth
-          );
+      const tirePressure3_psi = convertTirePressureToPsi(
+        inputs.axle3TirePressure,
+        inputs.axle3TirePressureUnit || 'kPa'
+      );
+      const patch3 = calculateContactPatch(
+        inputsEN.axle3Load_lb,
+        tirePressure3_psi,
+        inputs.axle3TiresPerAxle,
+        axle3TireWidth_in
+      );
       axle3TireLength_in = patch3.contactLength_in;
     }
   }

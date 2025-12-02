@@ -9,6 +9,7 @@ export type SoilType = 'FINE' | 'COARSE_WITH_FINES' | 'COARSE_NO_FINES';
 export type Compaction = 80 | 85 | 90 | 95 | 100;
 export type PavementType = 'RIGID' | 'FLEXIBLE';
 export type VehicleClass = 'HIGHWAY' | 'FARM' | 'TRACK';
+export type TirePressureUnit = 'kPa' | 'kg/m2' | 'bar' | 'psig';
 
 export interface PipelineTrackInputs {
   // System
