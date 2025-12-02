@@ -429,7 +429,8 @@ export function calculateTrackVehicleVBA(inputs: PipelineTrackInputs): PipelineT
   const hoopInt_Zero = 0; // no internal pressure
   
   const hoopZeroHigh = hoopSoil_Zero + hoopLive_Zero + hoopInt_Zero;
-  const hoopZeroLow = hoopSoil_Zero - hoopLive_Zero + hoopInt_Zero;
+  // VBA: HoopZeroLow = HoopIntZero - HoopSoilZero - HoopLiveZero
+  const hoopZeroLow = hoopInt_Zero - hoopSoil_Zero - hoopLive_Zero;
   
   // (7) Hoop stresses - AT MOP
   const hoopSoil_MOP = calculateHoopStress(soilPressure_psi, inputsEN.MOP_psi, inputsEN.D_in, inputsEN.t_in, Kb, Kz, ePrime_psi, inputsEN.kr);
@@ -437,7 +438,8 @@ export function calculateTrackVehicleVBA(inputs: PipelineTrackInputs): PipelineT
   const hoopInt_MOP = inputsEN.MOP_psi * inputsEN.D_in / (2 * inputsEN.t_in);
   
   const hoopMOPHigh = hoopSoil_MOP + hoopLive_MOP + hoopInt_MOP;
-  const hoopMOPLow = hoopSoil_MOP - hoopLive_MOP + hoopInt_MOP;
+  // VBA: HoopMOPLow = HoopIntMOP - HoopSoilMOP - HoopLiveMOP
+  const hoopMOPLow = hoopInt_MOP - hoopSoil_MOP - hoopLive_MOP;
   
   // (8) Longitudinal stresses - AT ZERO PRESSURE
   const longSoil_Zero = POISSON * hoopSoil_Zero;
@@ -482,13 +484,15 @@ export function calculateTrackVehicleVBA(inputs: PipelineTrackInputs): PipelineT
   const equivZero = calculateEquivalentStress(
     hoopZeroHigh, hoopZeroLow,
     longZeroHigh, longZeroLow,
-    inputsEN.equivStressMethod
+    inputsEN.equivStressMethod,
+    inputsEN.SMYS_psi
   );
   
   const equivMOP = calculateEquivalentStress(
     hoopMOPHigh, hoopMOPLow,
     longMOPHigh, longMOPLow,
-    inputsEN.equivStressMethod
+    inputsEN.equivStressMethod,
+    inputsEN.SMYS_psi
   );
   
   // (11) Pass/Fail with limits info
@@ -727,26 +731,28 @@ function convertDebugToUserUnits(debug: DebugEN, unitsSystem: 'EN' | 'SI'): Debu
 
 /**
  * Calculate equivalent stress (Tresca or Von Mises)
- * Ported from VBA
+ * Ported from VBA - matches SurfaceLoadingTrackCode exactly
  */
 function calculateEquivalentStress(
   hoopHigh: number,
   hoopLow: number,
   longHigh: number,
   longLow: number,
-  method: 'TRESCA' | 'VON_MISES'
+  method: 'TRESCA' | 'VON_MISES',
+  SMYS_psi: number
 ): { high: number; low: number; percentSMYS: number } {
   if (method === 'TRESCA') {
-    // Tresca: 4 combinations (HH, HL, LH, LL)
-    const equiv_HH = Math.abs(hoopHigh - longHigh);
-    const equiv_HL = Math.abs(hoopHigh - longLow);
-    const equiv_LH = Math.abs(hoopLow - longHigh);
-    const equiv_LL = Math.abs(hoopLow - longLow);
+    // VBA Tresca: Max(Abs(hoop - long), hoop, long) for each combination
+    const equiv_HH = Math.max(Math.abs(hoopHigh - longHigh), hoopHigh, longHigh);
+    const equiv_HL = Math.max(Math.abs(hoopHigh - longLow), hoopHigh, longLow);
+    const equiv_LH = Math.max(Math.abs(hoopLow - longHigh), hoopLow, longHigh);
+    const equiv_LL = Math.max(Math.abs(hoopLow - longLow), hoopLow, longLow);
     
     const high = Math.max(equiv_HH, equiv_HL, equiv_LH, equiv_LL);
     const low = Math.min(equiv_HH, equiv_HL, equiv_LH, equiv_LL);
     
-    return { high, low, percentSMYS: 0 }; // Will be calculated later with SMYS
+    // percentSMYS as percentage (0-100), not ratio
+    return { high, low, percentSMYS: (high / SMYS_psi) * 100 };
   } else {
     // Von Mises: sqrt(hoop^2 - hoop*long + long^2)
     const equiv_HH = Math.sqrt(Math.pow(hoopHigh, 2) - hoopHigh * longHigh + Math.pow(longHigh, 2));
@@ -757,7 +763,8 @@ function calculateEquivalentStress(
     const high = Math.max(equiv_HH, equiv_HL, equiv_LH, equiv_LL);
     const low = Math.min(equiv_HH, equiv_HL, equiv_LH, equiv_LL);
     
-    return { high, low, percentSMYS: 0 };
+    // percentSMYS as percentage (0-100), not ratio
+    return { high, low, percentSMYS: (high / SMYS_psi) * 100 };
   }
 }
 

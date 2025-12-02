@@ -168,15 +168,17 @@ export function calculateEquivalentStress(
   SMYS_psi: number
 ): { high: number; low: number; pctSMYS: number } {
   if (method === 'TRESCA') {
+    // VBA Tresca: Max(Abs(hoop - long), hoop, long) for each combination
     const cases = [
-      Math.abs(hoopHigh - longHigh),
-      Math.abs(hoopHigh - longLow),
-      Math.abs(hoopLow - longHigh),
-      Math.abs(hoopLow - longLow),
+      Math.max(Math.abs(hoopHigh - longHigh), hoopHigh, longHigh),
+      Math.max(Math.abs(hoopHigh - longLow), hoopHigh, longLow),
+      Math.max(Math.abs(hoopLow - longHigh), hoopLow, longHigh),
+      Math.max(Math.abs(hoopLow - longLow), hoopLow, longLow),
     ];
     const high = Math.max(...cases);
     const low = Math.min(...cases);
-    return { high, low, pctSMYS: high / SMYS_psi };
+    // pctSMYS as percentage (0-100), not ratio
+    return { high, low, pctSMYS: (high / SMYS_psi) * 100 };
   } else {
     // Von Mises
     const cases = [
@@ -187,7 +189,8 @@ export function calculateEquivalentStress(
     ];
     const high = Math.max(...cases);
     const low = Math.min(...cases);
-    return { high, low, pctSMYS: high / SMYS_psi };
+    // pctSMYS as percentage (0-100), not ratio
+    return { high, low, pctSMYS: (high / SMYS_psi) * 100 };
   }
 }
 

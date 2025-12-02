@@ -23,30 +23,6 @@ const getUnitLabels = (system: UnitsSystem) => ({
   modulus: system === 'EN' ? 'psi' : 'kPa',
 });
 
-// Convert stress value from EN to user's system (psi to kPa)
-const convertStress = (value: number, toSystem: UnitsSystem): number => {
-  if (toSystem === 'EN') return value;
-  return value * 6.89476; // psi to kPa
-};
-
-// Convert force value from EN to user's system (lb to kg)
-const convertForce = (value: number, toSystem: UnitsSystem): number => {
-  if (toSystem === 'EN') return value;
-  return value * 0.453592; // lb to kg
-};
-
-// Convert contact pressure (psf to kPa)
-const convertContactPressure = (value: number, toSystem: UnitsSystem): number => {
-  if (toSystem === 'EN') return value;
-  return value * 0.04788; // psf to kPa
-};
-
-// Convert moment (lb·in to N·mm)
-const convertMoment = (value: number, toSystem: UnitsSystem): number => {
-  if (toSystem === 'EN') return value;
-  return value * 112.985; // lb·in to N·mm
-};
-
 const Results = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -175,7 +151,7 @@ const Results = () => {
                   <div>
                     <p className="text-sm text-muted-foreground">Max Surface Pressure on Pipe</p>
                     <p className="text-lg font-semibold">
-                      {formatValue(convertStress(pipelineResult.maxSurfacePressureOnPipe, unitsSystem))} {units.stress}
+                      {formatValue(pipelineResult.maxSurfacePressureOnPipe)} {units.stress}
                     </p>
                   </div>
                 </div>
@@ -191,23 +167,23 @@ const Results = () => {
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     Hoop Stresses
                   </h3>
-                  <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2">
                     <div className="p-3 bg-muted/50 rounded">
                       <p className="text-xs text-muted-foreground mb-1">At Zero Pressure</p>
-                      <p className="font-mono">High: {formatValue(convertStress(pipelineResult.stresses.atZeroPressure.hoop.high, unitsSystem))} {units.stress}</p>
-                      <p className="font-mono">Low: {formatValue(convertStress(pipelineResult.stresses.atZeroPressure.hoop.low, unitsSystem))} {units.stress}</p>
+                      <p className="font-mono">High: {formatValue(pipelineResult.stresses.atZeroPressure.hoop.high)} {units.stress}</p>
+                      <p className="font-mono">Low: {formatValue(pipelineResult.stresses.atZeroPressure.hoop.low)} {units.stress}</p>
                       <p className="text-xs text-muted-foreground mt-2">Components:</p>
-                      <p className="text-xs font-mono">Earth: {formatValue(convertStress(pipelineResult.stresses.atZeroPressure.hoop.components.earth, unitsSystem))}</p>
-                      <p className="text-xs font-mono">Thermal: {formatValue(convertStress(pipelineResult.stresses.atZeroPressure.hoop.components.thermal, unitsSystem))}</p>
+                      <p className="text-xs font-mono">Earth: {formatValue(pipelineResult.stresses.atZeroPressure.hoop.components.earth)}</p>
+                      <p className="text-xs font-mono">Thermal: {formatValue(pipelineResult.stresses.atZeroPressure.hoop.components.thermal)}</p>
                     </div>
                     <div className="p-3 bg-muted/50 rounded">
                       <p className="text-xs text-muted-foreground mb-1">At MOP</p>
-                      <p className="font-mono">High: {formatValue(convertStress(pipelineResult.stresses.atMOP.hoop.high, unitsSystem))} {units.stress}</p>
-                      <p className="font-mono">Low: {formatValue(convertStress(pipelineResult.stresses.atMOP.hoop.low, unitsSystem))} {units.stress}</p>
+                      <p className="font-mono">High: {formatValue(pipelineResult.stresses.atMOP.hoop.high)} {units.stress}</p>
+                      <p className="font-mono">Low: {formatValue(pipelineResult.stresses.atMOP.hoop.low)} {units.stress}</p>
                       <p className="text-xs text-muted-foreground mt-2">Components:</p>
-                      <p className="text-xs font-mono">Pressure: {formatValue(convertStress(pipelineResult.stresses.atMOP.hoop.components.pressure, unitsSystem))}</p>
-                      <p className="text-xs font-mono">Earth: {formatValue(convertStress(pipelineResult.stresses.atMOP.hoop.components.earth, unitsSystem))}</p>
-                      <p className="text-xs font-mono">Thermal: {formatValue(convertStress(pipelineResult.stresses.atMOP.hoop.components.thermal, unitsSystem))}</p>
+                      <p className="text-xs font-mono">Pressure: {formatValue(pipelineResult.stresses.atMOP.hoop.components.pressure)}</p>
+                      <p className="text-xs font-mono">Earth: {formatValue(pipelineResult.stresses.atMOP.hoop.components.earth)}</p>
+                      <p className="text-xs font-mono">Thermal: {formatValue(pipelineResult.stresses.atMOP.hoop.components.thermal)}</p>
                     </div>
                   </div>
                 </div>
@@ -217,20 +193,20 @@ const Results = () => {
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="p-3 bg-muted/50 rounded">
                       <p className="text-xs text-muted-foreground mb-1">At Zero Pressure</p>
-                      <p className="font-mono">High: {formatValue(convertStress(pipelineResult.stresses.atZeroPressure.longitudinal.high, unitsSystem))} {units.stress}</p>
-                      <p className="font-mono">Low: {formatValue(convertStress(pipelineResult.stresses.atZeroPressure.longitudinal.low, unitsSystem))} {units.stress}</p>
+                      <p className="font-mono">High: {formatValue(pipelineResult.stresses.atZeroPressure.longitudinal.high)} {units.stress}</p>
+                      <p className="font-mono">Low: {formatValue(pipelineResult.stresses.atZeroPressure.longitudinal.low)} {units.stress}</p>
                       <p className="text-xs text-muted-foreground mt-2">Components:</p>
-                      <p className="text-xs font-mono">Earth: {formatValue(convertStress(pipelineResult.stresses.atZeroPressure.longitudinal.components.earth, unitsSystem))}</p>
-                      <p className="text-xs font-mono">Thermal: {formatValue(convertStress(pipelineResult.stresses.atZeroPressure.longitudinal.components.thermal, unitsSystem))}</p>
+                      <p className="text-xs font-mono">Earth: {formatValue(pipelineResult.stresses.atZeroPressure.longitudinal.components.earth)}</p>
+                      <p className="text-xs font-mono">Thermal: {formatValue(pipelineResult.stresses.atZeroPressure.longitudinal.components.thermal)}</p>
                     </div>
                     <div className="p-3 bg-muted/50 rounded">
                       <p className="text-xs text-muted-foreground mb-1">At MOP</p>
-                      <p className="font-mono">High: {formatValue(convertStress(pipelineResult.stresses.atMOP.longitudinal.high, unitsSystem))} {units.stress}</p>
-                      <p className="font-mono">Low: {formatValue(convertStress(pipelineResult.stresses.atMOP.longitudinal.low, unitsSystem))} {units.stress}</p>
+                      <p className="font-mono">High: {formatValue(pipelineResult.stresses.atMOP.longitudinal.high)} {units.stress}</p>
+                      <p className="font-mono">Low: {formatValue(pipelineResult.stresses.atMOP.longitudinal.low)} {units.stress}</p>
                       <p className="text-xs text-muted-foreground mt-2">Components:</p>
-                      <p className="text-xs font-mono">Pressure: {formatValue(convertStress(pipelineResult.stresses.atMOP.longitudinal.components.pressure, unitsSystem))}</p>
-                      <p className="text-xs font-mono">Earth: {formatValue(convertStress(pipelineResult.stresses.atMOP.longitudinal.components.earth, unitsSystem))}</p>
-                      <p className="text-xs font-mono">Thermal: {formatValue(convertStress(pipelineResult.stresses.atMOP.longitudinal.components.thermal, unitsSystem))}</p>
+                      <p className="text-xs font-mono">Pressure: {formatValue(pipelineResult.stresses.atMOP.longitudinal.components.pressure)}</p>
+                      <p className="text-xs font-mono">Earth: {formatValue(pipelineResult.stresses.atMOP.longitudinal.components.earth)}</p>
+                      <p className="text-xs font-mono">Thermal: {formatValue(pipelineResult.stresses.atMOP.longitudinal.components.thermal)}</p>
                     </div>
                   </div>
                 </div>
@@ -240,16 +216,16 @@ const Results = () => {
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="p-3 bg-muted/50 rounded">
                       <p className="text-xs text-muted-foreground mb-1">At Zero Pressure</p>
-                      <p className="font-mono">High: {formatValue(convertStress(pipelineResult.stresses.atZeroPressure.equivalent.high, unitsSystem))} {units.stress}</p>
-                      <p className="font-mono">Low: {formatValue(convertStress(pipelineResult.stresses.atZeroPressure.equivalent.low, unitsSystem))} {units.stress}</p>
+                      <p className="font-mono">High: {formatValue(pipelineResult.stresses.atZeroPressure.equivalent.high)} {units.stress}</p>
+                      <p className="font-mono">Low: {formatValue(pipelineResult.stresses.atZeroPressure.equivalent.low)} {units.stress}</p>
                       <p className="text-sm font-semibold mt-2">
                         {formatValue(pipelineResult.stresses.atZeroPressure.equivalent.percentSMYS)}% SMYS
                       </p>
                     </div>
                     <div className="p-3 bg-muted/50 rounded">
                       <p className="text-xs text-muted-foreground mb-1">At MOP</p>
-                      <p className="font-mono">High: {formatValue(convertStress(pipelineResult.stresses.atMOP.equivalent.high, unitsSystem))} {units.stress}</p>
-                      <p className="font-mono">Low: {formatValue(convertStress(pipelineResult.stresses.atMOP.equivalent.low, unitsSystem))} {units.stress}</p>
+                      <p className="font-mono">High: {formatValue(pipelineResult.stresses.atMOP.equivalent.high)} {units.stress}</p>
+                      <p className="font-mono">Low: {formatValue(pipelineResult.stresses.atMOP.equivalent.low)} {units.stress}</p>
                       <p className="text-sm font-semibold mt-2">
                         {formatValue(pipelineResult.stresses.atMOP.equivalent.percentSMYS)}% SMYS
                       </p>
@@ -385,11 +361,11 @@ const Results = () => {
                           <div className="grid gap-2 text-sm font-mono">
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>Soil Pressure</span>
-                              <span>{formatValue(convertStress(pipelineResult.debug.soilPressure_psi, unitsSystem))} {units.stress}</span>
+                              <span>{formatValue(pipelineResult.debug.soilPressure_psi)} {units.stress}</span>
                             </div>
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>Boussinesq Max</span>
-                              <span>{formatValue(convertStress(pipelineResult.debug.boussinesqMax_psi, unitsSystem))} {units.stress}</span>
+                              <span>{formatValue(pipelineResult.debug.boussinesqMax_psi)} {units.stress}</span>
                             </div>
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>Impact Factor @ Depth</span>
@@ -397,7 +373,7 @@ const Results = () => {
                             </div>
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>Contact Pressure</span>
-                              <span>{formatValue(convertContactPressure(pipelineResult.debug.contactPressure_psf, unitsSystem))} {units.contactPressure}</span>
+                              <span>{formatValue(pipelineResult.debug.contactPressure_psf)} {units.contactPressure}</span>
                             </div>
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>Influence Factor</span>
@@ -406,25 +382,25 @@ const Results = () => {
                             {pipelineResult.debug.bsnqSUM1_psi && (
                               <div className="flex justify-between p-2 bg-muted/50 rounded">
                                 <span>Boussinesq SUM1</span>
-                                <span>{formatValue(convertStress(pipelineResult.debug.bsnqSUM1_psi, unitsSystem))} {units.stress}</span>
+                                <span>{formatValue(pipelineResult.debug.bsnqSUM1_psi)} {units.stress}</span>
                               </div>
                             )}
                             {pipelineResult.debug.bsnqSUM2_psi && (
                               <div className="flex justify-between p-2 bg-muted/50 rounded">
                                 <span>Boussinesq SUM2</span>
-                                <span>{formatValue(convertStress(pipelineResult.debug.bsnqSUM2_psi, unitsSystem))} {units.stress}</span>
+                                <span>{formatValue(pipelineResult.debug.bsnqSUM2_psi)} {units.stress}</span>
                               </div>
                             )}
                             {pipelineResult.debug.axleLoad_lb && (
                               <div className="flex justify-between p-2 bg-muted/50 rounded">
                                 <span>Axle Load</span>
-                                <span>{formatValue(convertForce(pipelineResult.debug.axleLoad_lb, unitsSystem))} {units.force}</span>
+                                <span>{formatValue(pipelineResult.debug.axleLoad_lb)} {units.force}</span>
                               </div>
                             )}
                             {pipelineResult.debug.pointLoad_lb && (
                               <div className="flex justify-between p-2 bg-muted/50 rounded">
                                 <span>Point Load</span>
-                                <span>{formatValue(convertForce(pipelineResult.debug.pointLoad_lb, unitsSystem))} {units.force}</span>
+                                <span>{formatValue(pipelineResult.debug.pointLoad_lb)} {units.force}</span>
                               </div>
                             )}
                             {pipelineResult.debug.nW && (
@@ -459,7 +435,7 @@ const Results = () => {
                             </div>
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>E' (Soil Modulus)</span>
-                              <span>{formatValue(convertStress(pipelineResult.debug.ePrime_psi, unitsSystem))} {units.modulus}</span>
+                              <span>{formatValue(pipelineResult.debug.ePrime_psi)} {units.modulus}</span>
                             </div>
                           </div>
                         </div>
@@ -469,48 +445,48 @@ const Results = () => {
                           <div className="grid gap-2 text-sm font-mono">
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>Hoop - Soil</span>
-                              <span>{formatValue(convertStress(pipelineResult.debug.hoopSoil_psi, unitsSystem))}</span>
+                              <span>{formatValue(pipelineResult.debug.hoopSoil_psi)}</span>
                             </div>
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>Hoop - Live Load</span>
-                              <span>{formatValue(convertStress(pipelineResult.debug.hoopLive_psi, unitsSystem))}</span>
+                              <span>{formatValue(pipelineResult.debug.hoopLive_psi)}</span>
                             </div>
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>Hoop - Internal Pressure</span>
-                              <span>{formatValue(convertStress(pipelineResult.debug.hoopInt_psi, unitsSystem))}</span>
+                              <span>{formatValue(pipelineResult.debug.hoopInt_psi)}</span>
                             </div>
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>Long - Soil</span>
-                              <span>{formatValue(convertStress(pipelineResult.debug.longSoil_psi, unitsSystem))}</span>
+                              <span>{formatValue(pipelineResult.debug.longSoil_psi)}</span>
                             </div>
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>Long - Live Load</span>
-                              <span>{formatValue(convertStress(pipelineResult.debug.longLive_psi, unitsSystem))}</span>
+                              <span>{formatValue(pipelineResult.debug.longLive_psi)}</span>
                             </div>
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>Long - Internal Pressure</span>
-                              <span>{formatValue(convertStress(pipelineResult.debug.longInt_psi, unitsSystem))}</span>
+                              <span>{formatValue(pipelineResult.debug.longInt_psi)}</span>
                             </div>
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>Long - Thermal</span>
-                              <span>{formatValue(convertStress(pipelineResult.debug.longTherm_psi, unitsSystem))}</span>
+                              <span>{formatValue(pipelineResult.debug.longTherm_psi)}</span>
                             </div>
                             {pipelineResult.debug.longLiveLocal_psi && (
                               <div className="flex justify-between p-2 bg-muted/50 rounded">
                                 <span>Long Live - Local Bending</span>
-                                <span>{formatValue(convertStress(pipelineResult.debug.longLiveLocal_psi, unitsSystem))}</span>
+                                <span>{formatValue(pipelineResult.debug.longLiveLocal_psi)}</span>
                               </div>
                             )}
                             {pipelineResult.debug.longLiveBend_psi && (
                               <div className="flex justify-between p-2 bg-muted/50 rounded">
                                 <span>Long Live - Axial Bending</span>
-                                <span>{formatValue(convertStress(pipelineResult.debug.longLiveBend_psi, unitsSystem))}</span>
+                                <span>{formatValue(pipelineResult.debug.longLiveBend_psi)}</span>
                               </div>
                             )}
                             {pipelineResult.debug.momentMAX_lbin && (
                               <div className="flex justify-between p-2 bg-muted/50 rounded">
                                 <span>Moment MAX</span>
-                                <span>{formatValue(convertMoment(pipelineResult.debug.momentMAX_lbin, unitsSystem))} {units.moment}</span>
+                                <span>{formatValue(pipelineResult.debug.momentMAX_lbin)} {units.moment}</span>
                               </div>
                             )}
                           </div>
