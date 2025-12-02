@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { storage } from "@/utils/storage";
 import { CalculationRun } from "@/types/calculation";
-import { Trash2, Download, Upload, Eye, Calculator, AlertCircle } from "lucide-react";
+import { Trash2, Download, Upload, Eye, Calculator, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { InputParametersCard } from "@/components/InputParametersCard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -141,9 +142,22 @@ const Runs = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <CardTitle className="text-lg">{run.input.calculationName}</CardTitle>
-                        <Badge variant={run.mode === 'PIPELINE_TRACK' ? 'default' : 'secondary'}>
-                          {run.mode === 'PIPELINE_TRACK' ? 'Pipeline' : 'Simple'}
+                        <Badge variant={run.mode !== 'SIMPLE' ? 'default' : 'secondary'}>
+                          {getModeLabel(run.mode)}
                         </Badge>
+                        {run.mode !== 'SIMPLE' && run.result?.passFailSummary && (
+                          run.result.passFailSummary.overallPass ? (
+                            <Badge variant="outline" className="text-green-600 border-green-600">
+                              <CheckCircle2 className="w-3 h-3 mr-1" />
+                              PASS
+                            </Badge>
+                          ) : (
+                            <Badge variant="destructive">
+                              <XCircle className="w-3 h-3 mr-1" />
+                              FAIL
+                            </Badge>
+                          )
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {new Date(run.timestamp).toLocaleString()}
@@ -190,9 +204,7 @@ const Runs = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="text-sm text-muted-foreground italic">
-                      Pipeline calculation preview - click View for full results
-                    </div>
+                    <InputParametersCard mode={run.mode} input={run.input} compact />
                   )}
                 </CardContent>
               </Card>
@@ -220,6 +232,16 @@ const Runs = () => {
       </AlertDialog>
     </Layout>
   );
+};
+
+const getModeLabel = (mode: string) => {
+  switch (mode) {
+    case 'PIPELINE_TRACK': return 'Track';
+    case '2_AXLE': return '2-Axle';
+    case '3_AXLE': return '3-Axle';
+    case 'GRID': return 'Grid';
+    default: return 'Simple';
+  }
 };
 
 export default Runs;

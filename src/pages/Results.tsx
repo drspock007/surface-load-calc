@@ -1,16 +1,18 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { usePDF } from "react-to-pdf";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle, FileDown } from "lucide-react";
 import { CalculationRun } from "@/types/calculation";
 import { PipelineTrackResults } from "@/domain/pipeline/types";
 import { TwoAxleResults } from "@/domain/pipeline/types2Axle";
 import { ThreeAxleResults } from "@/domain/pipeline/types3Axle";
 import { GridLoadResults } from "@/domain/pipeline/typesGrid";
 import { UnitsSystem } from "@/domain/pipeline/types";
+import { InputParametersCard } from "@/components/InputParametersCard";
 
 // Unit labels based on system
 const getUnitLabels = (system: UnitsSystem) => ({
@@ -27,6 +29,11 @@ const Results = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const run = location.state?.run as CalculationRun | undefined;
+  
+  const { toPDF, targetRef } = usePDF({
+    filename: `${run?.input?.calculationName || 'calculation'}-results.pdf`,
+    page: { margin: 20 }
+  });
 
   if (!run) {
     return (
@@ -61,7 +68,7 @@ const Results = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto" ref={targetRef}>
         <div className="mb-6 flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
@@ -130,6 +137,16 @@ const Results = () => {
           </>
         ) : pipelineResult ? (
           <>
+            {/* Input Parameters Section */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Input Parameters</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <InputParametersCard mode={run.mode} input={run.input} />
+              </CardContent>
+            </Card>
+
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle>Summary</CardTitle>
@@ -512,7 +529,11 @@ const Results = () => {
           </>
         ) : null}
 
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 print:hidden">
+          <Button variant="outline" onClick={() => toPDF()}>
+            <FileDown className="w-4 h-4 mr-2" />
+            Export PDF
+          </Button>
           <Button variant="outline" onClick={() => navigate("/calculator")}>
             New Calculation
           </Button>
