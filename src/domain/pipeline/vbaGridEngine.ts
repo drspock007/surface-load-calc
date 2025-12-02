@@ -122,15 +122,17 @@ export function calculateGridLoadVBA(inputs: GridLoadInputs): GridLoadResults {
   const Poisson = 0.3;
   const longTherm_psi = E * Alpha * inputsEN.deltaT_F;
   
+  // Hoop stresses (VBA-conformant formulas)
   const hoopZeroHigh = stressZero.hoopSoil + stressZero.hoopLive;
-  const hoopZeroLow = stressZero.hoopSoil;
+  const hoopZeroLow = -stressZero.hoopSoil - stressZero.hoopLive;
   const hoopMOPHigh = stressMOP.hoopSoil + stressMOP.hoopLive + stressMOP.hoopInt;
-  const hoopMOPLow = stressMOP.hoopSoil + stressMOP.hoopInt;
+  const hoopMOPLow = stressMOP.hoopInt - stressMOP.hoopSoil - stressMOP.hoopLive;
   
+  // Longitudinal stresses (VBA-conformant formulas)
   const longZeroHigh = Poisson * stressZero.hoopSoil + longZero.longLive + longTherm_psi;
-  const longZeroLow = Poisson * stressZero.hoopSoil + longTherm_psi;
+  const longZeroLow = longTherm_psi - Poisson * stressZero.hoopSoil - longZero.longLive;
   const longMOPHigh = Poisson * stressMOP.hoopSoil + longMOP.longLive + Poisson * stressMOP.hoopInt + longTherm_psi;
-  const longMOPLow = Poisson * stressMOP.hoopSoil + Poisson * stressMOP.hoopInt + longTherm_psi;
+  const longMOPLow = Poisson * stressMOP.hoopInt + longTherm_psi - Poisson * stressMOP.hoopSoil - longMOP.longLive;
   
   const equivZero = calculateEquivalentStress(inputs.equivStressMethod, hoopZeroHigh, hoopZeroLow, longZeroHigh, longZeroLow, inputsEN.SMYS_psi);
   const equivMOP = calculateEquivalentStress(inputs.equivStressMethod, hoopMOPHigh, hoopMOPLow, longMOPHigh, longMOPLow, inputsEN.SMYS_psi);

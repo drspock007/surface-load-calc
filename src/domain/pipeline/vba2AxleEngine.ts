@@ -253,17 +253,21 @@ export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults 
   const Alpha = 6.5e-6;
   const longTherm_psi = E * Alpha * inputsEN.deltaT_F;
   
-  // Combine stresses
+  // Combine stresses (VBA-conformant formulas)
+  // Hoop High = soil + live (+ internal at MOP)
+  // Hoop Low = internal - soil - live (VBA: HoopZeroLow = 0 - HoopSoil - HoopLive)
   const hoopZeroHigh = stressZero.hoopSoil + stressZero.hoopLive;
-  const hoopZeroLow = stressZero.hoopSoil;
+  const hoopZeroLow = -stressZero.hoopSoil - stressZero.hoopLive;
   const hoopMOPHigh = stressMOP.hoopSoil + stressMOP.hoopLive + stressMOP.hoopInt;
-  const hoopMOPLow = stressMOP.hoopSoil + stressMOP.hoopInt;
+  const hoopMOPLow = stressMOP.hoopInt - stressMOP.hoopSoil - stressMOP.hoopLive;
   
   const Poisson = 0.3;
+  // Longitudinal High = Poisson*hoopSoil + longLive + Poisson*hoopInt + thermal
+  // Longitudinal Low = Poisson*hoopInt + thermal - Poisson*hoopSoil - longLive (VBA formula)
   const longZeroHigh = Poisson * stressZero.hoopSoil + longZero.longLive + longTherm_psi;
-  const longZeroLow = Poisson * stressZero.hoopSoil + longTherm_psi;
+  const longZeroLow = longTherm_psi - Poisson * stressZero.hoopSoil - longZero.longLive;
   const longMOPHigh = Poisson * stressMOP.hoopSoil + longMOP.longLive + Poisson * stressMOP.hoopInt + longTherm_psi;
-  const longMOPLow = Poisson * stressMOP.hoopSoil + Poisson * stressMOP.hoopInt + longTherm_psi;
+  const longMOPLow = Poisson * stressMOP.hoopInt + longTherm_psi - Poisson * stressMOP.hoopSoil - longMOP.longLive;
   
   // Equivalent stresses
   const equivZero = calculateEquivalentStress(
