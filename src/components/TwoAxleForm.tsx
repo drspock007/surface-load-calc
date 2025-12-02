@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,6 +14,7 @@ import { PipeSelector } from "./PipelineTrackForm/PipeSelector";
 import { SoilLoadSection } from "./PipelineTrackForm/SoilLoadSection";
 import { AnalysisParametersSection } from "./AnalysisParametersSection";
 import { convertFormValue } from "@/domain/pipeline/unitConversions";
+import { calculateContactPatch, convertTirePressureToPsi, convertTirePressureBetweenUnits } from "@/domain/pipeline/tirePatchCalculations";
 
 const twoAxleSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),
@@ -93,7 +94,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
     axleSpacing: 14,
     axle1Load: 12000,
     axle2Load: 18000,
-    contactPatchMode: "MANUAL",
+    contactPatchMode: "AUTO",
     // Axle 1 defaults
     axle1TireWidth: 8,
     axle1TireLength: 10,
@@ -123,6 +124,68 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
   const soilLoadMethod = watch("soilLoadMethod");
   const codeCheck = watch("codeCheck");
   const contactPatchMode = watch("contactPatchMode");
+
+  // Watch values for real-time tire length calculation
+  const axle1Load = watch("axle1Load");
+  const axle1TireWidth = watch("axle1TireWidth");
+  const axle1TirePressure = watch("axle1TirePressure");
+  const axle1TirePressureUnit = watch("axle1TirePressureUnit") || "kg/m2";
+  const axle1TiresPerAxle = watch("axle1TiresPerAxle") || 2;
+
+  const axle2Load = watch("axle2Load");
+  const axle2TireWidth = watch("axle2TireWidth");
+  const axle2TirePressure = watch("axle2TirePressure");
+  const axle2TirePressureUnit = watch("axle2TirePressureUnit") || "kg/m2";
+  const axle2TiresPerAxle = watch("axle2TiresPerAxle") || 4;
+
+  // Real-time tire length calculation for Axle 1
+  const calculatedAxle1TireLength = useMemo(() => {
+    if (!axle1Load || !axle1TireWidth || !axle1TirePressure || !axle1TiresPerAxle) return null;
+    try {
+      const load_lb = unitsSystem === "SI" ? axle1Load * 2.2046226218 : axle1Load;
+      const width_in = unitsSystem === "SI" ? axle1TireWidth * 0.03937007874016 : axle1TireWidth;
+      const pressure_psi = convertTirePressureToPsi(axle1TirePressure, axle1TirePressureUnit as TirePressureUnit);
+      const patch = calculateContactPatch(load_lb, pressure_psi, axle1TiresPerAxle, width_in);
+      return unitsSystem === "SI" ? patch.contactLength_in * 25.4 : patch.contactLength_in;
+    } catch {
+      return null;
+    }
+  }, [axle1Load, axle1TireWidth, axle1TirePressure, axle1TirePressureUnit, axle1TiresPerAxle, unitsSystem]);
+
+  // Real-time tire length calculation for Axle 2
+  const calculatedAxle2TireLength = useMemo(() => {
+    if (!axle2Load || !axle2TireWidth || !axle2TirePressure || !axle2TiresPerAxle) return null;
+    try {
+      const load_lb = unitsSystem === "SI" ? axle2Load * 2.2046226218 : axle2Load;
+      const width_in = unitsSystem === "SI" ? axle2TireWidth * 0.03937007874016 : axle2TireWidth;
+      const pressure_psi = convertTirePressureToPsi(axle2TirePressure, axle2TirePressureUnit as TirePressureUnit);
+      const patch = calculateContactPatch(load_lb, pressure_psi, axle2TiresPerAxle, width_in);
+      return unitsSystem === "SI" ? patch.contactLength_in * 25.4 : patch.contactLength_in;
+    } catch {
+      return null;
+    }
+  }, [axle2Load, axle2TireWidth, axle2TirePressure, axle2TirePressureUnit, axle2TiresPerAxle, unitsSystem]);
+
+  // Handlers for tire pressure unit change with value conversion
+  const handleAxle1PressureUnitChange = (newUnit: TirePressureUnit) => {
+    const currentPressure = watch("axle1TirePressure");
+    const currentUnit = (watch("axle1TirePressureUnit") || "kg/m2") as TirePressureUnit;
+    if (currentPressure && currentUnit !== newUnit) {
+      const convertedValue = convertTirePressureBetweenUnits(currentPressure, currentUnit, newUnit);
+      setValue("axle1TirePressure", parseFloat(convertedValue.toFixed(2)));
+    }
+    setValue("axle1TirePressureUnit", newUnit);
+  };
+
+  const handleAxle2PressureUnitChange = (newUnit: TirePressureUnit) => {
+    const currentPressure = watch("axle2TirePressure");
+    const currentUnit = (watch("axle2TirePressureUnit") || "kg/m2") as TirePressureUnit;
+    if (currentPressure && currentUnit !== newUnit) {
+      const convertedValue = convertTirePressureBetweenUnits(currentPressure, currentUnit, newUnit);
+      setValue("axle2TirePressure", parseFloat(convertedValue.toFixed(2)));
+    }
+    setValue("axle2TirePressureUnit", newUnit);
+  };
 
   const onSubmit = (data: TwoAxleFormData) => {
     const inputs: TwoAxleInputs = {
@@ -196,15 +259,9 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
     // Axle 1 tire properties
     setValue("axle1TireWidth", convertFormValue(currentValues.axle1TireWidth, oldSystem, newSystem, 'length') ?? currentValues.axle1TireWidth);
     setValue("axle1TireLength", convertFormValue(currentValues.axle1TireLength, oldSystem, newSystem, 'length') ?? currentValues.axle1TireLength);
-    if (currentValues.axle1TirePressure) {
-      setValue("axle1TirePressure", convertFormValue(currentValues.axle1TirePressure, oldSystem, newSystem, 'tirePressure'));
-    }
     // Axle 2 tire properties
     setValue("axle2TireWidth", convertFormValue(currentValues.axle2TireWidth, oldSystem, newSystem, 'length') ?? currentValues.axle2TireWidth);
     setValue("axle2TireLength", convertFormValue(currentValues.axle2TireLength, oldSystem, newSystem, 'length') ?? currentValues.axle2TireLength);
-    if (currentValues.axle2TirePressure) {
-      setValue("axle2TirePressure", convertFormValue(currentValues.axle2TirePressure, oldSystem, newSystem, 'tirePressure'));
-    }
     setValue("axleWidth", convertFormValue(currentValues.axleWidth, oldSystem, newSystem, 'length') ?? currentValues.axleWidth);
     
     if (currentValues.ePrimeUserDefined) {
@@ -396,7 +453,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
                       <Label>Tire Pressure</Label>
                       <div className="flex gap-1">
                         <Input type="number" step="any" {...register("axle1TirePressure", { valueAsNumber: true })} className="flex-1" />
-                        <Select value={watch("axle1TirePressureUnit") || "kg/m2"} onValueChange={(v) => setValue("axle1TirePressureUnit", v as TirePressureUnit)}>
+                        <Select value={watch("axle1TirePressureUnit") || "kg/m2"} onValueChange={(v) => handleAxle1PressureUnitChange(v as TirePressureUnit)}>
                           <SelectTrigger className="w-20">
                             <SelectValue />
                           </SelectTrigger>
@@ -422,7 +479,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
                     <div className="space-y-2">
                       <Label className="text-muted-foreground">Tire Length (calc.)</Label>
                       <div className="h-10 flex items-center px-3 border rounded-md bg-muted/30 text-sm font-mono">
-                        {watch("axle1TireLength")?.toFixed(2) || "—"} {unitLabels.length}
+                        {calculatedAxle1TireLength?.toFixed(2) || "—"} {unitLabels.length}
                       </div>
                     </div>
                   </div>
@@ -438,7 +495,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
                       <Label>Tire Pressure</Label>
                       <div className="flex gap-1">
                         <Input type="number" step="any" {...register("axle2TirePressure", { valueAsNumber: true })} className="flex-1" />
-                        <Select value={watch("axle2TirePressureUnit") || "kg/m2"} onValueChange={(v) => setValue("axle2TirePressureUnit", v as TirePressureUnit)}>
+                        <Select value={watch("axle2TirePressureUnit") || "kg/m2"} onValueChange={(v) => handleAxle2PressureUnitChange(v as TirePressureUnit)}>
                           <SelectTrigger className="w-20">
                             <SelectValue />
                           </SelectTrigger>
@@ -464,7 +521,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
                     <div className="space-y-2">
                       <Label className="text-muted-foreground">Tire Length (calc.)</Label>
                       <div className="h-10 flex items-center px-3 border rounded-md bg-muted/30 text-sm font-mono">
-                        {watch("axle2TireLength")?.toFixed(2) || "—"} {unitLabels.length}
+                        {calculatedAxle2TireLength?.toFixed(2) || "—"} {unitLabels.length}
                       </div>
                     </div>
                   </div>
