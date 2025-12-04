@@ -13,6 +13,7 @@ import { GridLoadInputs, UnitsSystem, SoilLoadMethod, EPrimeMethod, BeddingAngle
 import { PipeSelector } from "./PipelineTrackForm/PipeSelector";
 import { SoilLoadSection } from "./PipelineTrackForm/SoilLoadSection";
 import { AnalysisParametersSection } from "./AnalysisParametersSection";
+import { SoilDensitySelector } from "./SoilDensitySelector";
 import { convertFormValue } from "@/domain/pipeline/unitConversions";
 
 const gridLoadSchema = z.object({
@@ -238,10 +239,11 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
               <Label>ΔT ({unitLabels.temp})</Label>
               <Input type="number" step="any" {...register("deltaT", { valueAsNumber: true })} />
             </div>
-            <div className="space-y-2">
-              <Label>Soil Density ({unitLabels.density})</Label>
-              <Input type="number" step="any" {...register("soilDensity", { valueAsNumber: true })} />
-            </div>
+            <SoilDensitySelector
+              setValue={setValue}
+              watch={watch}
+              unitsSystem={unitsSystem}
+            />
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
