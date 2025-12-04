@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UnitsSystem } from "@/domain/pipeline/types";
 import { PipeSelector } from "./PipeSelector";
+import { SoilDensitySelector } from "@/components/SoilDensitySelector";
 
 interface PipelineInputsSectionProps {
   register: UseFormRegister<any>;
@@ -64,16 +65,11 @@ export const PipelineInputsSection = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="soilDensity">Soil Density ({unitLabels.density}) *</Label>
-            <Input
-              id="soilDensity"
-              type="number"
-              step="any"
-              {...register("soilDensity", { valueAsNumber: true })}
-            />
-            {errors.soilDensity && <p className="text-sm text-destructive">{String(errors.soilDensity.message)}</p>}
-          </div>
+          <SoilDensitySelector
+            setValue={setValue}
+            watch={watch}
+            unitsSystem={unitsSystem}
+          />
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
