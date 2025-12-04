@@ -76,7 +76,6 @@ export const InputParametersCard = ({ mode, input, compact = false }: InputParam
             </>
           )}
           <ParamItem label="Friction Angle" value={input.frictionAngleDeg} unit="°" />
-          <ParamItem label="Kr" value={input.kr} />
         </div>
       </div>
 

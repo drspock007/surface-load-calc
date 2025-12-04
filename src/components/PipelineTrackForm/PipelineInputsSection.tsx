@@ -107,15 +107,6 @@ export const PipelineInputsSection = ({
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="kr">Kr (Coefficient of Lateral Earth Pressure) *</Label>
-            <Input
-              id="kr"
-              type="number"
-              step="any"
-              {...register("kr", { valueAsNumber: true })}
-            />
-          </div>
         </div>
       </CardContent>
     </Card>
