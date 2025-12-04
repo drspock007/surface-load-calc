@@ -29,7 +29,6 @@ const gridLoadSchema = z.object({
   soilLoadMethod: z.enum(["PRISM", "TRAP_DOOR"]),
   frictionAngleDeg: z.number().min(0).max(90),
   soilCohesion: z.number().min(0),
-  kr: z.number().positive(),
   ePrimeMethod: z.enum(["LOOKUP", "USER_DEFINED"]),
   ePrimeUserDefined: z.number().positive().optional(),
   soilType: z.enum(["FINE", "COARSE_WITH_FINES", "COARSE_NO_FINES"]).optional(),
@@ -77,7 +76,6 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
     soilLoadMethod: "PRISM",
     frictionAngleDeg: 30,
     soilCohesion: 0,
-    kr: 1,
     ePrimeMethod: "LOOKUP",
     soilType: "COARSE_WITH_FINES",
     compaction: 90,
@@ -120,7 +118,7 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
       soilLoadMethod: data.soilLoadMethod,
       frictionAngleDeg: data.frictionAngleDeg,
       soilCohesion: data.soilCohesion,
-      kr: data.kr,
+      kr: 1, // Hardcoded per VBA
       ePrimeMethod: data.ePrimeMethod,
       ePrimeUserDefined: data.ePrimeUserDefined,
       soilType: data.soilType,
@@ -260,10 +258,6 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Kr</Label>
-              <Input type="number" step="any" {...register("kr", { valueAsNumber: true })} />
             </div>
           </div>
         </CardContent>
