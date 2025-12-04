@@ -52,26 +52,28 @@ export const SoilLoadSection = ({
           </div>
 
           {soilLoadMethod === "TRAP_DOOR" && (
-            <div className="space-y-2">
-              <Label htmlFor="frictionAngleDeg">Friction Angle (°) *</Label>
-              <Input
-                id="frictionAngleDeg"
-                type="number"
-                step="any"
-                {...register("frictionAngleDeg", { valueAsNumber: true })}
-              />
-            </div>
-          )}
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="frictionAngleDeg">Friction Angle (°) *</Label>
+                <Input
+                  id="frictionAngleDeg"
+                  type="number"
+                  step="any"
+                  {...register("frictionAngleDeg", { valueAsNumber: true })}
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="soilCohesion">Soil Cohesion ({unitLabels.pressure})</Label>
-            <Input
-              id="soilCohesion"
-              type="number"
-              step="any"
-              {...register("soilCohesion", { valueAsNumber: true })}
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="soilCohesion">Soil Cohesion ({unitLabels.pressure})</Label>
+                <Input
+                  id="soilCohesion"
+                  type="number"
+                  step="any"
+                  {...register("soilCohesion", { valueAsNumber: true })}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         <div className="border-t pt-4">
