@@ -213,13 +213,17 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
       contactPatchMode: data.contactPatchMode,
       // Axle 1 tire properties
       axle1TireWidth: data.axle1TireWidth,
-      axle1TireLength: data.axle1TireLength,
+      axle1TireLength: data.contactPatchMode === "AUTO" && calculatedAxle1TireLength 
+        ? calculatedAxle1TireLength 
+        : data.axle1TireLength,
       axle1TirePressure: data.axle1TirePressure,
       axle1TirePressureUnit: data.axle1TirePressureUnit as TirePressureUnit | undefined,
       axle1TiresPerAxle: data.axle1TiresPerAxle,
       // Axle 2 tire properties
       axle2TireWidth: data.axle2TireWidth,
-      axle2TireLength: data.axle2TireLength,
+      axle2TireLength: data.contactPatchMode === "AUTO" && calculatedAxle2TireLength 
+        ? calculatedAxle2TireLength 
+        : data.axle2TireLength,
       axle2TirePressure: data.axle2TirePressure,
       axle2TirePressureUnit: data.axle2TirePressureUnit as TirePressureUnit | undefined,
       axle2TiresPerAxle: data.axle2TiresPerAxle,

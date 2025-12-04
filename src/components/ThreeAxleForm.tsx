@@ -261,19 +261,25 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
       contactPatchMode: data.contactPatchMode,
       // Axle 1 tire properties
       axle1TireWidth: data.axle1TireWidth,
-      axle1TireLength: data.axle1TireLength,
+      axle1TireLength: data.contactPatchMode === "AUTO" && calculatedAxle1TireLength 
+        ? calculatedAxle1TireLength 
+        : data.axle1TireLength,
       axle1TirePressure: data.axle1TirePressure,
       axle1TirePressureUnit: data.axle1TirePressureUnit as TirePressureUnit | undefined,
       axle1TiresPerAxle: data.axle1TiresPerAxle,
       // Axle 2 tire properties
       axle2TireWidth: data.axle2TireWidth,
-      axle2TireLength: data.axle2TireLength,
+      axle2TireLength: data.contactPatchMode === "AUTO" && calculatedAxle2TireLength 
+        ? calculatedAxle2TireLength 
+        : data.axle2TireLength,
       axle2TirePressure: data.axle2TirePressure,
       axle2TirePressureUnit: data.axle2TirePressureUnit as TirePressureUnit | undefined,
       axle2TiresPerAxle: data.axle2TiresPerAxle,
       // Axle 3 tire properties
       axle3TireWidth: data.axle3TireWidth,
-      axle3TireLength: data.axle3TireLength,
+      axle3TireLength: data.contactPatchMode === "AUTO" && calculatedAxle3TireLength 
+        ? calculatedAxle3TireLength 
+        : data.axle3TireLength,
       axle3TirePressure: data.axle3TirePressure,
       axle3TirePressureUnit: data.axle3TirePressureUnit as TirePressureUnit | undefined,
       axle3TiresPerAxle: data.axle3TiresPerAxle,
