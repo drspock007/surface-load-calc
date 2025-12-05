@@ -125,32 +125,56 @@ export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults 
     }
   }
   
-  // Generate point loads for both axles
+  // Generate point loads for both axles - separate left/right grids
   const pointLoads: PointLoad[] = [];
+  const halfAxleWidth_in = inputsEN.axleWidth_in / 2;
+  const laneOffset_in = inputsEN.laneOffset_ft * 12;
   
-  // Axle 1 (front) - use axle-specific tire dimensions
-  const axle1_Y = -inputsEN.axleSpacing_ft * 12 / 2; // convert ft to inches, place before centerline
-  const axle1Loads = generateRectangularGrid(
-    inputsEN.laneOffset_ft * 12, // lateral offset in inches
+  // Determine contact width per side based on Single (2 tires) or Dual (4 tires)
+  // Single = 1 tire per side → tireWidth
+  // Dual = 2 tires per side (jumelés) → tireWidth * 2
+  const axle1WidthPerSide = (inputs.axle1TiresPerAxle || 2) === 4 ? axle1TireWidth_in * 2 : axle1TireWidth_in;
+  const axle2WidthPerSide = (inputs.axle2TiresPerAxle || 2) === 4 ? axle2TireWidth_in * 2 : axle2TireWidth_in;
+  
+  // Axle 1 (front) - left and right tire patches
+  const axle1_Y = -inputsEN.axleSpacing_ft * 12 / 2;
+  const axle1LeftLoads = generateRectangularGrid(
+    laneOffset_in - halfAxleWidth_in, // left tire center
     axle1_Y,
-    axle1TireWidth_in * 2, // two tires per axle (left + right) - axle 1 specific
-    axle1TireLength_in, // axle 1 specific
-    inputsEN.axle1Load_lb,
-    6 // 6-inch grid spacing
+    axle1WidthPerSide,
+    axle1TireLength_in,
+    inputsEN.axle1Load_lb / 2, // half the axle load
+    6
   );
-  
-  // Axle 2 (rear) - use axle-specific tire dimensions
-  const axle2_Y = inputsEN.axleSpacing_ft * 12 / 2;
-  const axle2Loads = generateRectangularGrid(
-    inputsEN.laneOffset_ft * 12,
-    axle2_Y,
-    axle2TireWidth_in * 2, // axle 2 specific
-    axle2TireLength_in, // axle 2 specific
-    inputsEN.axle2Load_lb,
+  const axle1RightLoads = generateRectangularGrid(
+    laneOffset_in + halfAxleWidth_in, // right tire center
+    axle1_Y,
+    axle1WidthPerSide,
+    axle1TireLength_in,
+    inputsEN.axle1Load_lb / 2,
     6
   );
   
-  pointLoads.push(...axle1Loads, ...axle2Loads);
+  // Axle 2 (rear) - left and right tire patches
+  const axle2_Y = inputsEN.axleSpacing_ft * 12 / 2;
+  const axle2LeftLoads = generateRectangularGrid(
+    laneOffset_in - halfAxleWidth_in,
+    axle2_Y,
+    axle2WidthPerSide,
+    axle2TireLength_in,
+    inputsEN.axle2Load_lb / 2,
+    6
+  );
+  const axle2RightLoads = generateRectangularGrid(
+    laneOffset_in + halfAxleWidth_in,
+    axle2_Y,
+    axle2WidthPerSide,
+    axle2TireLength_in,
+    inputsEN.axle2Load_lb / 2,
+    6
+  );
+  
+  pointLoads.push(...axle1LeftLoads, ...axle1RightLoads, ...axle2LeftLoads, ...axle2RightLoads);
   
   // Measurement points
   const measurementPoints = generateStandardMeasurementPoints(
