@@ -58,6 +58,8 @@ export const SoilLoadSection = ({
                 id="frictionAngleDeg"
                 type="number"
                 step="any"
+                min="0"
+                max="90"
                 {...register("frictionAngleDeg", { valueAsNumber: true })}
               />
             </div>
@@ -86,12 +88,13 @@ export const SoilLoadSection = ({
             {ePrimeMethod === "USER_DEFINED" && (
               <div className="space-y-2">
                 <Label htmlFor="ePrimeUserDefined">E' Value ({unitLabels.pressure}) *</Label>
-                <Input
-                  id="ePrimeUserDefined"
-                  type="number"
-                  step="any"
-                  {...register("ePrimeUserDefined", { valueAsNumber: true })}
-                />
+              <Input
+                id="ePrimeUserDefined"
+                type="number"
+                step="any"
+                min="0"
+                {...register("ePrimeUserDefined", { valueAsNumber: true })}
+              />
               </div>
             )}
 

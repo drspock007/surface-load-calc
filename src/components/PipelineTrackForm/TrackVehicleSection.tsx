@@ -33,6 +33,7 @@ export const TrackVehicleSection = ({
               id="trackLength"
               type="number"
               step="any"
+              min="0"
               {...register("trackLength", { valueAsNumber: true })}
             />
             {errors.trackLength && <p className="text-sm text-destructive">{String(errors.trackLength.message)}</p>}
@@ -44,6 +45,7 @@ export const TrackVehicleSection = ({
               id="trackWidth"
               type="number"
               step="any"
+              min="0"
               {...register("trackWidth", { valueAsNumber: true })}
             />
             {errors.trackWidth && <p className="text-sm text-destructive">{String(errors.trackWidth.message)}</p>}
@@ -57,6 +59,7 @@ export const TrackVehicleSection = ({
               id="trackSeparation"
               type="number"
               step="any"
+              min="0"
               {...register("trackSeparation", { valueAsNumber: true })}
             />
             {errors.trackSeparation && <p className="text-sm text-destructive">{String(errors.trackSeparation.message)}</p>}
@@ -68,6 +71,7 @@ export const TrackVehicleSection = ({
               id="trackVehicleWeight"
               type="number"
               step="any"
+              min="0"
               {...register("trackVehicleWeight", { valueAsNumber: true })}
             />
             {errors.trackVehicleWeight && <p className="text-sm text-destructive">{String(errors.trackVehicleWeight.message)}</p>}

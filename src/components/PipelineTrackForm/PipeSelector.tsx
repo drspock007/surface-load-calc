@@ -94,6 +94,7 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
           id="pipeOD"
           type="number"
           step="any"
+          min="0"
           {...register("pipeOD", { valueAsNumber: true })}
           disabled={!isCustomNPS}
           className={!isCustomNPS ? "bg-muted" : ""}
@@ -132,6 +133,7 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
           id="pipeWT"
           type="number"
           step="any"
+          min="0"
           {...register("pipeWT", { valueAsNumber: true })}
           disabled={!isCustomSchedule && !isCustomNPS}
           className={!isCustomSchedule && !isCustomNPS ? "bg-muted" : ""}
@@ -166,6 +168,7 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
           id="SMYS"
           type="number"
           step="any"
+          min="0"
           {...register("SMYS", { valueAsNumber: true })}
           disabled={!isCustomGrade}
           className={!isCustomGrade ? "bg-muted" : ""}
