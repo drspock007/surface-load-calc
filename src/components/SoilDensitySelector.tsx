@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UnitsSystem } from "@/domain/pipeline/types";
+import { createEnsurePositive } from "@/hooks/useEnsurePositive";
 
 interface SoilDensitySelectorProps {
   setValue: UseFormSetValue<any>;
@@ -28,6 +29,7 @@ const SOIL_DENSITY_PRESETS_SI = [
 ];
 
 export const SoilDensitySelector = ({ setValue, watch, unitsSystem }: SoilDensitySelectorProps) => {
+  const ensurePositive = createEnsurePositive(setValue);
   const presets = unitsSystem === "EN" ? SOIL_DENSITY_PRESETS_EN : SOIL_DENSITY_PRESETS_SI;
   const unitLabel = unitsSystem === "EN" ? "lb/ft³" : "kg/m³";
   
@@ -66,6 +68,15 @@ export const SoilDensitySelector = ({ setValue, watch, unitsSystem }: SoilDensit
     }
   };
 
+  const handleCustomBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    if (!isNaN(val) && val < 0) {
+      const absVal = Math.abs(val);
+      setCustomValue(absVal);
+      setValue("soilDensity", absVal);
+    }
+  };
+
   const selectValue = mode === "custom" ? "custom" : currentValue?.toString();
 
   return (
@@ -92,6 +103,7 @@ export const SoilDensitySelector = ({ setValue, watch, unitsSystem }: SoilDensit
           min="0"
           value={customValue}
           onChange={handleCustomChange}
+          onBlur={handleCustomBlur}
           placeholder={`Enter custom density (${unitLabel})`}
           className="mt-2"
         />

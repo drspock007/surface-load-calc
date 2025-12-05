@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SoilLoadMethod, EPrimeMethod, SoilType, UnitsSystem } from "@/domain/pipeline/types";
+import { createEnsurePositive } from "@/hooks/useEnsurePositive";
 
 interface SoilLoadSectionProps {
   register: UseFormRegister<any>;
@@ -20,6 +21,8 @@ export const SoilLoadSection = ({
   setValue, 
   unitsSystem 
 }: SoilLoadSectionProps) => {
+  const ensurePositive = createEnsurePositive(setValue);
+
   const unitLabels = unitsSystem === "EN" 
     ? { pressure: "psi" }
     : { pressure: "kPa" };
@@ -61,6 +64,7 @@ export const SoilLoadSection = ({
                 min="0"
                 max="90"
                 {...register("frictionAngleDeg", { valueAsNumber: true })}
+                {...ensurePositive("frictionAngleDeg")}
               />
             </div>
           )}
@@ -94,6 +98,7 @@ export const SoilLoadSection = ({
                 step="any"
                 min="0"
                 {...register("ePrimeUserDefined", { valueAsNumber: true })}
+                {...ensurePositive("ePrimeUserDefined")}
               />
               </div>
             )}
