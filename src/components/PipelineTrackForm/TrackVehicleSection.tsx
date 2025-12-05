@@ -30,7 +30,7 @@ export const TrackVehicleSection = ({
 
   const unitLabels = unitsSystem === "EN" 
     ? { length: "in", force: "lb" }
-    : { length: "mm", force: "kN" };
+    : { length: "mm", force: "kg" };
 
   return (
     <Card>
