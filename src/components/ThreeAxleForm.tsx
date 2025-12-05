@@ -16,6 +16,7 @@ import { AnalysisParametersSection } from "./AnalysisParametersSection";
 import { SoilDensitySelector } from "./SoilDensitySelector";
 import { convertFormValue } from "@/domain/pipeline/unitConversions";
 import { calculateContactPatch, convertTirePressureToPsi, convertTirePressureBetweenUnits } from "@/domain/pipeline/tirePatchCalculations";
+import { ThreeAxleDiagram } from "./ThreeAxleDiagram";
 
 const threeAxleSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),
@@ -435,6 +436,26 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
           <CardTitle>3-Axle Vehicle Properties</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Dynamic Vehicle Diagram */}
+          <ThreeAxleDiagram
+            axle1Load={watch("axle1Load")}
+            axle2Load={watch("axle2Load")}
+            axle3Load={watch("axle3Load")}
+            axle1TireWidth={watch("axle1TireWidth")}
+            axle2TireWidth={watch("axle2TireWidth")}
+            axle3TireWidth={watch("axle3TireWidth")}
+            axle1TirePressure={watch("axle1TirePressure")}
+            axle2TirePressure={watch("axle2TirePressure")}
+            axle3TirePressure={watch("axle3TirePressure")}
+            axle1TirePressureUnit={watch("axle1TirePressureUnit")}
+            axle2TirePressureUnit={watch("axle2TirePressureUnit")}
+            axle3TirePressureUnit={watch("axle3TirePressureUnit")}
+            axle1To2Spacing={watch("axle1To2Spacing")}
+            axle2To3Spacing={watch("axle2To3Spacing")}
+            axleWidth={watch("axleWidth")}
+            unitsSystem={unitsSystem}
+          />
+
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>Axle 1-2 Spacing ({unitLabels.depth})</Label>

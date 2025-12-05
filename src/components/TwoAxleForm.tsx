@@ -16,6 +16,7 @@ import { AnalysisParametersSection } from "./AnalysisParametersSection";
 import { SoilDensitySelector } from "./SoilDensitySelector";
 import { convertFormValue } from "@/domain/pipeline/unitConversions";
 import { calculateContactPatch, convertTirePressureToPsi, convertTirePressureBetweenUnits } from "@/domain/pipeline/tirePatchCalculations";
+import { TwoAxleDiagram } from "./TwoAxleDiagram";
 
 const twoAxleSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),
@@ -374,6 +375,21 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
           <CardTitle>2-Axle Vehicle Properties</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Dynamic Vehicle Diagram */}
+          <TwoAxleDiagram
+            axle1Load={watch("axle1Load")}
+            axle2Load={watch("axle2Load")}
+            axle1TireWidth={watch("axle1TireWidth")}
+            axle2TireWidth={watch("axle2TireWidth")}
+            axle1TirePressure={watch("axle1TirePressure")}
+            axle2TirePressure={watch("axle2TirePressure")}
+            axle1TirePressureUnit={watch("axle1TirePressureUnit")}
+            axle2TirePressureUnit={watch("axle2TirePressureUnit")}
+            axleSpacing={watch("axleSpacing")}
+            axleWidth={watch("axleWidth")}
+            unitsSystem={unitsSystem}
+          />
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label>Axle Spacing ({unitLabels.depth})</Label>
