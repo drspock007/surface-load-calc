@@ -317,7 +317,6 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
     setValue("depthCover", convertFormValue(currentValues.depthCover, oldSystem, newSystem, 'depth') ?? currentValues.depthCover);
     setValue("axle1To2Spacing", convertFormValue(currentValues.axle1To2Spacing, oldSystem, newSystem, 'depth') ?? currentValues.axle1To2Spacing);
     setValue("axle2To3Spacing", convertFormValue(currentValues.axle2To3Spacing, oldSystem, newSystem, 'depth') ?? currentValues.axle2To3Spacing);
-    setValue("laneOffset", convertFormValue(currentValues.laneOffset, oldSystem, newSystem, 'depth') ?? currentValues.laneOffset);
     setValue("axle1Load", convertFormValue(currentValues.axle1Load, oldSystem, newSystem, 'force') ?? currentValues.axle1Load);
     setValue("axle2Load", convertFormValue(currentValues.axle2Load, oldSystem, newSystem, 'force') ?? currentValues.axle2Load);
     setValue("axle3Load", convertFormValue(currentValues.axle3Load, oldSystem, newSystem, 'force') ?? currentValues.axle3Load);
@@ -467,10 +466,6 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
             <div className="space-y-2">
               <Label>Axle 2-3 Spacing ({unitLabels.depth})</Label>
               <Input type="number" step="any" min="0" {...register("axle2To3Spacing", { valueAsNumber: true })} {...ensurePositive("axle2To3Spacing")} />
-            </div>
-            <div className="space-y-2">
-              <Label>Lane Offset ({unitLabels.depth})</Label>
-              <Input type="number" step="any" {...register("laneOffset", { valueAsNumber: true })} />
             </div>
           </div>
           <div className="grid gap-4 md:grid-cols-3">

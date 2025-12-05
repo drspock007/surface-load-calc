@@ -260,7 +260,6 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
     setValue("soilDensity", convertFormValue(currentValues.soilDensity, oldSystem, newSystem, 'density') ?? currentValues.soilDensity);
     setValue("depthCover", convertFormValue(currentValues.depthCover, oldSystem, newSystem, 'depth') ?? currentValues.depthCover);
     setValue("axleSpacing", convertFormValue(currentValues.axleSpacing, oldSystem, newSystem, 'depth') ?? currentValues.axleSpacing);
-    setValue("laneOffset", convertFormValue(currentValues.laneOffset, oldSystem, newSystem, 'depth') ?? currentValues.laneOffset);
     setValue("axle1Load", convertFormValue(currentValues.axle1Load, oldSystem, newSystem, 'force') ?? currentValues.axle1Load);
     setValue("axle2Load", convertFormValue(currentValues.axle2Load, oldSystem, newSystem, 'force') ?? currentValues.axle2Load);
     // Axle 1 tire properties
@@ -393,15 +392,9 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
             unitsSystem={unitsSystem}
           />
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Axle Spacing ({unitLabels.depth})</Label>
-              <Input type="number" step="any" min="0" {...register("axleSpacing", { valueAsNumber: true })} {...ensurePositive("axleSpacing")} />
-            </div>
-            <div className="space-y-2">
-              <Label>Lane Offset ({unitLabels.depth})</Label>
-              <Input type="number" step="any" {...register("laneOffset", { valueAsNumber: true })} />
-            </div>
+          <div className="space-y-2">
+            <Label>Axle Spacing ({unitLabels.depth})</Label>
+            <Input type="number" step="any" min="0" {...register("axleSpacing", { valueAsNumber: true })} {...ensurePositive("axleSpacing")} />
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
