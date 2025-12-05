@@ -230,6 +230,7 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
         errors={errors} 
         unitsSystem={unitsSystem}
         setValue={setValue}
+        watch={watch}
       />
 
       <AnalysisParametersSection 

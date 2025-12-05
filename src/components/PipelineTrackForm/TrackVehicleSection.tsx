@@ -1,24 +1,32 @@
-import { UseFormRegister, FieldErrors, UseFormSetValue } from "react-hook-form";
+import { UseFormRegister, FieldErrors, UseFormSetValue, UseFormWatch } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UnitsSystem } from "@/domain/pipeline/types";
 import { createEnsurePositive } from "@/hooks/useEnsurePositive";
+import { TrackVehicleDiagram } from "@/components/TrackVehicleDiagram";
 
 interface TrackVehicleSectionProps {
   register: UseFormRegister<any>;
   errors: FieldErrors<any>;
   unitsSystem: UnitsSystem;
   setValue: UseFormSetValue<any>;
+  watch: UseFormWatch<any>;
 }
 
 export const TrackVehicleSection = ({ 
   register, 
   errors, 
   unitsSystem,
-  setValue 
+  setValue,
+  watch
 }: TrackVehicleSectionProps) => {
   const ensurePositive = createEnsurePositive(setValue);
+
+  const trackLength = watch("trackLength") || 0;
+  const trackWidth = watch("trackWidth") || 0;
+  const trackSeparation = watch("trackSeparation") || 0;
+  const trackVehicleWeight = watch("trackVehicleWeight") || 0;
 
   const unitLabels = unitsSystem === "EN" 
     ? { length: "in", force: "lb" }
@@ -31,6 +39,13 @@ export const TrackVehicleSection = ({
         <CardDescription>Vehicle dimensions and loading parameters</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <TrackVehicleDiagram
+          trackLength={trackLength}
+          trackWidth={trackWidth}
+          trackSeparation={trackSeparation}
+          vehicleWeight={trackVehicleWeight}
+          unitsSystem={unitsSystem}
+        />
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="trackLength">Track Length ({unitLabels.length}) *</Label>
