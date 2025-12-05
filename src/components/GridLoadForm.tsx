@@ -15,6 +15,7 @@ import { SoilLoadSection } from "./PipelineTrackForm/SoilLoadSection";
 import { AnalysisParametersSection } from "./AnalysisParametersSection";
 import { SoilDensitySelector } from "./SoilDensitySelector";
 import { convertFormValue } from "@/domain/pipeline/unitConversions";
+import { createEnsurePositive } from "@/hooks/useEnsurePositive";
 
 const gridLoadSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),
@@ -98,6 +99,8 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
     resolver: zodResolver(gridLoadSchema),
     defaultValues,
   });
+
+  const ensurePositive = createEnsurePositive(setValue);
 
   const ePrimeMethod = watch("ePrimeMethod");
   const soilLoadMethod = watch("soilLoadMethod");
@@ -233,7 +236,7 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>MOP ({unitLabels.pressure})</Label>
-              <Input type="number" step="any" min="0" {...register("MOP", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("MOP", { valueAsNumber: true })} {...ensurePositive("MOP")} />
             </div>
             <div className="space-y-2">
               <Label>ΔT ({unitLabels.temp})</Label>
@@ -248,7 +251,7 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>Cover Depth ({unitLabels.depth})</Label>
-              <Input type="number" step="any" min="0" {...register("depthCover", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("depthCover", { valueAsNumber: true })} {...ensurePositive("depthCover")} />
             </div>
             <div className="space-y-2">
               <Label>Bedding Angle (°)</Label>
@@ -292,25 +295,25 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
           {loadType === "TOTAL_LOAD" && (
             <div className="space-y-2">
               <Label>Total Load ({unitLabels.force})</Label>
-              <Input type="number" step="any" min="0" {...register("totalLoad", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("totalLoad", { valueAsNumber: true })} {...ensurePositive("totalLoad")} />
             </div>
           )}
           
           {loadType === "UNIFORM_PRESSURE" && (
             <div className="space-y-2">
               <Label>Uniform Pressure ({unitLabels.pressure})</Label>
-              <Input type="number" step="any" min="0" {...register("uniformPressure", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("uniformPressure", { valueAsNumber: true })} {...ensurePositive("uniformPressure")} />
             </div>
           )}
           
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label>Grid Length ({unitLabels.depth})</Label>
-              <Input type="number" step="any" min="0" {...register("gridLength", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("gridLength", { valueAsNumber: true })} {...ensurePositive("gridLength")} />
             </div>
             <div className="space-y-2">
               <Label>Grid Width ({unitLabels.depth})</Label>
-              <Input type="number" step="any" min="0" {...register("gridWidth", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("gridWidth", { valueAsNumber: true })} {...ensurePositive("gridWidth")} />
             </div>
           </div>
           

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UnitsSystem } from "@/domain/pipeline/types";
 import { PIPE_SIZES, STEEL_GRADES, getWallThicknessOptions, getPipeOD, getWallThickness, getSMYS } from "@/domain/pipeline/pipePresets";
+import { createEnsurePositive } from "@/hooks/useEnsurePositive";
 
 interface PipeSelectorProps {
   register: UseFormRegister<any>;
@@ -14,6 +15,8 @@ interface PipeSelectorProps {
 }
 
 export function PipeSelector({ register, setValue, watch, errors, unitsSystem }: PipeSelectorProps) {
+  const ensurePositive = createEnsurePositive(setValue);
+
   const selectedNPS = watch("selectedNPS") || "CUSTOM";
   const selectedSchedule = watch("selectedSchedule") || "Custom";
   const selectedGrade = watch("selectedGrade") || "CUSTOM";
@@ -96,6 +99,7 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
           step="any"
           min="0"
           {...register("pipeOD", { valueAsNumber: true })}
+          {...ensurePositive("pipeOD")}
           disabled={!isCustomNPS}
           className={!isCustomNPS ? "bg-muted" : ""}
         />
@@ -135,6 +139,7 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
           step="any"
           min="0"
           {...register("pipeWT", { valueAsNumber: true })}
+          {...ensurePositive("pipeWT")}
           disabled={!isCustomSchedule && !isCustomNPS}
           className={!isCustomSchedule && !isCustomNPS ? "bg-muted" : ""}
         />
@@ -170,6 +175,7 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
           step="any"
           min="0"
           {...register("SMYS", { valueAsNumber: true })}
+          {...ensurePositive("SMYS")}
           disabled={!isCustomGrade}
           className={!isCustomGrade ? "bg-muted" : ""}
         />

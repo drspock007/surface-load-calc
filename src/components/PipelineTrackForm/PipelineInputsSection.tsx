@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UnitsSystem } from "@/domain/pipeline/types";
 import { PipeSelector } from "./PipeSelector";
 import { SoilDensitySelector } from "@/components/SoilDensitySelector";
+import { createEnsurePositive } from "@/hooks/useEnsurePositive";
 
 interface PipelineInputsSectionProps {
   register: UseFormRegister<any>;
@@ -22,6 +23,8 @@ export const PipelineInputsSection = ({
   setValue, 
   unitsSystem 
 }: PipelineInputsSectionProps) => {
+  const ensurePositive = createEnsurePositive(setValue);
+
   const unitLabels = unitsSystem === "EN" 
     ? { length: "in", depth: "ft", pressure: "psi", smys: "psi", density: "lb/ft³", temp: "°F" }
     : { length: "mm", depth: "m", pressure: "kPa", smys: "MPa", density: "kg/m³", temp: "°C" };
@@ -52,6 +55,7 @@ export const PipelineInputsSection = ({
               step="any"
               min="0"
               {...register("MOP", { valueAsNumber: true })}
+              {...ensurePositive("MOP")}
             />
             {errors.MOP && <p className="text-sm text-destructive">{String(errors.MOP.message)}</p>}
           </div>
@@ -82,6 +86,7 @@ export const PipelineInputsSection = ({
               step="any"
               min="0"
               {...register("depthCover", { valueAsNumber: true })}
+              {...ensurePositive("depthCover")}
             />
             {errors.depthCover && <p className="text-sm text-destructive">{String(errors.depthCover.message)}</p>}
           </div>

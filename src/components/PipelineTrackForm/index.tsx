@@ -19,6 +19,7 @@ import { PipelineInputsSection } from "./PipelineInputsSection";
 import { SoilLoadSection } from "./SoilLoadSection";
 import { TrackVehicleSection } from "./TrackVehicleSection";
 import { AnalysisParametersSection } from "../AnalysisParametersSection";
+import { createEnsurePositive } from "@/hooks/useEnsurePositive";
 
 const pipelineSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),
@@ -95,6 +96,8 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
     resolver: zodResolver(pipelineSchema),
     defaultValues,
   });
+
+  const ensurePositive = createEnsurePositive(setValue);
 
   const onSubmit = (data: PipelineFormData) => {
     const inputs: PipelineTrackInputs = {
@@ -226,6 +229,7 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
         register={register} 
         errors={errors} 
         unitsSystem={unitsSystem}
+        setValue={setValue}
       />
 
       <AnalysisParametersSection 

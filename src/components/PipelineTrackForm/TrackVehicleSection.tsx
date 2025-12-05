@@ -1,20 +1,25 @@
-import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { UseFormRegister, FieldErrors, UseFormSetValue } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UnitsSystem } from "@/domain/pipeline/types";
+import { createEnsurePositive } from "@/hooks/useEnsurePositive";
 
 interface TrackVehicleSectionProps {
   register: UseFormRegister<any>;
   errors: FieldErrors<any>;
   unitsSystem: UnitsSystem;
+  setValue: UseFormSetValue<any>;
 }
 
 export const TrackVehicleSection = ({ 
   register, 
   errors, 
-  unitsSystem 
+  unitsSystem,
+  setValue 
 }: TrackVehicleSectionProps) => {
+  const ensurePositive = createEnsurePositive(setValue);
+
   const unitLabels = unitsSystem === "EN" 
     ? { length: "in", force: "lb" }
     : { length: "mm", force: "kN" };
@@ -35,6 +40,7 @@ export const TrackVehicleSection = ({
               step="any"
               min="0"
               {...register("trackLength", { valueAsNumber: true })}
+              {...ensurePositive("trackLength")}
             />
             {errors.trackLength && <p className="text-sm text-destructive">{String(errors.trackLength.message)}</p>}
           </div>
@@ -47,6 +53,7 @@ export const TrackVehicleSection = ({
               step="any"
               min="0"
               {...register("trackWidth", { valueAsNumber: true })}
+              {...ensurePositive("trackWidth")}
             />
             {errors.trackWidth && <p className="text-sm text-destructive">{String(errors.trackWidth.message)}</p>}
           </div>
@@ -61,6 +68,7 @@ export const TrackVehicleSection = ({
               step="any"
               min="0"
               {...register("trackSeparation", { valueAsNumber: true })}
+              {...ensurePositive("trackSeparation")}
             />
             {errors.trackSeparation && <p className="text-sm text-destructive">{String(errors.trackSeparation.message)}</p>}
           </div>
@@ -73,6 +81,7 @@ export const TrackVehicleSection = ({
               step="any"
               min="0"
               {...register("trackVehicleWeight", { valueAsNumber: true })}
+              {...ensurePositive("trackVehicleWeight")}
             />
             {errors.trackVehicleWeight && <p className="text-sm text-destructive">{String(errors.trackVehicleWeight.message)}</p>}
           </div>

@@ -17,6 +17,7 @@ import { SoilDensitySelector } from "./SoilDensitySelector";
 import { convertFormValue } from "@/domain/pipeline/unitConversions";
 import { calculateContactPatch, convertTirePressureToPsi, convertTirePressureBetweenUnits } from "@/domain/pipeline/tirePatchCalculations";
 import { ThreeAxleDiagram } from "./ThreeAxleDiagram";
+import { createEnsurePositive } from "@/hooks/useEnsurePositive";
 
 const threeAxleSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),
@@ -135,6 +136,8 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
     resolver: zodResolver(threeAxleSchema),
     defaultValues,
   });
+
+  const ensurePositive = createEnsurePositive(setValue);
 
   const ePrimeMethod = watch("ePrimeMethod");
   const soilLoadMethod = watch("soilLoadMethod");
@@ -391,7 +394,7 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>MOP ({unitLabels.pressure})</Label>
-              <Input type="number" step="any" min="0" {...register("MOP", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("MOP", { valueAsNumber: true })} {...ensurePositive("MOP")} />
             </div>
             <div className="space-y-2">
               <Label>ΔT ({unitLabels.temp})</Label>
@@ -406,7 +409,7 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>Cover Depth ({unitLabels.depth})</Label>
-              <Input type="number" step="any" min="0" {...register("depthCover", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("depthCover", { valueAsNumber: true })} {...ensurePositive("depthCover")} />
             </div>
             <div className="space-y-2">
               <Label>Bedding Angle (°)</Label>
@@ -459,11 +462,11 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>Axle 1-2 Spacing ({unitLabels.depth})</Label>
-              <Input type="number" step="any" min="0" {...register("axle1To2Spacing", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("axle1To2Spacing", { valueAsNumber: true })} {...ensurePositive("axle1To2Spacing")} />
             </div>
             <div className="space-y-2">
               <Label>Axle 2-3 Spacing ({unitLabels.depth})</Label>
-              <Input type="number" step="any" min="0" {...register("axle2To3Spacing", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("axle2To3Spacing", { valueAsNumber: true })} {...ensurePositive("axle2To3Spacing")} />
             </div>
             <div className="space-y-2">
               <Label>Lane Offset ({unitLabels.depth})</Label>
@@ -473,15 +476,15 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>Axle 1 Load ({unitLabels.force})</Label>
-              <Input type="number" step="any" min="0" {...register("axle1Load", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("axle1Load", { valueAsNumber: true })} {...ensurePositive("axle1Load")} />
             </div>
             <div className="space-y-2">
               <Label>Axle 2 Load ({unitLabels.force})</Label>
-              <Input type="number" step="any" min="0" {...register("axle2Load", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("axle2Load", { valueAsNumber: true })} {...ensurePositive("axle2Load")} />
             </div>
             <div className="space-y-2">
               <Label>Axle 3 Load ({unitLabels.force})</Label>
-              <Input type="number" step="any" min="0" {...register("axle3Load", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("axle3Load", { valueAsNumber: true })} {...ensurePositive("axle3Load")} />
             </div>
           </div>
           
