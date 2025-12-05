@@ -330,7 +330,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>MOP ({unitLabels.pressure})</Label>
-              <Input type="number" step="any" {...register("MOP", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("MOP", { valueAsNumber: true })} />
             </div>
             <div className="space-y-2">
               <Label>ΔT ({unitLabels.temp})</Label>
@@ -345,7 +345,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>Cover Depth ({unitLabels.depth})</Label>
-              <Input type="number" step="any" {...register("depthCover", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("depthCover", { valueAsNumber: true })} />
             </div>
             <div className="space-y-2">
               <Label>Bedding Angle (°)</Label>
@@ -393,7 +393,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label>Axle Spacing ({unitLabels.depth})</Label>
-              <Input type="number" step="any" {...register("axleSpacing", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("axleSpacing", { valueAsNumber: true })} />
             </div>
             <div className="space-y-2">
               <Label>Lane Offset ({unitLabels.depth})</Label>
@@ -403,11 +403,11 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label>Axle 1 Load ({unitLabels.force})</Label>
-              <Input type="number" step="any" {...register("axle1Load", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("axle1Load", { valueAsNumber: true })} />
             </div>
             <div className="space-y-2">
               <Label>Axle 2 Load ({unitLabels.force})</Label>
-              <Input type="number" step="any" {...register("axle2Load", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("axle2Load", { valueAsNumber: true })} />
             </div>
           </div>
           
@@ -434,11 +434,11 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label>Tire Width ({unitLabels.length})</Label>
-                      <Input type="number" step="any" {...register("axle1TireWidth", { valueAsNumber: true })} />
+                      <Input type="number" step="any" min="0" {...register("axle1TireWidth", { valueAsNumber: true })} />
                     </div>
                     <div className="space-y-2">
                       <Label>Tire Length ({unitLabels.length})</Label>
-                      <Input type="number" step="any" {...register("axle1TireLength", { valueAsNumber: true })} />
+                      <Input type="number" step="any" min="0" {...register("axle1TireLength", { valueAsNumber: true })} />
                     </div>
                   </div>
                 </div>
@@ -447,11 +447,11 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label>Tire Width ({unitLabels.length})</Label>
-                      <Input type="number" step="any" {...register("axle2TireWidth", { valueAsNumber: true })} />
+                      <Input type="number" step="any" min="0" {...register("axle2TireWidth", { valueAsNumber: true })} />
                     </div>
                     <div className="space-y-2">
                       <Label>Tire Length ({unitLabels.length})</Label>
-                      <Input type="number" step="any" {...register("axle2TireLength", { valueAsNumber: true })} />
+                      <Input type="number" step="any" min="0" {...register("axle2TireLength", { valueAsNumber: true })} />
                     </div>
                   </div>
                 </div>
@@ -463,12 +463,12 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <div className="space-y-2">
                       <Label>Tire Width ({unitLabels.length})</Label>
-                      <Input type="number" step="any" {...register("axle1TireWidth", { valueAsNumber: true })} />
+                      <Input type="number" step="any" min="0" {...register("axle1TireWidth", { valueAsNumber: true })} />
                     </div>
                     <div className="space-y-2">
                       <Label>Tire Pressure</Label>
                       <div className="flex gap-1">
-                        <Input type="number" step="any" {...register("axle1TirePressure", { valueAsNumber: true })} className="flex-1" />
+                        <Input type="number" step="any" min="0" {...register("axle1TirePressure", { valueAsNumber: true })} className="flex-1" />
                         <Select value={watch("axle1TirePressureUnit") || "kg/m2"} onValueChange={(v) => handleAxle1PressureUnitChange(v as TirePressureUnit)}>
                           <SelectTrigger className="w-20">
                             <SelectValue />
@@ -505,12 +505,12 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <div className="space-y-2">
                       <Label>Tire Width ({unitLabels.length})</Label>
-                      <Input type="number" step="any" {...register("axle2TireWidth", { valueAsNumber: true })} />
+                      <Input type="number" step="any" min="0" {...register("axle2TireWidth", { valueAsNumber: true })} />
                     </div>
                     <div className="space-y-2">
                       <Label>Tire Pressure</Label>
                       <div className="flex gap-1">
-                        <Input type="number" step="any" {...register("axle2TirePressure", { valueAsNumber: true })} className="flex-1" />
+                        <Input type="number" step="any" min="0" {...register("axle2TirePressure", { valueAsNumber: true })} className="flex-1" />
                         <Select value={watch("axle2TirePressureUnit") || "kg/m2"} onValueChange={(v) => handleAxle2PressureUnitChange(v as TirePressureUnit)}>
                           <SelectTrigger className="w-20">
                             <SelectValue />
@@ -548,7 +548,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
           
           <div className="space-y-2">
             <Label>Axle Width ({unitLabels.length})</Label>
-            <Input type="number" step="any" {...register("axleWidth", { valueAsNumber: true })} />
+            <Input type="number" step="any" min="0" {...register("axleWidth", { valueAsNumber: true })} />
           </div>
         </CardContent>
       </Card>

@@ -233,7 +233,7 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>MOP ({unitLabels.pressure})</Label>
-              <Input type="number" step="any" {...register("MOP", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("MOP", { valueAsNumber: true })} />
             </div>
             <div className="space-y-2">
               <Label>ΔT ({unitLabels.temp})</Label>
@@ -248,7 +248,7 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>Cover Depth ({unitLabels.depth})</Label>
-              <Input type="number" step="any" {...register("depthCover", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("depthCover", { valueAsNumber: true })} />
             </div>
             <div className="space-y-2">
               <Label>Bedding Angle (°)</Label>
@@ -292,25 +292,25 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
           {loadType === "TOTAL_LOAD" && (
             <div className="space-y-2">
               <Label>Total Load ({unitLabels.force})</Label>
-              <Input type="number" step="any" {...register("totalLoad", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("totalLoad", { valueAsNumber: true })} />
             </div>
           )}
           
           {loadType === "UNIFORM_PRESSURE" && (
             <div className="space-y-2">
               <Label>Uniform Pressure ({unitLabels.pressure})</Label>
-              <Input type="number" step="any" {...register("uniformPressure", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("uniformPressure", { valueAsNumber: true })} />
             </div>
           )}
           
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label>Grid Length ({unitLabels.depth})</Label>
-              <Input type="number" step="any" {...register("gridLength", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("gridLength", { valueAsNumber: true })} />
             </div>
             <div className="space-y-2">
               <Label>Grid Width ({unitLabels.depth})</Label>
-              <Input type="number" step="any" {...register("gridWidth", { valueAsNumber: true })} />
+              <Input type="number" step="any" min="0" {...register("gridWidth", { valueAsNumber: true })} />
             </div>
           </div>
           

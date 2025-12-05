@@ -89,6 +89,7 @@ export const SoilDensitySelector = ({ setValue, watch, unitsSystem }: SoilDensit
         <Input
           type="number"
           step="any"
+          min="0"
           value={customValue}
           onChange={handleCustomChange}
           placeholder={`Enter custom density (${unitLabel})`}

@@ -50,6 +50,7 @@ export const PipelineInputsSection = ({
               id="MOP"
               type="number"
               step="any"
+              min="0"
               {...register("MOP", { valueAsNumber: true })}
             />
             {errors.MOP && <p className="text-sm text-destructive">{String(errors.MOP.message)}</p>}
@@ -79,6 +80,7 @@ export const PipelineInputsSection = ({
               id="depthCover"
               type="number"
               step="any"
+              min="0"
               {...register("depthCover", { valueAsNumber: true })}
             />
             {errors.depthCover && <p className="text-sm text-destructive">{String(errors.depthCover.message)}</p>}
