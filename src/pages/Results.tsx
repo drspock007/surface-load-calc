@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { usePDF } from "react-to-pdf";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,10 +30,10 @@ const Results = () => {
   const navigate = useNavigate();
   const run = location.state?.run as CalculationRun | undefined;
   
-  // Use native browser print for PDF export (secure alternative to react-to-pdf)
-  const handleExportPDF = () => {
-    window.print();
-  };
+  const { toPDF, targetRef } = usePDF({
+    filename: `${run?.input?.calculationName || 'calculation'}-results.pdf`,
+    page: { margin: 20 }
+  });
 
   if (!run) {
     return (
@@ -67,7 +68,7 @@ const Results = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto" ref={targetRef}>
         <div className="mb-6 flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
@@ -529,7 +530,7 @@ const Results = () => {
         ) : null}
 
         <div className="flex justify-center gap-4 print:hidden">
-          <Button variant="outline" onClick={handleExportPDF}>
+          <Button variant="outline" onClick={() => toPDF()}>
             <FileDown className="w-4 h-4 mr-2" />
             Export PDF
           </Button>
