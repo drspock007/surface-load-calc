@@ -11,6 +11,9 @@ interface ThreeAxleDiagramProps {
   axle1TirePressureUnit?: string;
   axle2TirePressureUnit?: string;
   axle3TirePressureUnit?: string;
+  axle1TiresPerAxle?: number;
+  axle2TiresPerAxle?: number;
+  axle3TiresPerAxle?: number;
   axle1To2Spacing: number;
   axle2To3Spacing: number;
   axleWidth: number;
@@ -24,12 +27,9 @@ export const ThreeAxleDiagram = ({
   axle1TireWidth,
   axle2TireWidth,
   axle3TireWidth,
-  axle1TirePressure,
-  axle2TirePressure,
-  axle3TirePressure,
-  axle1TirePressureUnit = "kg/m2",
-  axle2TirePressureUnit = "kg/m2",
-  axle3TirePressureUnit = "kg/m2",
+  axle1TiresPerAxle = 2,
+  axle2TiresPerAxle = 4,
+  axle3TiresPerAxle = 4,
   axle1To2Spacing,
   axle2To3Spacing,
   axleWidth,
@@ -44,6 +44,29 @@ export const ThreeAxleDiagram = ({
     return val.toLocaleString(undefined, { maximumFractionDigits: 1 });
   };
 
+  // Calculate total contact width per side
+  const axle1ContactWidth = axle1TireWidth * (axle1TiresPerAxle === 4 ? 2 : 1);
+  const axle2ContactWidth = axle2TireWidth * (axle2TiresPerAxle === 4 ? 2 : 1);
+  const axle3ContactWidth = axle3TireWidth * (axle3TiresPerAxle === 4 ? 2 : 1);
+
+  const isDual1 = axle1TiresPerAxle === 4;
+  const isDual2 = axle2TiresPerAxle === 4;
+  const isDual3 = axle3TiresPerAxle === 4;
+
+  // Helper to render tires (single or dual)
+  const renderTires = (isDual: boolean, side: "left" | "right") => {
+    const xBase = side === "left" ? -100 : 76;
+    if (isDual) {
+      return (
+        <>
+          <rect x={xBase} y="-10" width="10" height="20" fill="hsl(var(--foreground))" rx="2" />
+          <rect x={xBase + 12} y="-10" width="10" height="20" fill="hsl(var(--foreground))" rx="2" />
+        </>
+      );
+    }
+    return <rect x={xBase} y="-10" width="22" height="20" fill="hsl(var(--foreground))" rx="3" />;
+  };
+
   return (
     <div className="w-full bg-muted/30 border border-border rounded-lg p-4 mb-4">
       <svg viewBox="0 0 600 340" className="w-full h-auto max-h-[340px]">
@@ -55,19 +78,21 @@ export const ThreeAxleDiagram = ({
         {/* Axle 1 (Top) */}
         <g transform="translate(200, 55)">
           <rect x="-80" y="-2" width="160" height="4" fill="hsl(var(--foreground))" rx="1" />
-          <rect x="-100" y="-10" width="22" height="20" fill="hsl(var(--foreground))" rx="3" />
-          <rect x="78" y="-10" width="22" height="20" fill="hsl(var(--foreground))" rx="3" />
+          {renderTires(isDual1, "left")}
+          {renderTires(isDual1, "right")}
         </g>
 
-        {/* Info box Axle 1 - Right side, aligned with axle */}
+        {/* Info box Axle 1 */}
         <g transform="translate(480, 55)">
-          <rect x="-60" y="-21" width="120" height="42" fill="hsl(45, 100%, 50%)" rx="4" />
-          <text x="0" y="-7" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="9" fontWeight="bold">Axle 1</text>
-          <text x="0" y="5" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8" fontFamily="monospace">
-            {formatValue(axle1Load)} {forceUnit} | W:{formatValue(axle1TireWidth)}
+          <rect x="-70" y="-22" width="140" height="44" fill="hsl(45, 100%, 50%)" rx="4" />
+          <text x="0" y="-7" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="9" fontWeight="bold">
+            Axle 1 ({isDual1 ? "Dual" : "Single"})
           </text>
-          <text x="0" y="17" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8" fontFamily="monospace">
-            P: {formatValue(axle1TirePressure)} {axle1TirePressureUnit}
+          <text x="0" y="5" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8" fontFamily="monospace">
+            {formatValue(axle1Load)} {forceUnit}
+          </text>
+          <text x="0" y="16" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8" fontFamily="monospace">
+            W: {formatValue(axle1ContactWidth)} {lengthUnit}
           </text>
         </g>
 
@@ -88,38 +113,42 @@ export const ThreeAxleDiagram = ({
         {/* Axle 2 (Middle) */}
         <g transform="translate(200, 165)">
           <rect x="-80" y="-2" width="160" height="4" fill="hsl(var(--foreground))" rx="1" />
-          <rect x="-100" y="-10" width="22" height="20" fill="hsl(var(--foreground))" rx="3" />
-          <rect x="78" y="-10" width="22" height="20" fill="hsl(var(--foreground))" rx="3" />
+          {renderTires(isDual2, "left")}
+          {renderTires(isDual2, "right")}
         </g>
 
-        {/* Info box Axle 2 - Right side, aligned with axle */}
+        {/* Info box Axle 2 */}
         <g transform="translate(480, 165)">
-          <rect x="-60" y="-21" width="120" height="42" fill="hsl(45, 100%, 50%)" rx="4" />
-          <text x="0" y="-7" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="9" fontWeight="bold">Axle 2</text>
-          <text x="0" y="5" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8" fontFamily="monospace">
-            {formatValue(axle2Load)} {forceUnit} | W:{formatValue(axle2TireWidth)}
+          <rect x="-70" y="-22" width="140" height="44" fill="hsl(45, 100%, 50%)" rx="4" />
+          <text x="0" y="-7" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="9" fontWeight="bold">
+            Axle 2 ({isDual2 ? "Dual" : "Single"})
           </text>
-          <text x="0" y="17" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8" fontFamily="monospace">
-            P: {formatValue(axle2TirePressure)} {axle2TirePressureUnit}
+          <text x="0" y="5" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8" fontFamily="monospace">
+            {formatValue(axle2Load)} {forceUnit}
+          </text>
+          <text x="0" y="16" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8" fontFamily="monospace">
+            W: {formatValue(axle2ContactWidth)} {lengthUnit}
           </text>
         </g>
 
         {/* Axle 3 (Bottom) */}
         <g transform="translate(200, 245)">
           <rect x="-80" y="-2" width="160" height="4" fill="hsl(var(--foreground))" rx="1" />
-          <rect x="-100" y="-10" width="22" height="20" fill="hsl(var(--foreground))" rx="3" />
-          <rect x="78" y="-10" width="22" height="20" fill="hsl(var(--foreground))" rx="3" />
+          {renderTires(isDual3, "left")}
+          {renderTires(isDual3, "right")}
         </g>
 
-        {/* Info box Axle 3 - Right side, aligned with axle */}
+        {/* Info box Axle 3 */}
         <g transform="translate(480, 245)">
-          <rect x="-60" y="-21" width="120" height="42" fill="hsl(45, 100%, 50%)" rx="4" />
-          <text x="0" y="-7" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="9" fontWeight="bold">Axle 3</text>
-          <text x="0" y="5" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8" fontFamily="monospace">
-            {formatValue(axle3Load)} {forceUnit} | W:{formatValue(axle3TireWidth)}
+          <rect x="-70" y="-22" width="140" height="44" fill="hsl(45, 100%, 50%)" rx="4" />
+          <text x="0" y="-7" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="9" fontWeight="bold">
+            Axle 3 ({isDual3 ? "Dual" : "Single"})
           </text>
-          <text x="0" y="17" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8" fontFamily="monospace">
-            P: {formatValue(axle3TirePressure)} {axle3TirePressureUnit}
+          <text x="0" y="5" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8" fontFamily="monospace">
+            {formatValue(axle3Load)} {forceUnit}
+          </text>
+          <text x="0" y="16" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8" fontFamily="monospace">
+            W: {formatValue(axle3ContactWidth)} {lengthUnit}
           </text>
         </g>
 
