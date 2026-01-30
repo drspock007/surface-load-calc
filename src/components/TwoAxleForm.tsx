@@ -387,6 +387,8 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
             axle2TirePressure={watch("axle2TirePressure")}
             axle1TirePressureUnit={watch("axle1TirePressureUnit")}
             axle2TirePressureUnit={watch("axle2TirePressureUnit")}
+            axle1TiresPerAxle={watch("axle1TiresPerAxle")}
+            axle2TiresPerAxle={watch("axle2TiresPerAxle")}
             axleSpacing={watch("axleSpacing")}
             axleWidth={watch("axleWidth")}
             unitsSystem={unitsSystem}
@@ -427,13 +429,14 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
               <>
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium">Axle 1 (Front) Contact Patch</h4>
-                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Tire Width ({unitLabels.length})</Label>
+                      <Label>Contact Width per Side ({unitLabels.length})</Label>
                       <Input type="number" step="any" min="0" {...register("axle1TireWidth", { valueAsNumber: true })} {...ensurePositive("axle1TireWidth")} />
+                      <p className="text-xs text-muted-foreground">Total width for one side of axle (single or dual tires combined)</p>
                     </div>
                     <div className="space-y-2">
-                      <Label>Tire Length ({unitLabels.length})</Label>
+                      <Label>Contact Length ({unitLabels.length})</Label>
                       <Input type="number" step="any" min="0" {...register("axle1TireLength", { valueAsNumber: true })} {...ensurePositive("axle1TireLength")} />
                     </div>
                   </div>
@@ -442,11 +445,12 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
                   <h4 className="text-sm font-medium">Axle 2 (Rear) Contact Patch</h4>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Tire Width ({unitLabels.length})</Label>
+                      <Label>Contact Width per Side ({unitLabels.length})</Label>
                       <Input type="number" step="any" min="0" {...register("axle2TireWidth", { valueAsNumber: true })} {...ensurePositive("axle2TireWidth")} />
+                      <p className="text-xs text-muted-foreground">Total width for one side of axle (single or dual tires combined)</p>
                     </div>
                     <div className="space-y-2">
-                      <Label>Tire Length ({unitLabels.length})</Label>
+                      <Label>Contact Length ({unitLabels.length})</Label>
                       <Input type="number" step="any" min="0" {...register("axle2TireLength", { valueAsNumber: true })} {...ensurePositive("axle2TireLength")} />
                     </div>
                   </div>
@@ -456,9 +460,9 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
               <>
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium">Axle 1 (Front) Contact Patch</h4>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
                     <div className="space-y-2">
-                      <Label>Tire Width ({unitLabels.length})</Label>
+                      <Label>Single Tire Width ({unitLabels.length})</Label>
                       <Input type="number" step="any" min="0" {...register("axle1TireWidth", { valueAsNumber: true })} {...ensurePositive("axle1TireWidth")} />
                     </div>
                     <div className="space-y-2">
@@ -479,28 +483,34 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label>Tires Per Axle</Label>
+                      <Label>Tire Config</Label>
                       <Select value={watch("axle1TiresPerAxle")?.toString()} onValueChange={(v) => setValue("axle1TiresPerAxle", parseInt(v))}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="2">2 (Single)</SelectItem>
-                          <SelectItem value="4">4 (Dual)</SelectItem>
+                          <SelectItem value="2">Single</SelectItem>
+                          <SelectItem value="4">Dual</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-muted-foreground">Tire Length (calc.)</Label>
+                      <Label className="text-muted-foreground">Contact Width/Side</Label>
+                      <div className="h-10 flex items-center px-3 border rounded-md bg-primary/10 text-sm font-mono">
+                        {(axle1TireWidth * (axle1TiresPerAxle === 4 ? 2 : 1)).toFixed(0)} {unitLabels.length}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-muted-foreground">Contact Length</Label>
                       <div className="h-10 flex items-center px-3 border rounded-md bg-muted/30 text-sm font-mono">
-                        {calculatedAxle1TireLength?.toFixed(2) || "—"} {unitLabels.length}
+                        {calculatedAxle1TireLength?.toFixed(1) || "—"} {unitLabels.length}
                       </div>
                     </div>
                   </div>
                 </div>
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium">Axle 2 (Rear) Contact Patch</h4>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
                     <div className="space-y-2">
-                      <Label>Tire Width ({unitLabels.length})</Label>
+                      <Label>Single Tire Width ({unitLabels.length})</Label>
                       <Input type="number" step="any" min="0" {...register("axle2TireWidth", { valueAsNumber: true })} {...ensurePositive("axle2TireWidth")} />
                     </div>
                     <div className="space-y-2">
@@ -521,19 +531,25 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label>Tires Per Axle</Label>
+                      <Label>Tire Config</Label>
                       <Select value={watch("axle2TiresPerAxle")?.toString()} onValueChange={(v) => setValue("axle2TiresPerAxle", parseInt(v))}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="2">2 (Single)</SelectItem>
-                          <SelectItem value="4">4 (Dual)</SelectItem>
+                          <SelectItem value="2">Single</SelectItem>
+                          <SelectItem value="4">Dual</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-muted-foreground">Tire Length (calc.)</Label>
+                      <Label className="text-muted-foreground">Contact Width/Side</Label>
+                      <div className="h-10 flex items-center px-3 border rounded-md bg-primary/10 text-sm font-mono">
+                        {(axle2TireWidth * (axle2TiresPerAxle === 4 ? 2 : 1)).toFixed(0)} {unitLabels.length}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-muted-foreground">Contact Length</Label>
                       <div className="h-10 flex items-center px-3 border rounded-md bg-muted/30 text-sm font-mono">
-                        {calculatedAxle2TireLength?.toFixed(2) || "—"} {unitLabels.length}
+                        {calculatedAxle2TireLength?.toFixed(1) || "—"} {unitLabels.length}
                       </div>
                     </div>
                   </div>
