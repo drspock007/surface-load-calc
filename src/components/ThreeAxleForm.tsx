@@ -551,17 +551,17 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
               <>
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium">Axle 1 (Front) Contact Patch</h4>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                  <div className="grid gap-4 md:grid-cols-3">
                     <div className="space-y-2">
                       <Label>Single Tire Width ({unitLabels.length})</Label>
                       <Input type="number" step="any" min="0" {...register("axle1TireWidth", { valueAsNumber: true })} />
                     </div>
                     <div className="space-y-2">
                       <Label>Tire Pressure</Label>
-                      <div className="flex gap-1">
-                        <Input type="number" step="any" min="0" {...register("axle1TirePressure", { valueAsNumber: true })} className="flex-1" />
+                      <div className="flex gap-2">
+                        <Input type="number" step="any" min="0" {...register("axle1TirePressure", { valueAsNumber: true })} className="min-w-[80px]" />
                         <Select value={watch("axle1TirePressureUnit") || "kg/m2"} onValueChange={(v) => handleAxle1PressureUnitChange(v as TirePressureUnit)}>
-                          <SelectTrigger className="w-20">
+                          <SelectTrigger className="w-24">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -583,6 +583,8 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label className="text-muted-foreground">Contact Width/Side</Label>
                       <div className="h-10 flex items-center px-3 border rounded-md bg-primary/10 text-sm font-mono">
@@ -599,17 +601,17 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
                 </div>
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium">Axle 2 (Middle) Contact Patch</h4>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                  <div className="grid gap-4 md:grid-cols-3">
                     <div className="space-y-2">
                       <Label>Single Tire Width ({unitLabels.length})</Label>
                       <Input type="number" step="any" min="0" {...register("axle2TireWidth", { valueAsNumber: true })} />
                     </div>
                     <div className="space-y-2">
                       <Label>Tire Pressure</Label>
-                      <div className="flex gap-1">
-                        <Input type="number" step="any" min="0" {...register("axle2TirePressure", { valueAsNumber: true })} className="flex-1" />
+                      <div className="flex gap-2">
+                        <Input type="number" step="any" min="0" {...register("axle2TirePressure", { valueAsNumber: true })} className="min-w-[80px]" />
                         <Select value={watch("axle2TirePressureUnit") || "kg/m2"} onValueChange={(v) => handleAxle2PressureUnitChange(v as TirePressureUnit)}>
-                          <SelectTrigger className="w-20">
+                          <SelectTrigger className="w-24">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -631,6 +633,8 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label className="text-muted-foreground">Contact Width/Side</Label>
                       <div className="h-10 flex items-center px-3 border rounded-md bg-primary/10 text-sm font-mono">
@@ -647,17 +651,17 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
                 </div>
                 <div className="space-y-3">
                   <h4 className="text-sm font-medium">Axle 3 (Rear) Contact Patch</h4>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                  <div className="grid gap-4 md:grid-cols-3">
                     <div className="space-y-2">
                       <Label>Single Tire Width ({unitLabels.length})</Label>
                       <Input type="number" step="any" min="0" {...register("axle3TireWidth", { valueAsNumber: true })} />
                     </div>
                     <div className="space-y-2">
                       <Label>Tire Pressure</Label>
-                      <div className="flex gap-1">
-                        <Input type="number" step="any" min="0" {...register("axle3TirePressure", { valueAsNumber: true })} className="flex-1" />
+                      <div className="flex gap-2">
+                        <Input type="number" step="any" min="0" {...register("axle3TirePressure", { valueAsNumber: true })} className="min-w-[80px]" />
                         <Select value={watch("axle3TirePressureUnit") || "kg/m2"} onValueChange={(v) => handleAxle3PressureUnitChange(v as TirePressureUnit)}>
-                          <SelectTrigger className="w-20">
+                          <SelectTrigger className="w-24">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -679,6 +683,8 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label className="text-muted-foreground">Contact Width/Side</Label>
                       <div className="h-10 flex items-center px-3 border rounded-md bg-primary/10 text-sm font-mono">
