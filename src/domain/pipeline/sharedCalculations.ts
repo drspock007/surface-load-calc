@@ -10,16 +10,17 @@ import { calculateEPrimeFromLookup } from './ePrimeLookup';
  * CEPA Manual Table 2-1: Spangler Stress Formula Parameters
  */
 export function calculateBeddingParams(beddingAngleDeg: number): { Kb: number; Kz: number; Theta: number } {
-  // VBA-conformant Theta values (uses bedding angle directly, with 10 for 0°)
+  // CEPA Manual Table 2-1: Spangler Stress Formula Parameters
+  // Theta values corrected to match vbaTrackEngine.ts for VBA parity
   switch (beddingAngleDeg) {
-    case 0: return { Kb: 0.294, Kz: 0.110, Theta: 10 };
-    case 30: return { Kb: 0.235, Kz: 0.108, Theta: 30 };
-    case 60: return { Kb: 0.189, Kz: 0.103, Theta: 60 };
-    case 90: return { Kb: 0.157, Kz: 0.096, Theta: 90 };
-    case 120: return { Kb: 0.138, Kz: 0.089, Theta: 120 };
-    case 150: return { Kb: 0.128, Kz: 0.085, Theta: 150 };
-    case 180: return { Kb: 0.125, Kz: 0.083, Theta: 180 };
-    default: return { Kb: 0.157, Kz: 0.096, Theta: 90 };
+    case 0: return { Kb: 0.294, Kz: 0.110, Theta: 135 };
+    case 30: return { Kb: 0.235, Kz: 0.108, Theta: 130 };
+    case 60: return { Kb: 0.189, Kz: 0.103, Theta: 120 };
+    case 90: return { Kb: 0.157, Kz: 0.096, Theta: 105 };
+    case 120: return { Kb: 0.138, Kz: 0.089, Theta: 90 };
+    case 150: return { Kb: 0.128, Kz: 0.085, Theta: 75 };
+    case 180: return { Kb: 0.125, Kz: 0.083, Theta: 60 };
+    default: return { Kb: 0.157, Kz: 0.096, Theta: 105 };
   }
 }
 
