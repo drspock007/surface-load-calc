@@ -247,24 +247,24 @@ export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults 
   
   const longZero = calculateLongitudinalLiveStress(
     stressZero.hoopLive,
-    BsnqIF,
-    inputsEN.H_ft,
+    boussinesq.maxPressure_psi,
+    impactResult.impactFactorDepth,
     inputsEN.D_in,
     inputsEN.t_in,
-    ePrime.ePrime_psi,
+    inputsEN.H_ft,
     bedding.Theta,
-    impactResult.impactFactorDepth
+    ePrime.ePrime_psi
   );
   
   const longMOP = calculateLongitudinalLiveStress(
     stressMOP.hoopLive,
-    BsnqIF,
-    inputsEN.H_ft,
+    boussinesq.maxPressure_psi,
+    impactResult.impactFactorDepth,
     inputsEN.D_in,
     inputsEN.t_in,
-    ePrime.ePrime_psi,
+    inputsEN.H_ft,
     bedding.Theta,
-    impactResult.impactFactorDepth
+    ePrime.ePrime_psi
   );
   
   // Thermal stress

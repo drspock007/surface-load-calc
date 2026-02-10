@@ -120,42 +120,80 @@ export function calculateHoopStress(
 
 export function calculateLongitudinalLiveStress(
   hoopLive_psi: number,
-  Plive_psi: number,
-  H_ft: number,
+  bsnqMax_psi: number,
+  impactFactorDepth: number,
   D_in: number,
   t_in: number,
-  Eprime_psi: number,
+  H_ft: number,
   Theta: number,
-  impactFactor: number
+  ePrime_psi: number
 ): { longLive: number; longLiveLocal: number; longLiveBend: number } {
   const E = 30e6;
   const Poisson = 0.3;
+  const PI = Math.PI;
   
-  // Local bending
-  const Beta = Math.pow(12 * (1 - Poisson * Poisson), 1/8);
+  // Local bending component
+  const Beta = Math.pow(12 * (1 - Math.pow(Poisson, 2)), 1/8);
   const longLiveLocal = (0.153 / 1.56) * Math.pow(Beta, 4) * hoopLive_psi;
   
-  // Axial bending
+  // Axial bending component
   const H_in = H_ft * 12;
-  const Inertia = Math.PI / 4 * (Math.pow(D_in / 2, 4) - Math.pow(D_in / 2 - t_in, 4));
-  const Lambda = Math.pow((Eprime_psi * D_in * Theta / 360) / (4 * E * Inertia), 0.25);
   
-  const Wsurf = Plive_psi * 2 * Math.PI * H_in * H_in / 3 * impactFactor;
-  const Lload = H_in * Math.tan(29.9 * Math.PI / 180);
-  const Ppipe = Wsurf / (Math.PI * Lload * Lload);
+  // Moment of inertia
+  const R_out = D_in / 2;
+  const R_in = R_out - t_in;
+  const Inertia = (PI / 4) * (Math.pow(R_out, 4) - Math.pow(R_in, 4));
   
-  // Simplified moment calculation (avoid huge loops)
-  const maxIterations = Math.min(500, Math.floor(100 * Lload));
-  let momentMAX = 0;
+  // Lambda parameter
+  const Lambda = Math.pow((ePrime_psi * D_in * Theta / 360) / (4 * E * Inertia), 0.25);
   
-  for (let i = 0; i <= maxIterations; i++) {
-    const x = (i / maxIterations) * 100 * Lload;
-    const M = (Ppipe * Lload * Lload / (2 * Lambda)) * 
-      (Math.exp(-Lambda * x) * (Math.cos(Lambda * x) - Math.sin(Lambda * x)) + 1);
-    momentMAX = Math.max(momentMAX, Math.abs(M));
+  // Load on pipe from Boussinesq (VBA: Wsurf = bsnq * 2*PI*H^2/3 * IF)
+  const Wsurf = bsnqMax_psi * 2 * PI * Math.pow(H_in, 2) / 3 * impactFactorDepth;
+  
+  // Load length
+  const Lload = H_in * Math.tan((29.9 * PI) / 180);
+  
+  // Distributed load on pipe
+  const Ppipe = Wsurf / (PI * Math.pow(Lload, 2));
+  
+  // Calculate moment distribution (ported from VBA Track Engine)
+  const maxRange = 100 * Lload;
+  const stepSize = Math.max(1, Lload / 50);
+  
+  let Mmax = 0;
+  let Mmin1 = 0;
+  let Mmin2 = 0;
+  
+  for (let x = -maxRange; x <= maxRange; x += stepSize) {
+    const absX = Math.abs(x);
+    
+    let M = 0;
+    
+    if (absX <= Lload) {
+      // Within load region
+      const term1 = Ppipe / (4 * Math.pow(Lambda, 3));
+      const expTerm = Math.exp(-Lambda * absX);
+      const M1 = term1 * expTerm * (Math.cos(Lambda * absX) + Math.sin(Lambda * absX));
+      const M2 = -Ppipe * Math.pow(absX, 2) / 2;
+      M = M1 + M2;
+    } else {
+      // Outside load region
+      const term1 = Ppipe / (4 * Math.pow(Lambda, 3));
+      const expTerm1 = Math.exp(-Lambda * absX);
+      const expTerm2 = Math.exp(-Lambda * (absX - Lload));
+      const M1 = term1 * expTerm1 * (Math.cos(Lambda * absX) + Math.sin(Lambda * absX));
+      const M2 = -term1 * expTerm2 * (Math.cos(Lambda * (absX - Lload)) + Math.sin(Lambda * (absX - Lload)));
+      M = M1 + M2;
+    }
+    
+    if (M > Mmax) Mmax = M;
+    if (absX <= Lload && M < Mmin1) Mmin1 = M;
+    if (absX > Lload && M < Mmin2) Mmin2 = M;
   }
   
-  const longLiveBend = (momentMAX * D_in) / (2 * Inertia);
+  const momentMAX = Math.max(Math.abs(Mmax), Math.abs(Mmin1), Math.abs(Mmin2));
+  const longLiveBend = momentMAX * (D_in / 2) / Inertia;
+  
   const longLive = longLiveBend + longLiveLocal;
   
   return { longLive, longLiveLocal, longLiveBend };

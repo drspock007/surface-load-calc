@@ -114,8 +114,8 @@ export function calculateGridLoadVBA(inputs: GridLoadInputs): GridLoadResults {
   const stressZero = calculateHoopStress(soilLoad.Psoil_psi, BsnqIF, 0, inputsEN.D_in, inputsEN.t_in, bedding.Kb, bedding.Kz, ePrime.ePrime_psi, inputs.kr);
   const stressMOP = calculateHoopStress(soilLoad.Psoil_psi, BsnqIF, inputsEN.Pint_psi, inputsEN.D_in, inputsEN.t_in, bedding.Kb, bedding.Kz, ePrime.ePrime_psi, inputs.kr);
   
-  const longZero = calculateLongitudinalLiveStress(stressZero.hoopLive, BsnqIF, inputsEN.H_ft, inputsEN.D_in, inputsEN.t_in, ePrime.ePrime_psi, bedding.Theta, impactResult.impactFactorDepth);
-  const longMOP = calculateLongitudinalLiveStress(stressMOP.hoopLive, BsnqIF, inputsEN.H_ft, inputsEN.D_in, inputsEN.t_in, ePrime.ePrime_psi, bedding.Theta, impactResult.impactFactorDepth);
+  const longZero = calculateLongitudinalLiveStress(stressZero.hoopLive, boussinesq.maxPressure_psi, impactResult.impactFactorDepth, inputsEN.D_in, inputsEN.t_in, inputsEN.H_ft, bedding.Theta, ePrime.ePrime_psi);
+  const longMOP = calculateLongitudinalLiveStress(stressMOP.hoopLive, boussinesq.maxPressure_psi, impactResult.impactFactorDepth, inputsEN.D_in, inputsEN.t_in, inputsEN.H_ft, bedding.Theta, ePrime.ePrime_psi);
   
   const E = 30e6;
   const Alpha = 6.5e-6;
