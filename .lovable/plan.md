@@ -1,109 +1,64 @@
 
 
-# Plan de Vérification : Alignement des Calculs avec le Manuel CEPA
+# Correction du calcul longitudinal : 2 bugs critiques
 
-## Résumé de l'Analyse
+## Problemes identifies
 
-Après examen approfondi du manuel CEPA Kiefner 2014 et du code source de l'application, j'ai identifié les points suivants :
+### Bug 1 : Impact Factor double-compte
 
-### Points de Validation Positifs
+Dans `vba2AxleEngine.ts`, le Boussinesq est multiplie par l'impact factor AVANT d'etre passe a la fonction :
 
-| Aspect | État | Observation |
-|--------|------|-------------|
-| Formule de Boussinesq (Eq. 1) | ✅ Conforme | Σ(3·F)/(2π·H²·(1+(d/H)²)^2.5) |
-| Formule de charge du sol (Eq. 2) | ✅ Conforme | Prism: ρ·H/144 psi |
-| Formule CEPA Hoop Stress (Eq. 3-4) | ✅ Conforme | Dénominateur avec Kz et E' |
-| Formule Hoop Interne (Eq. 5) | ✅ Conforme | P·D/(2·t) |
-| Contrainte locale longitudinale (Eq. 8-9) | ✅ Conforme | 0.153·β⁴·σH_live |
-| Contrainte équivalente Tresca (Eq. 14) | ✅ Conforme | max(σH, σL, σH-σL) |
-| Table E' (CEPA Table 2-3) | ✅ Conforme | Lookup par profondeur et compaction |
-| Tests unitaires Example 2 | ✅ Passent | Tolérance 5% |
-
-### Incohérence Critique Détectée
-
-**Paramètre Theta dans calculateBeddingParams()** :
-
-Il existe **deux implémentations différentes** de cette fonction :
-
-| Fichier | Theta pour bedding angle 30° |
-|---------|------------------------------|
-| `vbaTrackEngine.ts` | 130 |
-| `sharedCalculations.ts` | 30 |
-
-Le fichier `sharedCalculations.ts` (utilisé par 2-Axle, 3-Axle, et Grid) utilise Theta = bedding angle directement, tandis que `vbaTrackEngine.ts` utilise une correspondance différente (Theta = 180° - bedding angle approximativement).
-
-**Impact** : Cette différence affecte le calcul du moment de flexion longitudinal (Eq. 10-12) via le paramètre Lambda :
-
-```
-λ = ⁴√(E'·D·θ / (360·4·E·I))
+```text
+BsnqIF = boussinesq.maxPressure_psi * impactFactorDepth   (ligne 199)
 ```
 
-### Validation avec les Exemples CEPA
+Puis dans `sharedCalculations.ts`, la fonction multiplie ENCORE par l'impact factor :
 
-**Exemple 2 (Track Vehicle)** - Résultats attendus du manuel :
-- σH_Live @ Zero = 2032 psi
-- σH_Total @ Zero = 5691 psi  
-- σL_Total @ Zero = 6971 psi
-- σE @ Zero = 12662 psi
-- Impact Factor = 1.45
-
-**Exemple 1 (3-Axle Wheel Vehicle)** - Résultats attendus :
-- σH_Live @ Zero = 1708 psi
-- σH_Total @ Zero = 5367 psi
-- σL_Total @ Zero = 6656 psi  
-- σE @ Zero = 12023 psi
-- Impact Factor = 1.20
-
-### Définition de Contact Width (Clarifiée par le manuel)
-
-Le manuel CEPA spécifie clairement (page 10-11) :
-
-> "**Contact Width** – enter the ground contact width of a tire. **If dual tires exist, treat them as one tire and enter the overall ground contact width of both tires, including the space between the tires.**"
-
-Cela confirme que l'Excel attend la **largeur totale par côté** (y compris l'espace entre les pneus jumelés), et non la largeur d'un seul pneu.
-
-## Corrections Recommandées
-
-### 1. Harmoniser le calcul de Theta
-
-Déterminer quelle version est correcte en comparant avec le VBA original Excel, puis unifier les deux fichiers. La version de `vbaTrackEngine.ts` est probablement correcte car les tests passent pour Example 2.
-
-### 2. Mettre à jour sharedCalculations.ts
-
-```typescript
-// Corriger pour correspondre à vbaTrackEngine.ts
-case 0: return { Kb: 0.294, Kz: 0.110, Theta: 135 };
-case 30: return { Kb: 0.235, Kz: 0.108, Theta: 130 };
-case 60: return { Kb: 0.189, Kz: 0.103, Theta: 120 };
-case 90: return { Kb: 0.157, Kz: 0.096, Theta: 105 };
-case 120: return { Kb: 0.138, Kz: 0.089, Theta: 90 };
-case 150: return { Kb: 0.128, Kz: 0.085, Theta: 75 };
-case 180: return { Kb: 0.125, Kz: 0.083, Theta: 60 };
+```text
+Wsurf = Plive_psi * 2 * PI * H_in^2 / 3 * impactFactor   (ligne 143)
 ```
 
-### 3. Ajouter des Tests pour l'Exemple 1 (3-Axle)
+Resultat : l'impact factor est applique **deux fois**, gonflant artificiellement le stress longitudinal.
 
-Créer `vba3AxleEngine.test.ts` avec les valeurs de l'Exemple 1 CEPA pour valider les calculs 3-Axle.
+Dans le VBA Track engine (correct), le Boussinesq brut est passe et l'impact factor n'est applique qu'une seule fois.
 
-### 4. Ajuster l'interprétation de Contact Width
+### Bug 2 : Formule du moment de flexion incorrecte
 
-Comme les récentes modifications UI ont clarifié que l'utilisateur entre la "Single Tire Width" et que l'application calcule la "Contact Width/Side", vérifier que la logique de multiplication est correcte :
+La formule du moment dans `sharedCalculations.ts` est une version simplifiee incorrecte :
 
-```typescript
-// Pour Dual (4 pneus par axe) : widthPerSide = singleTireWidth * 2
-// Pour Single (2 pneus par axe) : widthPerSide = singleTireWidth
+```text
+M = (Ppipe * Lload^2 / (2*Lambda)) * (exp(-Lambda*x)*(cos-sin) + 1)
 ```
 
-## Fichiers à Modifier
+Le VBA original utilise une formule beam-on-elastic-foundation avec deux cas distincts :
+
+- **Dans la zone de charge** (|x| <= Lload) : M = M1 + M2 (avec M2 = -Ppipe*x^2/2)
+- **Hors de la zone de charge** (|x| > Lload) : M = M1 + M2 (superposition de deux termes exponentiels)
+
+Et il suit Mmax, Mmin1 (dans la zone), et Mmin2 (hors zone) separement.
+
+## Correction proposee
+
+Remplacer la fonction `calculateLongitudinalLiveStress` dans `sharedCalculations.ts` par un port exact de la version VBA de `vbaTrackEngine.ts`.
+
+### Changements cles
+
+1. **Signature de la fonction** : changer l'ordre des parametres pour correspondre au VBA Track engine, et passer le Boussinesq brut (sans impact factor) + impact factor separement
+
+2. **Formule du moment** : porter exactement la logique VBA avec les deux cas (inside/outside load region) et le suivi Mmax/Mmin1/Mmin2
+
+3. **Appels dans les engines** : modifier `vba2AxleEngine.ts`, `vba3AxleEngine.ts`, et `vbaGridEngine.ts` pour passer le Boussinesq brut au lieu de BsnqIF
+
+### Fichiers a modifier
 
 | Fichier | Modification |
-|---------|--------------|
-| `src/domain/pipeline/sharedCalculations.ts` | Corriger les valeurs Theta |
-| `src/domain/pipeline/__tests__/vba3AxleEngine.test.ts` | Ajouter tests Example 1 |
+|---------|-------------|
+| `src/domain/pipeline/sharedCalculations.ts` | Remplacer `calculateLongitudinalLiveStress` par le port VBA exact |
+| `src/domain/pipeline/vba2AxleEngine.ts` | Passer `boussinesq.maxPressure_psi` au lieu de `BsnqIF` |
+| `src/domain/pipeline/vba3AxleEngine.ts` | Idem |
+| `src/domain/pipeline/vbaGridEngine.ts` | Idem |
 
-## Prochaines Étapes
+### Impact attendu
 
-1. **Confirmer avec l'Excel VBA** : Vérifier les valeurs exactes de Theta utilisées dans le VBA original
-2. **Appliquer les corrections** : Unifier les paramètres de bedding
-3. **Valider avec Example 1** : S'assurer que les calculs 3-Axle correspondent au manuel
+Le stress longitudinal devrait diminuer significativement et s'aligner avec les valeurs Excel (sigma_L_Total_Zero ~ 239161 kPa au lieu d'une valeur trop elevee). Le calcul passera alors le code check CSA Z662-2011.
 
