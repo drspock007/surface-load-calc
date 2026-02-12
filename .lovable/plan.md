@@ -1,64 +1,111 @@
 
 
-# Correction du calcul longitudinal : 2 bugs critiques
+# Module "Rayon de Courbure Minimal" (Minimum Bend Radius)
 
-## Problemes identifies
+## Concept
 
-### Bug 1 : Impact Factor double-compte
+Apres le calcul CEPA standard, le module determine la marge residuelle en contrainte longitudinale et en deduit le rayon de courbure minimal que le tuyau peut supporter sans depasser les limites admissibles.
 
-Dans `vba2AxleEngine.ts`, le Boussinesq est multiplie par l'impact factor AVANT d'etre passe a la fonction :
+### Formule
 
-```text
-BsnqIF = boussinesq.maxPressure_psi * impactFactorDepth   (ligne 199)
-```
-
-Puis dans `sharedCalculations.ts`, la fonction multiplie ENCORE par l'impact factor :
+La contrainte de flexion due a la courbure est :
 
 ```text
-Wsurf = Plive_psi * 2 * PI * H_in^2 / 3 * impactFactor   (ligne 143)
+sigma_bend = E * D / (2 * R)
 ```
 
-Resultat : l'impact factor est applique **deux fois**, gonflant artificiellement le stress longitudinal.
-
-Dans le VBA Track engine (correct), le Boussinesq brut est passe et l'impact factor n'est applique qu'une seule fois.
-
-### Bug 2 : Formule du moment de flexion incorrecte
-
-La formule du moment dans `sharedCalculations.ts` est une version simplifiee incorrecte :
+Donc le rayon minimal est :
 
 ```text
-M = (Ppipe * Lload^2 / (2*Lambda)) * (exp(-Lambda*x)*(cos-sin) + 1)
+R_min = E * D / (2 * sigma_remaining)
 ```
 
-Le VBA original utilise une formule beam-on-elastic-foundation avec deux cas distincts :
+Ou `sigma_remaining` est la marge disponible en contrainte longitudinale :
 
-- **Dans la zone de charge** (|x| <= Lload) : M = M1 + M2 (avec M2 = -Ppipe*x^2/2)
-- **Hors de la zone de charge** (|x| > Lload) : M = M1 + M2 (superposition de deux termes exponentiels)
+```text
+sigma_remaining = sigma_allowable - sigma_long_existing
+```
 
-Et il suit Mmax, Mmin1 (dans la zone), et Mmin2 (hors zone) separement.
+Le calcul sera fait pour les deux conditions (Zero Pressure et MOP), et le R_min le plus conservateur sera retenu. Le resultat sera presente en horizontal et vertical (memes valeurs physiquement, mais distinction utile pour l'utilisateur).
 
-## Correction proposee
+## Interface Utilisateur
 
-Remplacer la fonction `calculateLongitudinalLiveStress` dans `sharedCalculations.ts` par un port exact de la version VBA de `vbaTrackEngine.ts`.
+### Sur le formulaire (Calculator)
 
-### Changements cles
+- Un **Switch** "Enable Bend Radius Analysis" dans la section Analysis Parameters de chaque formulaire (Track, 2-Axle, 3-Axle, Grid)
+- Pas de champs supplementaires : le calcul utilise uniquement les donnees deja saisies
 
-1. **Signature de la fonction** : changer l'ordre des parametres pour correspondre au VBA Track engine, et passer le Boussinesq brut (sans impact factor) + impact factor separement
+### Sur la page Results
 
-2. **Formule du moment** : porter exactement la logique VBA avec les deux cas (inside/outside load region) et le suivi Mmax/Mmin1/Mmin2
+- Une nouvelle **Card** "Minimum Bend Radius" affichee uniquement si le switch est active
+- Contenu :
+  - R_min horizontal et vertical (en ft / m selon le systeme d'unites)
+  - Marge residuelle en contrainte longitudinale (psi / kPa)
+  - Condition determinante (Zero Pressure ou MOP)
+  - Indication Pass/Fail : si la marge est negative, le tuyau est deja en depassement sans courbure
 
-3. **Appels dans les engines** : modifier `vba2AxleEngine.ts`, `vba3AxleEngine.ts`, et `vbaGridEngine.ts` pour passer le Boussinesq brut au lieu de BsnqIF
-
-### Fichiers a modifier
+## Fichiers a Modifier
 
 | Fichier | Modification |
 |---------|-------------|
-| `src/domain/pipeline/sharedCalculations.ts` | Remplacer `calculateLongitudinalLiveStress` par le port VBA exact |
-| `src/domain/pipeline/vba2AxleEngine.ts` | Passer `boussinesq.maxPressure_psi` au lieu de `BsnqIF` |
+| `src/domain/pipeline/types.ts` | Ajouter `enableBendRadius: boolean` dans `PipelineTrackInputs` et `BendRadiusResults` dans les types de resultats |
+| `src/domain/pipeline/types2Axle.ts` | Idem pour `TwoAxleInputs` |
+| `src/domain/pipeline/types3Axle.ts` | Idem pour `ThreeAxleInputs` |
+| `src/domain/pipeline/typesGrid.ts` | Idem pour `GridLoadInputs` |
+| `src/domain/pipeline/bendRadiusCalculation.ts` | **Nouveau fichier** : fonction `calculateMinBendRadius()` |
+| `src/domain/pipeline/vbaTrackEngine.ts` | Appeler le calcul de bend radius si active |
+| `src/domain/pipeline/vba2AxleEngine.ts` | Idem |
 | `src/domain/pipeline/vba3AxleEngine.ts` | Idem |
 | `src/domain/pipeline/vbaGridEngine.ts` | Idem |
+| `src/components/AnalysisParametersSection.tsx` | Ajouter le Switch "Bend Radius Analysis" |
+| `src/components/PipelineTrackForm/index.tsx` | Ajouter le champ au schema et le passer |
+| `src/components/TwoAxleForm.tsx` | Idem |
+| `src/components/ThreeAxleForm.tsx` | Idem |
+| `src/components/GridLoadForm.tsx` | Idem |
+| `src/pages/Results.tsx` | Afficher la Card "Minimum Bend Radius" si les resultats existent |
 
-### Impact attendu
+## Details Techniques
 
-Le stress longitudinal devrait diminuer significativement et s'aligner avec les valeurs Excel (sigma_L_Total_Zero ~ 239161 kPa au lieu d'une valeur trop elevee). Le calcul passera alors le code check CSA Z662-2011.
+### Nouveau fichier `bendRadiusCalculation.ts`
+
+```text
+Entrees :
+  - D (diametre exterieur, inches)
+  - sigma_long_high_zero (contrainte longitudinale haute @ zero pressure)
+  - sigma_long_high_mop (contrainte longitudinale haute @ MOP)
+  - sigma_allowable_long (limite admissible longitudinale en psi)
+  - unitsSystem (EN ou SI)
+
+Sorties :
+  - R_min_ft (rayon minimal en ft ou m)
+  - sigma_remaining_psi (marge residuelle)
+  - governingCondition ("Zero Pressure" ou "MOP")
+  - hasMargin (boolean : true si marge > 0)
+```
+
+### Logique
+
+1. Calculer la marge pour chaque condition :
+   - `margin_zero = allowable - longHighZero`
+   - `margin_mop = allowable - longHighMOP`
+2. Prendre la marge la plus petite (condition la plus contraignante)
+3. Si marge <= 0 : pas de courbure possible, retourner `hasMargin = false`
+4. Sinon : `R_min = E * D / (2 * margin)`, convertir en ft puis en m si SI
+
+### Affichage Results
+
+Nouvelle Card entre "Stress Analysis" et "Pass/Fail Summary" :
+
+```text
+Minimum Bend Radius
+-------------------
+Governing Condition: [MOP / Zero Pressure]
+Remaining Long. Margin: [xxx] psi/kPa
+Min. Horizontal Radius: [xxx] ft/m
+Min. Vertical Radius:   [xxx] ft/m
+
+[Warning si hasMargin = false]
+"Pipe is already at or beyond longitudinal stress limits
+ without any curvature. No bend is permissible."
+```
 
