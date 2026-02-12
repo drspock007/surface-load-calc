@@ -24,7 +24,7 @@ const excelInputs: TwoAxleInputs = {
   pipeOD: 114.3,       // mm
   pipeWT: 6.02,        // mm
   MOP: 7070,           // kPa
-  SMYS: 359000,        // kPa (359 MPa)
+  SMYS: 359,           // MPa (converted to psi internally)
   deltaT: 65,          // °C
 
   // Soil properties

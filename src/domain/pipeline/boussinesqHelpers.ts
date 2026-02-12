@@ -133,3 +133,43 @@ export function generateStandardMeasurementPoints(
     { x: 0, y: 0, label: 'At pipe centerline' },
   ];
 }
+
+/**
+ * Generate measurement points by scanning along the pipeline axis (Y direction)
+ * to find the true maximum Boussinesq pressure. This matches the VBA Excel behavior
+ * which scans along the pipe rather than measuring at a single point.
+ * 
+ * @param pipeX_in - X position of the pipe (typically laneOffset in inches)
+ * @param axlePositions_Y - Y positions of each axle (inches)
+ * @param scanStep_in - spacing between scan points (default 3 inches for accuracy)
+ * @param margin_in - extra distance beyond outermost axle to scan (default 36 inches)
+ */
+export function generatePipeScanMeasurementPoints(
+  pipeX_in: number,
+  axlePositions_Y: number[],
+  scanStep_in: number = 3,
+  margin_in: number = 36
+): MeasurementPoint[] {
+  const minY = Math.min(...axlePositions_Y) - margin_in;
+  const maxY = Math.max(...axlePositions_Y) + margin_in;
+  
+  const points: MeasurementPoint[] = [];
+  for (let y = minY; y <= maxY; y += scanStep_in) {
+    points.push({
+      x: pipeX_in,
+      y,
+      label: `Pipe scan y=${y.toFixed(0)}"`,
+    });
+  }
+  
+  // Also add exact axle positions to ensure we don't miss them
+  for (const axleY of axlePositions_Y) {
+    points.push({
+      x: pipeX_in,
+      y: axleY,
+      label: `Under axle y=${axleY.toFixed(0)}"`,
+    });
+  }
+  
+  return points;
+}
