@@ -1,66 +1,74 @@
 
 
-# Correction du test 2-Axle et investigation de l'ecart longitudinal
+# Correction du calcul Boussinesq pour les vehicules 2-Axle et 3-Axle
 
-## Problemes identifies
+## Probleme racine
 
-### A. Parametres du test completement faux (8 erreurs)
+La fonction `generateStandardMeasurementPoints()` dans `boussinesqHelpers.ts` ne mesure la pression qu'a `(0, 0)`, soit le centre du vehicule. Pour un 2-Axle, les essieux sont a `y = +/- axleSpacing/2` (environ 83 pouces de part et d'autre). La pression maximale sur le pipeline se trouve directement sous l'essieu le plus lourd, pas au centre.
 
-Le test `vba2AxleEngine.test.ts` a ete cree avec des parametres qui ne correspondent pas a l'Excel :
+Le VBA Excel scanne le long du pipeline pour trouver le maximum. L'app ne mesure qu'en un seul point, d'ou une sous-estimation de ~10-15% de la pression de surface et par consequent du stress longitudinal.
 
-| Parametre | Excel | Test actuel | Correction |
-|-----------|-------|-------------|------------|
-| Densite sol | 1600 kg/m3 | 1800 | 1600 |
-| Profondeur H | 1.6 m | 1.2 | 1.6 |
-| Bedding angle | 30 deg | 90 | 30 |
-| Axle Width | 2929 mm | 2300 | 2929 |
-| Axle Spacing | 4.215 m | 4 | 4.215 |
-| Tire Width | 652 mm | 315 | 652 |
-| Tire Pressure | 71400 kg/m2 | 8 bar | 71400 kg/m2 |
-| Equiv Stress | Von Mises | Tresca | Von Mises |
-| E' method | N/A (lookup) | LOOKUP | Conserver LOOKUP |
-| Axle 1 tires | Single (2) | Dual (4) | 2 (contact=652=1x652) |
-| Axle 2 tires | Dual (4) | Dual (4) | 4 (contact=1304=2x652) |
+## Plan de correction
 
-### B. Ecart longitudinal meme avec bons parametres
+### Etape 1 : Modifier `boussinesqHelpers.ts`
 
-La fonction `calculateLongitudinalLiveStress()` dans `sharedCalculations.ts` utilise une discretisation numerique (boucle for avec stepSize) qui peut diverger de la formule analytique exacte du VBA Excel. Les points suspects :
+Ajouter une nouvelle fonction `generatePipeScanMeasurementPoints()` qui cree un ensemble de points le long de l'axe du pipeline (y variable) pour scanner la pression maximale :
 
-1. **stepSize trop grossier** : `Math.max(1, Lload/50)` pourrait manquer le pic de moment
-2. **Formule Wsurf** : `bsnq * 2*PI*H^2/3 * IF` est une approximation du VBA qui merite verification
-3. **Distribution Ppipe** : `Wsurf / (PI * Lload^2)` suppose une repartition uniforme
+- Scanner de `y = -maxExtent` a `y = +maxExtent` avec un pas fin (par exemple 6 pouces)
+- `maxExtent` = la position y de l'essieu le plus eloigne + une marge
+- `x` fixe a `laneOffset` (position laterale du pipeline)
+- Retourner tous les points pour que `calculateBoussinesqFromPoints` trouve le vrai maximum
 
-## Plan d'action
+### Etape 2 : Modifier `vba2AxleEngine.ts`
 
-### Etape 1 : Corriger le test avec les vrais parametres Excel
+Remplacer l'appel a `generateStandardMeasurementPoints(laneOffset, 0)` par la nouvelle fonction de scan, en passant les positions y des essieux pour definir la plage de scan.
 
-Modifier `src/domain/pipeline/__tests__/vba2AxleEngine.test.ts` :
-- Corriger tous les 8+ parametres d'entree pour correspondre exactement a l'Excel
-- Mettre les valeurs de reference Excel exactes (nouvelles valeurs de l'image) :
-  - sigma_H_Live_Zero = 17154 kPa
-  - sigma_H_Total_Zero = 23380 kPa
-  - sigma_H_Total_MOP = 88888 kPa
-  - sigma_L_Live_Zero = 48163 kPa
-  - sigma_L_Total_Zero = 207334 kPa
-  - sigma_L_Total_MOP = 226958 kPa
-  - sigma_E_Zero = 219958 kPa (Von Mises)
-  - sigma_E_MOP = 208025 kPa
+Concretement :
+- Passer les positions `axle1_Y` et `axle2_Y` pour definir la zone de scan
+- Scanner au minimum de `min(axle1_Y, axle2_Y) - marge` a `max(axle1_Y, axle2_Y) + marge`
+- Le pas de scan peut etre de 3 a 6 pouces pour un bon compromis precision/performance
 
-### Etape 2 : Executer le test et mesurer les ecarts exacts
+### Etape 3 : Modifier `vba3AxleEngine.ts`
 
-Lancer le test pour identifier precisement quelles valeurs intermediaires divergent (hoop live, longitudinal live, etc.) et de combien.
+Meme correction pour le moteur 3-Axle : scanner le long du pipeline au lieu de mesurer seulement a (0, 0).
 
-### Etape 3 : Affiner le calcul longitudinal si necessaire
+### Etape 4 : Corriger le test `vba2AxleEngine.test.ts`
 
-Si l'ecart sur sigma_L_Live depasse 10% :
-- Reduire le stepSize dans la boucle de moment (ligne 161)
-- Verifier la formule Wsurf contre le VBA original
-- Comparer la distribution de charge Ppipe avec le VBA
+- Changer `SMYS: 359000` en `SMYS: 359` (le formulaire entre en MPa, pas kPa)
+- Mettre a jour les valeurs attendues avec les references Excel exactes
+
+### Etape 5 : Valider les resultats
+
+Verifier que les nouvelles valeurs de stress correspondent aux references Excel :
+- sigma_H_Total_Zero ~= 23,380 kPa
+- sigma_L_Total_Zero ~= 207,334 kPa  
+- sigma_L_Total_MOP ~= 226,958 kPa
+- sigma_E_Zero ~= 219,958 kPa (Von Mises)
+
+## Details techniques
+
+### Nouvelle fonction dans `boussinesqHelpers.ts`
+
+```text
+generatePipeScanMeasurementPoints(
+  laneOffset_in: number,
+  axlePositions_Y: number[],   // positions Y de chaque essieu
+  scanStep_in: number = 6      // pas de scan (pouces)
+): MeasurementPoint[]
+```
+
+Genere des points de (minY - 2*scanStep) a (maxY + 2*scanStep) le long du pipeline a x = laneOffset_in.
+
+### Impact sur la performance
+
+Le nombre de points de mesure augmente (de 2 a environ 30-50 selon l'espacement des essieux), mais le calcul reste rapide car la boucle Boussinesq est O(pointLoads x measurementPoints).
 
 ### Fichiers modifies
 
 | Fichier | Modification |
 |---------|-------------|
-| `src/domain/pipeline/__tests__/vba2AxleEngine.test.ts` | Corriger les parametres + valeurs de reference |
-| `src/domain/pipeline/sharedCalculations.ts` | Potentiellement affiner la discretisation longitudinale |
+| `src/domain/pipeline/boussinesqHelpers.ts` | Ajouter `generatePipeScanMeasurementPoints()` |
+| `src/domain/pipeline/vba2AxleEngine.ts` | Utiliser le scan au lieu de 2 points fixes |
+| `src/domain/pipeline/vba3AxleEngine.ts` | Meme correction |
+| `src/domain/pipeline/__tests__/vba2AxleEngine.test.ts` | Corriger SMYS et valeurs attendues |
 
