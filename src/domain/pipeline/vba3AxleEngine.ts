@@ -9,6 +9,7 @@ import {
   calculateBoussinesqFromPoints, 
   generateRectangularGrid, 
   generateStandardMeasurementPoints,
+  generatePipeScanMeasurementPoints,
   PointLoad 
 } from './boussinesqHelpers';
 import { calculateContactPatch, convertTirePressureToPsi } from './tirePatchCalculations';
@@ -212,7 +213,10 @@ export function calculate3AxleVehicleVBA(inputs: ThreeAxleInputs): ThreeAxleResu
     ...axle3LeftLoads, ...axle3RightLoads
   );
   
-  const measurementPoints = generateStandardMeasurementPoints(inputsEN.laneOffset_ft * 12, 0);
+  const measurementPoints = generatePipeScanMeasurementPoints(
+    inputsEN.laneOffset_ft * 12,
+    [axle1_Y, axle2_Y, axle3_Y]
+  );
   const boussinesq = calculateBoussinesqFromPoints(pointLoads, measurementPoints, inputsEN.H_ft);
   const impactResult = calculateImpactFactor(inputs.vehicleClass, inputs.pavementType, inputsEN.H_ft);
   const BsnqIF = boussinesq.maxPressure_psi * impactResult.impactFactorDepth;

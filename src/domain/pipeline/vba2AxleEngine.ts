@@ -10,6 +10,7 @@ import {
   calculateBoussinesqFromPoints, 
   generateRectangularGrid, 
   generateStandardMeasurementPoints,
+  generatePipeScanMeasurementPoints,
   PointLoad 
 } from './boussinesqHelpers';
 import { calculateContactPatch, convertTirePressureToPsi } from './tirePatchCalculations';
@@ -177,10 +178,10 @@ export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults 
   
   pointLoads.push(...axle1LeftLoads, ...axle1RightLoads, ...axle2LeftLoads, ...axle2RightLoads);
   
-  // Measurement points
-  const measurementPoints = generateStandardMeasurementPoints(
-    inputsEN.laneOffset_ft * 12,
-    0
+  // Measurement points - scan along pipeline to find true max pressure
+  const measurementPoints = generatePipeScanMeasurementPoints(
+    laneOffset_in,
+    [axle1_Y, axle2_Y]
   );
   
   // Calculate Boussinesq
