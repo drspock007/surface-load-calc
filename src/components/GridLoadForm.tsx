@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Calculator as CalcIcon } from "lucide-react";
+import { PresetManager } from "@/components/PresetManager";
 import { GridLoadInputs, UnitsSystem, SoilLoadMethod, EPrimeMethod, BeddingAngleDeg, EquivStressMethod, CodeCheck, SoilType, Compaction, PavementType, VehicleClass } from "@/domain/pipeline/typesGrid";
 import { PipeSelector } from "./PipelineTrackForm/PipeSelector";
 import { SoilLoadSection } from "./PipelineTrackForm/SoilLoadSection";
@@ -214,9 +215,26 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
         <CardHeader>
           <CardTitle>Calculation Name</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Input placeholder="e.g., Storage Area Load" {...register("calculationName")} />
-          {errors.calculationName && <p className="text-sm text-destructive mt-1">{errors.calculationName.message}</p>}
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Input placeholder="e.g., Storage Area Load" {...register("calculationName")} />
+            {errors.calculationName && <p className="text-sm text-destructive mt-1">{errors.calculationName.message}</p>}
+          </div>
+          <PresetManager
+            mode="grid"
+            getCurrentValues={() => watch() as unknown as Record<string, unknown>}
+            onLoad={(values) => {
+              const vals = values as Record<string, unknown>;
+              if (vals.unitsSystem && vals.unitsSystem !== unitsSystem) {
+                setUnitsSystem(vals.unitsSystem as "EN" | "SI");
+              }
+              Object.entries(vals).forEach(([key, val]) => {
+                if (key !== "calculationName") {
+                  setValue(key as keyof GridLoadFormData, val as any);
+                }
+              });
+            }}
+          />
         </CardContent>
       </Card>
 
