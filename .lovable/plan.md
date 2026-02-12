@@ -1,111 +1,64 @@
 
 
-# Module "Rayon de Courbure Minimal" (Minimum Bend Radius)
+# Sauvegarde et chargement des parametres de calcul (Presets)
 
-## Concept
+## Objectif
 
-Apres le calcul CEPA standard, le module determine la marge residuelle en contrainte longitudinale et en deduit le rayon de courbure minimal que le tuyau peut supporter sans depasser les limites admissibles.
+Permettre a l'utilisateur de sauvegarder ses parametres de calcul sous un nom, puis de les recharger rapidement pour eviter de tout ressaisir a chaque nouveau calcul.
 
-### Formule
+## Fonctionnement
 
-La contrainte de flexion due a la courbure est :
+- **Sauvegarder** : Un bouton "Save Preset" a cote du bouton Calculate permet de sauvegarder tous les parametres actuels du formulaire sous un nom choisi par l'utilisateur
+- **Charger** : Un menu deroulant "Load Preset" en haut du formulaire (dans la carte "Calculation Name") permet de selectionner un preset sauvegarde et pre-remplir automatiquement tous les champs
+- **Supprimer** : Chaque preset peut etre supprime individuellement depuis le menu deroulant
+- **Stockage** : Les presets sont sauvegardes dans le localStorage du navigateur, separes par mode de calcul (Track, 2-Axle, 3-Axle, Grid)
 
-```text
-sigma_bend = E * D / (2 * R)
-```
+## Interface
 
-Donc le rayon minimal est :
+### Carte "Calculation Name" (haut du formulaire)
 
-```text
-R_min = E * D / (2 * sigma_remaining)
-```
+Un selecteur "Load Preset" sera ajoute a cote du champ "Name". Quand l'utilisateur selectionne un preset :
+- Tous les champs du formulaire sont pre-remplis avec les valeurs sauvegardees
+- Le nom du calcul reste editable
 
-Ou `sigma_remaining` est la marge disponible en contrainte longitudinale :
+### Bas du formulaire (a cote du bouton Calculate)
 
-```text
-sigma_remaining = sigma_allowable - sigma_long_existing
-```
+Un bouton secondaire "Save Preset" ouvre une petite boite de dialogue demandant un nom pour le preset, puis sauvegarde les valeurs actuelles.
 
-Le calcul sera fait pour les deux conditions (Zero Pressure et MOP), et le R_min le plus conservateur sera retenu. Le resultat sera presente en horizontal et vertical (memes valeurs physiquement, mais distinction utile pour l'utilisateur).
+## Details techniques
 
-## Interface Utilisateur
+### Nouveau fichier : `src/utils/presetStorage.ts`
 
-### Sur le formulaire (Calculator)
+Fonctions utilitaires pour gerer les presets dans le localStorage :
+- `getPresets(mode)` : recupere la liste des presets pour un mode donne
+- `savePreset(mode, name, values)` : sauvegarde un preset (max 20 par mode)
+- `deletePreset(mode, name)` : supprime un preset
+- Cle localStorage : `surface-loading-presets-{mode}`
+- Validation Zod pour la structure des presets
 
-- Un **Switch** "Enable Bend Radius Analysis" dans la section Analysis Parameters de chaque formulaire (Track, 2-Axle, 3-Axle, Grid)
-- Pas de champs supplementaires : le calcul utilise uniquement les donnees deja saisies
+### Nouveau composant : `src/components/PresetManager.tsx`
 
-### Sur la page Results
+Composant reutilisable contenant :
+- Le selecteur de preset (Select de shadcn/ui)
+- Le bouton "Save Preset" avec Dialog pour le nom
+- Le bouton de suppression par preset
+- Props : `mode`, `onLoad(values)`, `getCurrentValues()`
 
-- Une nouvelle **Card** "Minimum Bend Radius" affichee uniquement si le switch est active
-- Contenu :
-  - R_min horizontal et vertical (en ft / m selon le systeme d'unites)
-  - Marge residuelle en contrainte longitudinale (psi / kPa)
-  - Condition determinante (Zero Pressure ou MOP)
-  - Indication Pass/Fail : si la marge est negative, le tuyau est deja en depassement sans courbure
-
-## Fichiers a Modifier
+### Fichiers a modifier
 
 | Fichier | Modification |
 |---------|-------------|
-| `src/domain/pipeline/types.ts` | Ajouter `enableBendRadius: boolean` dans `PipelineTrackInputs` et `BendRadiusResults` dans les types de resultats |
-| `src/domain/pipeline/types2Axle.ts` | Idem pour `TwoAxleInputs` |
-| `src/domain/pipeline/types3Axle.ts` | Idem pour `ThreeAxleInputs` |
-| `src/domain/pipeline/typesGrid.ts` | Idem pour `GridLoadInputs` |
-| `src/domain/pipeline/bendRadiusCalculation.ts` | **Nouveau fichier** : fonction `calculateMinBendRadius()` |
-| `src/domain/pipeline/vbaTrackEngine.ts` | Appeler le calcul de bend radius si active |
-| `src/domain/pipeline/vba2AxleEngine.ts` | Idem |
-| `src/domain/pipeline/vba3AxleEngine.ts` | Idem |
-| `src/domain/pipeline/vbaGridEngine.ts` | Idem |
-| `src/components/AnalysisParametersSection.tsx` | Ajouter le Switch "Bend Radius Analysis" |
-| `src/components/PipelineTrackForm/index.tsx` | Ajouter le champ au schema et le passer |
+| `src/utils/presetStorage.ts` | Nouveau : fonctions CRUD pour les presets |
+| `src/components/PresetManager.tsx` | Nouveau : composant UI selecteur + sauvegarde |
+| `src/components/PipelineTrackForm/index.tsx` | Ajouter PresetManager, logique load/save |
 | `src/components/TwoAxleForm.tsx` | Idem |
 | `src/components/ThreeAxleForm.tsx` | Idem |
 | `src/components/GridLoadForm.tsx` | Idem |
-| `src/pages/Results.tsx` | Afficher la Card "Minimum Bend Radius" si les resultats existent |
 
-## Details Techniques
+### Logique de chargement
 
-### Nouveau fichier `bendRadiusCalculation.ts`
-
-```text
-Entrees :
-  - D (diametre exterieur, inches)
-  - sigma_long_high_zero (contrainte longitudinale haute @ zero pressure)
-  - sigma_long_high_mop (contrainte longitudinale haute @ MOP)
-  - sigma_allowable_long (limite admissible longitudinale en psi)
-  - unitsSystem (EN ou SI)
-
-Sorties :
-  - R_min_ft (rayon minimal en ft ou m)
-  - sigma_remaining_psi (marge residuelle)
-  - governingCondition ("Zero Pressure" ou "MOP")
-  - hasMargin (boolean : true si marge > 0)
-```
-
-### Logique
-
-1. Calculer la marge pour chaque condition :
-   - `margin_zero = allowable - longHighZero`
-   - `margin_mop = allowable - longHighMOP`
-2. Prendre la marge la plus petite (condition la plus contraignante)
-3. Si marge <= 0 : pas de courbure possible, retourner `hasMargin = false`
-4. Sinon : `R_min = E * D / (2 * margin)`, convertir en ft puis en m si SI
-
-### Affichage Results
-
-Nouvelle Card entre "Stress Analysis" et "Pass/Fail Summary" :
-
-```text
-Minimum Bend Radius
--------------------
-Governing Condition: [MOP / Zero Pressure]
-Remaining Long. Margin: [xxx] psi/kPa
-Min. Horizontal Radius: [xxx] ft/m
-Min. Vertical Radius:   [xxx] ft/m
-
-[Warning si hasMargin = false]
-"Pipe is already at or beyond longitudinal stress limits
- without any curvature. No bend is permissible."
-```
+Quand un preset est charge :
+1. Le systeme d'unites du preset est applique en premier
+2. Tous les champs sont mis a jour via `setValue()` de react-hook-form
+3. Le nom du calcul n'est PAS ecrase (l'utilisateur le choisit lui-meme)
 
