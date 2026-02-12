@@ -1,64 +1,45 @@
 
 
-# Sauvegarde et chargement des parametres de calcul (Presets)
+# Test unitaire Vitest pour le moteur 2-Axle (comparaison Excel)
 
 ## Objectif
 
-Permettre a l'utilisateur de sauvegarder ses parametres de calcul sous un nom, puis de les recharger rapidement pour eviter de tout ressaisir a chaque nouveau calcul.
+Creer un fichier de test `src/domain/pipeline/__tests__/vba2AxleEngine.test.ts` qui valide le moteur 2-Axle contre les valeurs de reference Excel fournies dans la capture d'ecran.
 
-## Fonctionnement
+## Parametres du test (d'apres l'image Excel)
 
-- **Sauvegarder** : Un bouton "Save Preset" a cote du bouton Calculate permet de sauvegarder tous les parametres actuels du formulaire sous un nom choisi par l'utilisateur
-- **Charger** : Un menu deroulant "Load Preset" en haut du formulaire (dans la carte "Calculation Name") permet de selectionner un preset sauvegarde et pre-remplir automatiquement tous les champs
-- **Supprimer** : Chaque preset peut etre supprime individuellement depuis le menu deroulant
-- **Stockage** : Les presets sont sauvegardes dans le localStorage du navigateur, separes par mode de calcul (Track, 2-Axle, 3-Axle, Grid)
+- **Pipe** : D=114.3 mm, t=6.02 mm, MOP=7070 kPa, SMYS=359 MPa, deltaT=65 C
+- **Sol** : densite=1800 kg/m3, H=1.2 m, bedding=90 deg, methode Prism, friction=30 deg
+- **E'** : Lookup, Coarse with fines, 90% compaction
+- **Vehicle** : Farm (IF=1.25), 2 essieux
+  - Axle 1 : 36000 kg (front)
+  - Axle 2 : 67000 kg (rear)
+  - Axle Spacing : ~4 m
+  - Tire Width : 315 mm, mode AUTO, pression ~8 bar
+  - Axle Width : 2300 mm, lane offset : 0
+- **Analyse** : Flexible pavement, Tresca, CSA Z662
 
-## Interface
+## Valeurs de reference Excel
 
-### Carte "Calculation Name" (haut du formulaire)
+| Grandeur | Valeur attendue |
+|----------|----------------|
+| sigma_H_Total_Zero | ~32 100 kPa |
+| sigma_L_Total_Zero | ~239 161 kPa |
+| sigma_E_Zero (Tresca) | ~271 261 kPa |
 
-Un selecteur "Load Preset" sera ajoute a cote du champ "Name". Quand l'utilisateur selectionne un preset :
-- Tous les champs du formulaire sont pre-remplis avec les valeurs sauvegardees
-- Le nom du calcul reste editable
+## Structure du test
 
-### Bas du formulaire (a cote du bouton Calculate)
+Le test suivra le meme patron que `vba3AxleEngine.test.ts` :
 
-Un bouton secondaire "Save Preset" ouvre une petite boite de dialogue demandant un nom pour le preset, puis sauvegarde les valeurs actuelles.
+1. Definition des inputs SI
+2. Appel de `calculate2AxleVehicleVBA(inputs)`
+3. Les resultats sont deja en kPa (car `unitsSystem: 'SI'`)
+4. Comparaison avec tolerance de 10% (pour tenir compte des differences d'interpolation et de discretisation Boussinesq)
+5. Verification de la structure des resultats et des valeurs debug
 
-## Details techniques
+## Fichier a creer
 
-### Nouveau fichier : `src/utils/presetStorage.ts`
+`src/domain/pipeline/__tests__/vba2AxleEngine.test.ts`
 
-Fonctions utilitaires pour gerer les presets dans le localStorage :
-- `getPresets(mode)` : recupere la liste des presets pour un mode donne
-- `savePreset(mode, name, values)` : sauvegarde un preset (max 20 par mode)
-- `deletePreset(mode, name)` : supprime un preset
-- Cle localStorage : `surface-loading-presets-{mode}`
-- Validation Zod pour la structure des presets
-
-### Nouveau composant : `src/components/PresetManager.tsx`
-
-Composant reutilisable contenant :
-- Le selecteur de preset (Select de shadcn/ui)
-- Le bouton "Save Preset" avec Dialog pour le nom
-- Le bouton de suppression par preset
-- Props : `mode`, `onLoad(values)`, `getCurrentValues()`
-
-### Fichiers a modifier
-
-| Fichier | Modification |
-|---------|-------------|
-| `src/utils/presetStorage.ts` | Nouveau : fonctions CRUD pour les presets |
-| `src/components/PresetManager.tsx` | Nouveau : composant UI selecteur + sauvegarde |
-| `src/components/PipelineTrackForm/index.tsx` | Ajouter PresetManager, logique load/save |
-| `src/components/TwoAxleForm.tsx` | Idem |
-| `src/components/ThreeAxleForm.tsx` | Idem |
-| `src/components/GridLoadForm.tsx` | Idem |
-
-### Logique de chargement
-
-Quand un preset est charge :
-1. Le systeme d'unites du preset est applique en premier
-2. Tous les champs sont mis a jour via `setValue()` de react-hook-form
-3. Le nom du calcul n'est PAS ecrase (l'utilisateur le choisit lui-meme)
+**Note** : Certains parametres (nombre de pneus par essieu, espacement exact, etc.) devront peut-etre etre ajustes apres un premier run du test si les ecarts sont trop importants. Le test servira aussi de base pour investiguer les differences eventuelles.
 
