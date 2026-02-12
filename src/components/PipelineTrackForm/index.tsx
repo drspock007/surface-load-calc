@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Calculator as CalcIcon } from "lucide-react";
+import { PresetManager } from "@/components/PresetManager";
 import { 
   PipelineTrackInputs, 
   UnitsSystem,
@@ -196,7 +197,7 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
         <CardHeader>
           <CardTitle>Calculation Name</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Name *</Label>
             <Input
@@ -208,6 +209,21 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
               <p className="text-sm text-destructive">{errors.calculationName.message}</p>
             )}
           </div>
+          <PresetManager
+            mode="track"
+            getCurrentValues={() => watch() as unknown as Record<string, unknown>}
+            onLoad={(values) => {
+              const vals = values as Record<string, unknown>;
+              if (vals.unitsSystem && vals.unitsSystem !== unitsSystem) {
+                setUnitsSystem(vals.unitsSystem as "EN" | "SI");
+              }
+              Object.entries(vals).forEach(([key, val]) => {
+                if (key !== "calculationName") {
+                  setValue(key as keyof PipelineFormData, val as any);
+                }
+              });
+            }}
+          />
         </CardContent>
       </Card>
 
@@ -243,10 +259,12 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
         unitsSystem={unitsSystem}
       />
 
-      <Button type="submit" className="w-full" size="lg">
-        <CalcIcon className="w-5 h-5 mr-2" />
-        Calculate Pipeline Track
-      </Button>
+      <div className="flex gap-3">
+        <Button type="submit" className="flex-1" size="lg">
+          <CalcIcon className="w-5 h-5 mr-2" />
+          Calculate Pipeline Track
+        </Button>
+      </div>
     </form>
   );
 };
