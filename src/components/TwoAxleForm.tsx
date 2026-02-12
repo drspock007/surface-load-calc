@@ -64,6 +64,7 @@ const twoAxleSchema = z.object({
     longLimitPct: z.number().min(0).max(100),
     equivLimitPct: z.number().min(0).max(100),
   }).optional(),
+  enableBendRadius: z.boolean().optional(),
 });
 
 type TwoAxleFormData = z.infer<typeof twoAxleSchema>;
@@ -243,6 +244,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
         ? { userDefinedLimits: data.userDefinedLimits as { hoopLimitPct: number; longLimitPct: number; equivLimitPct: number } }
         : {}
       ),
+      enableBendRadius: data.enableBendRadius,
     };
     onCalculate(inputs);
   };

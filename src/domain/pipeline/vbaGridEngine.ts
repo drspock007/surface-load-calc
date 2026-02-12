@@ -21,6 +21,7 @@ import {
   calculatePassFail,
   convertPressureToUserUnits,
 } from './sharedCalculations';
+import { calculateMinBendRadius } from './bendRadiusCalculation';
 
 function convertInputsToEN(inputs: GridLoadInputs): any {
   const isMetric = inputs.unitsSystem === 'SI';
@@ -315,5 +316,12 @@ export function calculateGridLoadVBA(inputs: GridLoadInputs): GridLoadResults {
       longInt_psi: convertPressureToUserUnits(results.debug.longInt_psi, inputs.unitsSystem),
       longTherm_psi: convertPressureToUserUnits(results.debug.longTherm_psi, inputs.unitsSystem),
     },
+    bendRadius: inputs.enableBendRadius ? calculateMinBendRadius({
+      D_in: inputsEN.D_in,
+      longHighZero_psi: longZeroHigh,
+      longHighMOP_psi: longMOPHigh,
+      longAllowable_psi: (passFailResult.limitsUsed.longLimitPct / 100) * inputsEN.SMYS_psi,
+      unitsSystem: inputs.unitsSystem,
+    }) : undefined,
   };
 }

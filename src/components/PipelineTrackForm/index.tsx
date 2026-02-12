@@ -53,6 +53,7 @@ const pipelineSchema = z.object({
     longLimitPct: z.number().min(0).max(100),
     equivLimitPct: z.number().min(0).max(100),
   }).optional(),
+  enableBendRadius: z.boolean().optional(),
 });
 
 type PipelineFormData = z.infer<typeof pipelineSchema>;
@@ -134,6 +135,7 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
         ? { userDefinedLimits: data.userDefinedLimits as { hoopLimitPct: number; longLimitPct: number; equivLimitPct: number } }
         : {}
       ),
+      enableBendRadius: data.enableBendRadius,
     };
     onCalculate(inputs);
   };

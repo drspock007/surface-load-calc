@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ArrowLeft, CheckCircle2, XCircle, FileDown } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle, FileDown, AlertTriangle } from "lucide-react";
 import { CalculationRun } from "@/types/calculation";
 import { PipelineTrackResults } from "@/domain/pipeline/types";
 import { TwoAxleResults } from "@/domain/pipeline/types2Axle";
@@ -251,6 +251,85 @@ const Results = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Minimum Bend Radius Card */}
+            {pipelineResult.bendRadius && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    Minimum Bend Radius
+                    {!pipelineResult.bendRadius.hasMargin && (
+                      <AlertTriangle className="h-5 w-5 text-destructive" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {pipelineResult.bendRadius.hasMargin ? (
+                    <div className="space-y-4">
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="p-3 bg-muted/50 rounded">
+                          <p className="text-xs text-muted-foreground mb-1">Governing Condition</p>
+                          <p className="text-lg font-semibold">{pipelineResult.bendRadius.governingCondition}</p>
+                        </div>
+                        <div className="p-3 bg-muted/50 rounded">
+                          <p className="text-xs text-muted-foreground mb-1">Remaining Long. Margin</p>
+                          <p className="text-lg font-semibold font-mono">
+                            {formatValue(pipelineResult.bendRadius.sigmaRemaining)} {units.stress}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="p-3 bg-primary/5 border border-primary/20 rounded">
+                          <p className="text-xs text-muted-foreground mb-1">Min. Horizontal Radius</p>
+                          <p className="text-xl font-bold font-mono">
+                            {formatValue(pipelineResult.bendRadius.minRadius, 1)} {unitsSystem === 'EN' ? 'ft' : 'm'}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-primary/5 border border-primary/20 rounded">
+                          <p className="text-xs text-muted-foreground mb-1">Min. Vertical Radius</p>
+                          <p className="text-xl font-bold font-mono">
+                            {formatValue(pipelineResult.bendRadius.minRadius, 1)} {unitsSystem === 'EN' ? 'ft' : 'm'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2 text-sm">
+                        <div className="p-2 bg-muted/30 rounded">
+                          <p className="text-xs text-muted-foreground">Margin @ Zero Pressure</p>
+                          <p className="font-mono">{formatValue(pipelineResult.bendRadius.marginZero)} {units.stress}</p>
+                        </div>
+                        <div className="p-2 bg-muted/30 rounded">
+                          <p className="text-xs text-muted-foreground">Margin @ MOP</p>
+                          <p className="font-mono">{formatValue(pipelineResult.bendRadius.marginMOP)} {units.stress}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+                        <div>
+                          <p className="font-semibold text-destructive">No Bend Permissible</p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Pipe is already at or beyond longitudinal stress limits without any curvature.
+                            No bend is permissible under the current loading conditions.
+                          </p>
+                          <div className="grid gap-2 md:grid-cols-2 mt-3 text-sm">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Margin @ Zero Pressure</p>
+                              <p className="font-mono text-destructive">{formatValue(pipelineResult.bendRadius.marginZero)} {units.stress}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Margin @ MOP</p>
+                              <p className="font-mono text-destructive">{formatValue(pipelineResult.bendRadius.marginMOP)} {units.stress}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             <Card className="mb-6">
               <CardHeader>

@@ -54,6 +54,7 @@ export interface PipelineTrackInputs {
     longLimitPct: number; // % SMYS
     equivLimitPct: number; // % SMYS
   }; // if USER_DEFINED
+  enableBendRadius?: boolean;
 }
 
 export interface StressComponents {
@@ -157,4 +158,7 @@ export interface PipelineTrackResults {
   
   // Debug values
   debug: DebugValues;
+  
+  // Optional bend radius results
+  bendRadius?: import('./bendRadiusCalculation').BendRadiusResults;
 }
