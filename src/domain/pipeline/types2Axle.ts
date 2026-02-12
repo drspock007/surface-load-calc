@@ -65,6 +65,7 @@ export interface TwoAxleInputs {
     longLimitPct: number;
     equivLimitPct: number;
   };
+  enableBendRadius?: boolean;
 }
 
 export interface TwoAxleResults {
@@ -79,4 +80,5 @@ export interface TwoAxleResults {
   soilLoadOnPipe: number;
   deflectionRatio: number;
   debug: DebugValues;
+  bendRadius?: import('./bendRadiusCalculation').BendRadiusResults;
 }

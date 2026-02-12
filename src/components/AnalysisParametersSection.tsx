@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { PavementType, VehicleClass, EquivStressMethod, CodeCheck, UnitsSystem } from "@/domain/pipeline/types";
 import { getCodeLabel, getCodeDescription, CODE_PROFILES } from "@/domain/pipeline/codeProfiles";
 
@@ -177,6 +178,22 @@ export const AnalysisParametersSection = ({
             </div>
           </div>
         )}
+
+        <div className="border-t pt-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="enableBendRadius" className="text-sm font-medium">Bend Radius Analysis</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Calculate minimum permissible horizontal &amp; vertical bend radius
+              </p>
+            </div>
+            <Switch
+              id="enableBendRadius"
+              checked={watch("enableBendRadius") || false}
+              onCheckedChange={(checked) => setValue("enableBendRadius", checked)}
+            />
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

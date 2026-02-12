@@ -51,6 +51,7 @@ export interface GridLoadInputs {
     longLimitPct: number;
     equivLimitPct: number;
   };
+  enableBendRadius?: boolean;
 }
 
 export interface GridLoadResults {
@@ -65,4 +66,5 @@ export interface GridLoadResults {
   soilLoadOnPipe: number;
   deflectionRatio: number;
   debug: DebugValues;
+  bendRadius?: import('./bendRadiusCalculation').BendRadiusResults;
 }

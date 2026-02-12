@@ -72,6 +72,7 @@ const threeAxleSchema = z.object({
     longLimitPct: z.number().min(0).max(100),
     equivLimitPct: z.number().min(0).max(100),
   }).optional(),
+  enableBendRadius: z.boolean().optional(),
 });
 
 type ThreeAxleFormData = z.infer<typeof threeAxleSchema>;
@@ -299,6 +300,7 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
         ? { userDefinedLimits: data.userDefinedLimits as { hoopLimitPct: number; longLimitPct: number; equivLimitPct: number } }
         : {}
       ),
+      enableBendRadius: data.enableBendRadius,
     };
     onCalculate(inputs);
   };

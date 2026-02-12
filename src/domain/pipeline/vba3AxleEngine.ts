@@ -12,6 +12,7 @@ import {
   PointLoad 
 } from './boussinesqHelpers';
 import { calculateContactPatch, convertTirePressureToPsi } from './tirePatchCalculations';
+import { calculateMinBendRadius } from './bendRadiusCalculation';
 import {
   calculateBeddingParams,
   calculateEPrime,
@@ -424,5 +425,12 @@ export function calculate3AxleVehicleVBA(inputs: ThreeAxleInputs): ThreeAxleResu
       longInt_psi: convertPressureToUserUnits(results.debug.longInt_psi, inputs.unitsSystem),
       longTherm_psi: convertPressureToUserUnits(results.debug.longTherm_psi, inputs.unitsSystem),
     },
+    bendRadius: inputs.enableBendRadius ? calculateMinBendRadius({
+      D_in: inputsEN.D_in,
+      longHighZero_psi: longZeroHigh,
+      longHighMOP_psi: longMOPHigh,
+      longAllowable_psi: (passFailResult.limitsUsed.longLimitPct / 100) * inputsEN.SMYS_psi,
+      unitsSystem: inputs.unitsSystem,
+    }) : undefined,
   };
 }

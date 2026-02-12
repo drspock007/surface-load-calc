@@ -6,6 +6,7 @@
 import { PipelineTrackInputs, PipelineTrackResults, DebugValues, LimitsUsed } from './types';
 import { getCodeProfile, getCodeLabel } from './codeProfiles';
 import { calculateEPrimeFromLookup } from './ePrimeLookup';
+import { calculateMinBendRadius } from './bendRadiusCalculation';
 
 // VBA Constants
 const PI = Math.PI;
@@ -623,6 +624,21 @@ export function calculateTrackVehicleVBA(inputs: PipelineTrackInputs): PipelineT
     deflectionRatio,
     debug: convertDebugToUserUnits(debug, inputs.unitsSystem),
   };
+  
+  // Bend radius calculation (optional)
+  if (inputs.enableBendRadius) {
+    const profile = inputsEN.codeCheck === 'USER_DEFINED' ? null : getCodeProfile(inputsEN.codeCheck);
+    const longLimitFraction = profile ? profile.longLimitPct / 100 : (inputsEN.userDefinedLongLimit || 0.9);
+    const longAllowable_psi = longLimitFraction * inputsEN.SMYS_psi;
+    
+    results.bendRadius = calculateMinBendRadius({
+      D_in: inputsEN.D_in,
+      longHighZero_psi: longZeroHigh,
+      longHighMOP_psi: longMOPHigh,
+      longAllowable_psi,
+      unitsSystem: inputs.unitsSystem,
+    });
+  }
   
   return results;
 }

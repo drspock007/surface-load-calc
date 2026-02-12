@@ -74,6 +74,7 @@ export interface ThreeAxleInputs {
     longLimitPct: number;
     equivLimitPct: number;
   };
+  enableBendRadius?: boolean;
 }
 
 export interface ThreeAxleResults {
@@ -88,4 +89,5 @@ export interface ThreeAxleResults {
   soilLoadOnPipe: number;
   deflectionRatio: number;
   debug: DebugValues;
+  bendRadius?: import('./bendRadiusCalculation').BendRadiusResults;
 }
