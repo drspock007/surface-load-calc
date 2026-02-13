@@ -14,7 +14,7 @@ const getUnitLabels = (system: UnitsSystem) => ({
   pressure: system === 'EN' ? 'psi' : 'kPa',
   stress: system === 'EN' ? 'psi' : 'MPa',
   force: system === 'EN' ? 'lb' : 'kg',
-  density: system === 'EN' ? 'pcf' : 'kN/m³',
+  density: system === 'EN' ? 'pcf' : 'kg/m³',
   temperature: system === 'EN' ? '°F' : '°C',
 });
 
