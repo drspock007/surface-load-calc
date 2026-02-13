@@ -1,4 +1,6 @@
 import React from 'react';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 
 const styles: Record<string, React.CSSProperties> = {
   doc: { fontFamily: 'Georgia, "Times New Roman", serif', color: '#111', background: '#fff', maxWidth: 850, margin: '0 auto', padding: '40px 60px', lineHeight: 1.7, fontSize: 14 },
@@ -8,7 +10,7 @@ const styles: Record<string, React.CSSProperties> = {
   h1: { fontSize: 22, fontWeight: 700, borderBottom: '2px solid #222', paddingBottom: 4, marginTop: 36, marginBottom: 12, pageBreakBefore: 'always' as const },
   h2: { fontSize: 17, fontWeight: 700, marginTop: 24, marginBottom: 8 },
   h3: { fontSize: 15, fontWeight: 700, marginTop: 16, marginBottom: 6 },
-  formula: { fontFamily: '"Courier New", monospace', background: '#f5f5f0', padding: '8px 12px', margin: '8px 0', borderLeft: '3px solid #ff8f05', display: 'block', fontSize: 13, overflowX: 'auto' as const },
+  formulaBlock: { background: '#f5f5f0', padding: '10px 16px', margin: '8px 0', borderLeft: '3px solid #ff8f05', display: 'block', overflowX: 'auto' as const },
   table: { borderCollapse: 'collapse' as const, width: '100%', margin: '12px 0', fontSize: 13 },
   th: { border: '1px solid #333', padding: '6px 10px', background: '#222', color: '#fff', fontWeight: 600, textAlign: 'center' as const },
   td: { border: '1px solid #999', padding: '5px 10px', textAlign: 'center' as const },
@@ -20,8 +22,17 @@ const styles: Record<string, React.CSSProperties> = {
   pageBreak: { pageBreakBefore: 'always' as const },
 };
 
-const F = ({ children }: { children: React.ReactNode }) => <code style={styles.formula}>{children}</code>;
-const Var = ({ children }: { children: React.ReactNode }) => <span style={{ fontFamily: '"Courier New", monospace', fontStyle: 'italic' }}>{children}</span>;
+/* Display math block with orange left border */
+const Math = ({ tex }: { tex: string }) => {
+  const html = katex.renderToString(tex, { displayMode: true, throwOnError: false, trust: true });
+  return <div style={styles.formulaBlock} dangerouslySetInnerHTML={{ __html: html }} />;
+};
+
+/* Inline math for variable references */
+const V = ({ tex }: { tex: string }) => {
+  const html = katex.renderToString(tex, { displayMode: false, throwOnError: false, trust: true });
+  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+};
 
 export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) => {
   const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -125,9 +136,9 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <table style={styles.table}>
         <thead><tr><th style={styles.th}>Constant</th><th style={styles.th}>Symbol</th><th style={styles.th}>Value</th></tr></thead>
         <tbody>
-          <tr><td style={styles.tdLeft}>Young's Modulus of Steel</td><td style={styles.td}>E</td><td style={styles.td}>30,000,000 psi (207 GPa)</td></tr>
-          <tr><td style={styles.tdLeft}>Poisson's Ratio</td><td style={styles.td}>ν</td><td style={styles.td}>0.3</td></tr>
-          <tr><td style={styles.tdLeft}>Thermal Expansion Coefficient</td><td style={styles.td}>α</td><td style={styles.td}>6.5 × 10⁻⁶ /°F (11.7 × 10⁻⁶ /°C)</td></tr>
+          <tr><td style={styles.tdLeft}>Young's Modulus of Steel</td><td style={styles.td}><V tex="E" /></td><td style={styles.td}>30,000,000 psi (207 GPa)</td></tr>
+          <tr><td style={styles.tdLeft}>Poisson's Ratio</td><td style={styles.td}><V tex="\nu" /></td><td style={styles.td}>0.3</td></tr>
+          <tr><td style={styles.tdLeft}>Thermal Expansion Coefficient</td><td style={styles.td}><V tex="\alpha" /></td><td style={styles.td}>6.5 × 10⁻⁶ /°F (11.7 × 10⁻⁶ /°C)</td></tr>
         </tbody>
       </table>
 
@@ -140,10 +151,10 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
           {[
             ['Soil Density', 'ρ', 'lb/ft³ (pcf)', 'kg/m³'],
             ['Depth of Cover', 'H', 'ft', 'm'],
-            ['Bedding Angle', 'θ_bed', 'degrees', 'degrees'],
+            ['Bedding Angle', 'θ_{bed}', 'degrees', 'degrees'],
             ['Soil Friction Angle', 'φ', 'degrees', 'degrees'],
             ['Soil Cohesion', 'c', 'psi', 'psi'],
-            ['Coeff. of Lateral Earth Pressure', 'Kr', '—', '—'],
+            ['Coeff. of Lateral Earth Pressure', 'K_r', '—', '—'],
           ].map(([p, s, e, si], i) => (
             <tr key={i}><td style={styles.tdLeft}>{p}</td><td style={styles.td}>{s}</td><td style={styles.td}>{e}</td><td style={styles.td}>{si}</td></tr>
           ))}
@@ -151,7 +162,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </table>
 
       <h2 style={styles.h2}>2.4 E' — Modulus of Soil Reaction</h2>
-      <p>E' can be determined via direct lookup from CEPA Table 2-3 (based on soil type, compaction level, and depth range) or entered as a user-defined value. The complete lookup table is reproduced in <strong>Appendix C</strong>.</p>
+      <p><V tex="E'" /> can be determined via direct lookup from CEPA Table 2-3 (based on soil type, compaction level, and depth range) or entered as a user-defined value. The complete lookup table is reproduced in <strong>Appendix C</strong>.</p>
 
       {/* CHAPTER 3 */}
       <h1 style={styles.h1}>3. Soil Load Calculation</h1>
@@ -159,9 +170,9 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       <h2 style={styles.h2}>3.1 Prism Method</h2>
       <p>Assumes the full column of soil directly above the pipe transfers its weight:</p>
-      <F>P_soil = ρ × H / 144     (psi)</F>
+      <Math tex="P_{soil} = \frac{\rho \times H}{144} \quad \text{(psi)}" />
       <div style={styles.varDef}>
-        <p>where <Var>ρ</Var> = soil unit weight (lb/ft³), <Var>H</Var> = depth of cover (ft)</p>
+        <p>where <V tex="\rho" /> = soil unit weight (lb/ft³), <V tex="H" /> = depth of cover (ft)</p>
         <p>Division by 144 converts psf to psi.</p>
       </div>
 
@@ -169,19 +180,19 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <p>Accounts for arching effects in the soil above the pipe. Used when the cover-to-diameter ratio is sufficient for arching to develop.</p>
 
       <h3 style={styles.h3}>Shallow Cover Check</h3>
-      <p>If <Var>H_in {'<'} 2.5 × D</Var>, the soil is too shallow for arching and the Prism method is used as a fallback.</p>
+      <p>If <V tex="H_{in} < 2.5 \times D" />, the soil is too shallow for arching and the Prism method is used as a fallback.</p>
 
       <h3 style={styles.h3}>Trap Door Formula</h3>
-      <F>P_soil = (DenCoTerm × D) / (2 × K_a) × (1 − e^(−2 × K_a × H_in / D)) + q × e^(−2 × K_a × H_in / D)</F>
+      <Math tex="P_{soil} = \frac{\text{DenCoTerm} \times D}{2\,K_a} \left(1 - e^{-2\,K_a\,H_{in}/D}\right) + q \cdot e^{-2\,K_a\,H_{in}/D}" />
       <div style={styles.varDef}>
         <p>where:</p>
-        <p><Var>K_a</Var> = (1 − sin φ) / (1 + sin φ)    — Rankine active earth pressure coefficient</p>
-        <p><Var>DenCoTerm</Var> = (ρ / 1728) − 2 × (c / 144) / D</p>
-        <p><Var>q</Var> = ρ × H / 144    — overburden pressure (psi)</p>
-        <p><Var>H_in</Var> = H × 12    — depth in inches</p>
-        <p><Var>D</Var> = pipe outside diameter (inches)</p>
-        <p><Var>φ</Var> = soil friction angle (degrees)</p>
-        <p><Var>c</Var> = soil cohesion (psi), default = 0</p>
+        <p><V tex="K_a = \dfrac{1 - \sin\varphi}{1 + \sin\varphi}" /> — Rankine active earth pressure coefficient</p>
+        <p><V tex="\text{DenCoTerm} = \dfrac{\rho}{1728} - \dfrac{2c}{144\,D}" /></p>
+        <p><V tex="q = \dfrac{\rho \times H}{144}" /> — overburden pressure (psi)</p>
+        <p><V tex="H_{in} = H \times 12" /> — depth in inches</p>
+        <p><V tex="D" /> = pipe outside diameter (inches)</p>
+        <p><V tex="\varphi" /> = soil friction angle (degrees)</p>
+        <p><V tex="c" /> = soil cohesion (psi), default = 0</p>
       </div>
 
       {/* CHAPTER 4 */}
@@ -189,26 +200,26 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <p>Surface loads are transferred to pipe depth using Boussinesq elastic half-space theory. Each vehicle contact patch is discretized into a grid of point loads, and the vertical stress at each measurement point is computed as the superposition of all point load contributions.</p>
 
       <h2 style={styles.h2}>4.1 Point Load Formula</h2>
-      <F>σ_z = (3P) / (2π H² × (1 + (R/H)²)^2.5)</F>
+      <Math tex="\sigma_z = \frac{3P}{2\pi H^2 \left(1 + \left(\dfrac{R}{H}\right)^2\right)^{2.5}}" />
       <div style={styles.varDef}>
-        <p><Var>P</Var> = point load (lb)</p>
-        <p><Var>H</Var> = depth of cover (inches)</p>
-        <p><Var>R</Var> = horizontal distance from point load to measurement point (inches)</p>
-        <p><Var>R</Var> = √(Δx² + Δy²)</p>
+        <p><V tex="P" /> = point load (lb)</p>
+        <p><V tex="H" /> = depth of cover (inches)</p>
+        <p><V tex="R" /> = horizontal distance from point load to measurement point (inches)</p>
+        <p><V tex="R = \sqrt{\Delta x^2 + \Delta y^2}" /></p>
       </div>
 
       <h2 style={styles.h2}>4.2 Grid Discretization</h2>
       <p>Each rectangular contact patch is divided into a uniform grid with <strong>6-inch spacing</strong>. The number of grid cells:</p>
-      <F>n_W = ⌈Width / 6⌉,  n_L = ⌈Length / 6⌉</F>
-      <F>Point load = Total patch load / (n_W × n_L)</F>
+      <Math tex="n_W = \lceil W / 6 \rceil, \quad n_L = \lceil L / 6 \rceil" />
+      <Math tex="\text{Point load} = \frac{\text{Total patch load}}{n_W \times n_L}" />
 
       <h2 style={styles.h2}>4.3 Vehicle-Specific Patch Layouts</h2>
 
       <h3 style={styles.h3}>Track Vehicle</h3>
-      <p>Two rectangular patches centered at ±(separation/2) from the vehicle centerline. Each track carries half the total vehicle weight.</p>
+      <p>Two rectangular patches centered at <V tex="\pm(\text{separation}/2)" /> from the vehicle centerline. Each track carries half the total vehicle weight.</p>
 
       <h3 style={styles.h3}>2-Axle / 3-Axle Vehicles</h3>
-      <p>Each axle has two tire patches (left and right) positioned at ±(axleWidth/2) from the lane offset. For <strong>Single</strong> tire configuration (2 tires/axle), each side uses the tire width. For <strong>Dual</strong> configuration (4 tires/axle), each side uses tire width × 2. Each left/right patch receives half the axle load.</p>
+      <p>Each axle has two tire patches (left and right) positioned at <V tex="\pm(\text{axleWidth}/2)" /> from the lane offset. For <strong>Single</strong> tire configuration (2 tires/axle), each side uses the tire width. For <strong>Dual</strong> configuration (4 tires/axle), each side uses tire width × 2. Each left/right patch receives half the axle load.</p>
 
       <h2 style={styles.h2}>4.4 Pipe-Axis Scanning</h2>
       <p>The calculator scans along the pipeline axis (Y-direction) at <strong>3-inch intervals</strong> to identify the true peak Boussinesq pressure. This is critical for multi-axle vehicles where the maximum pressure occurs directly under one axle rather than at the vehicle center.</p>
@@ -222,7 +233,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       <h2 style={styles.h2}>5.1 Base Impact Factor</h2>
       <table style={styles.table}>
-        <thead><tr><th style={styles.th}>Vehicle Class</th><th style={styles.th}>Pavement Type</th><th style={styles.th}>IF_base</th></tr></thead>
+        <thead><tr><th style={styles.th}>Vehicle Class</th><th style={styles.th}>Pavement Type</th><th style={styles.th}><V tex="IF_{base}" /></th></tr></thead>
         <tbody>
           <tr><td style={styles.td}>Highway</td><td style={styles.td}>Rigid</td><td style={styles.td}>1.00</td></tr>
           <tr><td style={styles.td}>Highway</td><td style={styles.td}>Flexible</td><td style={styles.td}>1.50</td></tr>
@@ -233,9 +244,9 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       <h2 style={styles.h2}>5.2 Depth Reduction</h2>
       <p>For burial depths exceeding 60 inches (5 ft), the impact factor is reduced:</p>
-      <F>IF_depth = IF_base − 0.0025 × (H_in − 60),  minimum = 1.0</F>
+      <Math tex="IF_{depth} = IF_{base} - 0.0025 \times (H_{in} - 60), \quad \min = 1.0" />
       <div style={styles.varDef}>
-        <p>where <Var>H_in</Var> = depth of cover in inches</p>
+        <p>where <V tex="H_{in}" /> = depth of cover in inches</p>
       </div>
 
       {/* CHAPTER 6 */}
@@ -243,7 +254,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       <h2 style={styles.h2}>6.1 Bedding Parameters — CEPA Table 2-1</h2>
       <table style={styles.table}>
-        <thead><tr><th style={styles.th}>Bedding Angle (°)</th><th style={styles.th}>K_b</th><th style={styles.th}>K_z</th><th style={styles.th}>Θ (°)</th></tr></thead>
+        <thead><tr><th style={styles.th}>Bedding Angle (°)</th><th style={styles.th}><V tex="K_b" /></th><th style={styles.th}><V tex="K_z" /></th><th style={styles.th}><V tex="\Theta" /> (°)</th></tr></thead>
         <tbody>
           {[
             [0, 0.294, 0.110, 135],
@@ -260,20 +271,20 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </table>
 
       <h2 style={styles.h2}>6.2 Spangler Denominator</h2>
-      <F>Denom = 1 + 3 K_z × (P_int / E) × (D/t)³ + 0.0915 × (E'/E) × (D/t)³</F>
+      <Math tex="\text{Denom} = 1 + 3\,K_z \cdot \frac{P_{int}}{E} \cdot \left(\frac{D}{t}\right)^3 + 0.0915 \cdot \frac{E'}{E} \cdot \left(\frac{D}{t}\right)^3" />
 
       <h2 style={styles.h2}>6.3 Hoop Stress Components</h2>
-      <F>σ_hoop_soil = 3 × K_b × P_soil × (D/t)² / Denom</F>
-      <F>σ_hoop_live = 3 × K_b × P_live × (D/t)² / Denom</F>
-      <F>σ_hoop_int = P_int × D / (2t)</F>
+      <Math tex="\sigma_{hoop,soil} = \frac{3\,K_b \cdot P_{soil} \cdot (D/t)^2}{\text{Denom}}" />
+      <Math tex="\sigma_{hoop,live} = \frac{3\,K_b \cdot P_{live} \cdot (D/t)^2}{\text{Denom}}" />
+      <Math tex="\sigma_{hoop,int} = \frac{P_{int} \cdot D}{2\,t}" />
       <div style={styles.varDef}>
-        <p>where <Var>P_live</Var> = Boussinesq max pressure × Impact Factor</p>
+        <p>where <V tex="P_{live}" /> = Boussinesq max pressure × Impact Factor</p>
       </div>
 
       <h2 style={styles.h2}>6.4 High/Low Stress Definitions</h2>
       <p>Stresses are evaluated at two internal pressure conditions:</p>
-      <F>At Zero Pressure:   σ_H_high = σ_soil + σ_live,  σ_H_low = −σ_soil − σ_live</F>
-      <F>At MOP:   σ_H_high = σ_soil + σ_live + σ_int,  σ_H_low = σ_int − σ_soil − σ_live</F>
+      <Math tex="\text{At Zero Pressure:} \quad \sigma_{H,high} = \sigma_{soil} + \sigma_{live}, \quad \sigma_{H,low} = -\sigma_{soil} - \sigma_{live}" />
+      <Math tex="\text{At MOP:} \quad \sigma_{H,high} = \sigma_{soil} + \sigma_{live} + \sigma_{int}, \quad \sigma_{H,low} = \sigma_{int} - \sigma_{soil} - \sigma_{live}" />
       <div style={styles.varDef}>
         <p>"High" = maximum compressive stress at crown/invert; "Low" = minimum tensile stress at springline.</p>
       </div>
@@ -281,70 +292,69 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       {/* CHAPTER 7 */}
       <h1 style={styles.h1}>7. Longitudinal Stress</h1>
       <p>Total longitudinal stress consists of multiple components:</p>
-      <F>σ_L = σ_L_bend + σ_L_local + ν × σ_hoop_soil ± ν × σ_hoop_int + E × α × ΔT</F>
+      <Math tex="\sigma_L = \sigma_{L,bend} + \sigma_{L,local} + \nu\,\sigma_{hoop,soil} \pm \nu\,\sigma_{hoop,int} + E\,\alpha\,\Delta T" />
 
       <h2 style={styles.h2}>7.1 Poisson Component</h2>
-      <F>σ_L_Poisson_soil = ν × σ_hoop_soil</F>
-      <F>σ_L_Poisson_int = ν × σ_hoop_int    (= ν × P × D / (2t))</F>
+      <Math tex="\sigma_{L,Poisson,soil} = \nu \cdot \sigma_{hoop,soil}" />
+      <Math tex="\sigma_{L,Poisson,int} = \nu \cdot \sigma_{hoop,int} = \nu \cdot \frac{P \cdot D}{2\,t}" />
 
       <h2 style={styles.h2}>7.2 Thermal Component</h2>
-      <F>σ_L_thermal = E × α × ΔT = 30×10⁶ × 6.5×10⁻⁶ × ΔT = 195 × ΔT (psi, for ΔT in °F)</F>
+      <Math tex="\sigma_{L,thermal} = E \cdot \alpha \cdot \Delta T = 30 \times 10^6 \times 6.5 \times 10^{-6} \times \Delta T = 195\,\Delta T \;\text{(psi)}" />
 
       <h2 style={styles.h2}>7.3 Live Load Bending — Beam on Elastic Foundation</h2>
 
       <h3 style={styles.h3}>Moment of Inertia</h3>
-      <F>I = (π/4) × (R_out⁴ − R_in⁴)</F>
+      <Math tex="I = \frac{\pi}{4}\left(R_{out}^4 - R_{in}^4\right)" />
       <div style={styles.varDef}>
-        <p><Var>R_out</Var> = D/2,  <Var>R_in</Var> = R_out − t</p>
+        <p><V tex="R_{out} = D/2" />, &nbsp; <V tex="R_{in} = R_{out} - t" /></p>
       </div>
 
       <h3 style={styles.h3}>Characteristic Parameter (Lambda)</h3>
-      <F>λ = ((E' × D × Θ / 360) / (4 × E × I))^0.25</F>
+      <Math tex="\lambda = \left(\frac{E' \cdot D \cdot \Theta / 360}{4\,E\,I}\right)^{0.25}" />
       <div style={styles.varDef}>
-        <p><Var>Θ</Var> = bedding parameter from Table 2-1 (degrees)</p>
+        <p><V tex="\Theta" /> = bedding parameter from Table 2-1 (degrees)</p>
       </div>
 
       <h3 style={styles.h3}>Surface Load on Pipe</h3>
-      <F>W_surf = σ_bsnq_max × 2π H² / 3 × IF_depth</F>
-      <F>L_load = H_in × tan(29.9°)</F>
-      <F>P_pipe = W_surf / (π × L_load²)</F>
+      <Math tex="W_{surf} = \sigma_{bsnq,max} \times \frac{2\pi H^2}{3} \times IF_{depth}" />
+      <Math tex="L_{load} = H_{in} \times \tan(29.9°)" />
+      <Math tex="P_{pipe} = \frac{W_{surf}}{\pi \cdot L_{load}^2}" />
 
       <h3 style={styles.h3}>Moment Distribution</h3>
-      <p><strong>For |x| ≤ L_load</strong> (within load region):</p>
-      <F>M(x) = [P_pipe / (4λ³)] × e^(−λ|x|) × [cos(λ|x|) + sin(λ|x|)] − P_pipe × x² / 2</F>
+      <p><strong>For <V tex="|x| \leq L_{load}" /></strong> (within load region):</p>
+      <Math tex="M(x) = \frac{P_{pipe}}{4\lambda^3}\,e^{-\lambda|x|}\left[\cos(\lambda|x|) + \sin(\lambda|x|)\right] - \frac{P_{pipe}\,x^2}{2}" />
 
-      <p><strong>For |x| {'>'} L_load</strong> (outside load region):</p>
-      <F>M(x) = [P_pipe / (4λ³)] × e^(−λ|x|) × [cos(λ|x|) + sin(λ|x|)]</F>
-      <F>       − [P_pipe / (4λ³)] × e^(−λ(|x|−L)) × [cos(λ(|x|−L)) + sin(λ(|x|−L))]</F>
+      <p><strong>For <V tex="|x| > L_{load}" /></strong> (outside load region):</p>
+      <Math tex="M(x) = \frac{P_{pipe}}{4\lambda^3}\,e^{-\lambda|x|}\left[\cos(\lambda|x|) + \sin(\lambda|x|)\right] - \frac{P_{pipe}}{4\lambda^3}\,e^{-\lambda(|x|-L)}\left[\cos\!\big(\lambda(|x|-L)\big) + \sin\!\big(\lambda(|x|-L)\big)\right]" />
 
-      <p>The maximum absolute moment <Var>M_max</Var> is found by evaluating M(x) over the range −100×L_load to +100×L_load.</p>
+      <p>The maximum absolute moment <V tex="M_{max}" /> is found by evaluating <V tex="M(x)" /> over the range <V tex="-100 L_{load}" /> to <V tex="+100 L_{load}" />.</p>
 
       <h3 style={styles.h3}>Bending Stress</h3>
-      <F>σ_L_bend = M_max × (D/2) / I</F>
+      <Math tex="\sigma_{L,bend} = \frac{M_{max} \cdot (D/2)}{I}" />
 
       <h2 style={styles.h2}>7.4 Local Bending Component</h2>
-      <F>β = (12 × (1 − ν²))^(1/8)</F>
-      <F>σ_L_local = (0.153 / 1.56) × β⁴ × σ_hoop_live</F>
+      <Math tex="\beta = \left(12\,(1 - \nu^2)\right)^{1/8}" />
+      <Math tex="\sigma_{L,local} = \frac{0.153}{1.56} \cdot \beta^4 \cdot \sigma_{hoop,live}" />
 
       <h2 style={styles.h2}>7.5 Total Longitudinal Stress</h2>
-      <F>σ_L_live = σ_L_bend + σ_L_local</F>
-      <F>σ_L_high = ν × σ_hoop_soil + σ_L_live + ν × σ_hoop_int + σ_thermal</F>
-      <F>σ_L_low  = ν × σ_hoop_int + σ_thermal − ν × σ_hoop_soil − σ_L_live</F>
+      <Math tex="\sigma_{L,live} = \sigma_{L,bend} + \sigma_{L,local}" />
+      <Math tex="\sigma_{L,high} = \nu\,\sigma_{hoop,soil} + \sigma_{L,live} + \nu\,\sigma_{hoop,int} + \sigma_{thermal}" />
+      <Math tex="\sigma_{L,low} = \nu\,\sigma_{hoop,int} + \sigma_{thermal} - \nu\,\sigma_{hoop,soil} - \sigma_{L,live}" />
 
       {/* CHAPTER 8 */}
       <h1 style={styles.h1}>8. Equivalent Stress and %SMYS</h1>
       <p>Equivalent stress is computed for all four combinations of (Hoop High/Low) × (Long High/Low):</p>
 
       <h2 style={styles.h2}>8.1 Tresca Criterion</h2>
-      <F>σ_eq = max(|σ_H − σ_L|, σ_H, σ_L)</F>
+      <Math tex="\sigma_{eq} = \max\!\left(|\sigma_H - \sigma_L|,\; \sigma_H,\; \sigma_L\right)" />
       <p>Evaluated for each combination; the maximum across all four is the governing equivalent stress.</p>
 
       <h2 style={styles.h2}>8.2 Von Mises Criterion</h2>
-      <F>σ_eq = √(σ_H² − σ_H × σ_L + σ_L²)</F>
+      <Math tex="\sigma_{eq} = \sqrt{\sigma_H^2 - \sigma_H\,\sigma_L + \sigma_L^2}" />
       <p>Evaluated for each combination; the maximum across all four is the governing equivalent stress.</p>
 
       <h2 style={styles.h2}>8.3 Percent SMYS</h2>
-      <F>%SMYS = (σ_eq_max / SMYS) × 100</F>
+      <Math tex="\%\text{SMYS} = \frac{\sigma_{eq,max}}{\text{SMYS}} \times 100" />
 
       {/* CHAPTER 9 */}
       <h1 style={styles.h1}>9. Pass/Fail Criteria</h1>
@@ -370,7 +380,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       <h2 style={styles.h2}>9.2 ASME B31.4 Sustained Longitudinal Check</h2>
       <p>For B31.4, an additional check is performed on sustained longitudinal stresses (excluding live load bending):</p>
-      <F>σ_L_sustained = |σ_L_int ± σ_L_soil + σ_thermal|</F>
+      <Math tex="\sigma_{L,sustained} = \left|\sigma_{L,int} \pm \sigma_{L,soil} + \sigma_{thermal}\right|" />
       <p>This sustained stress must also remain below the longitudinal limit.</p>
 
       <h2 style={styles.h2}>9.3 Overall Pass Determination</h2>
@@ -386,9 +396,9 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <p>For 2-Axle and 3-Axle vehicles, the tire contact patch dimensions can be calculated automatically from the axle load and tire inflation pressure.</p>
 
       <h2 style={styles.h2}>10.1 AUTO Mode Formula</h2>
-      <F>Load per tire = Axle Load / Tires per Axle</F>
-      <F>Contact Area = Load per tire / Tire Pressure    (in²)</F>
-      <F>Contact Length = Contact Area / Tire Width    (in)</F>
+      <Math tex="\text{Load per tire} = \frac{\text{Axle Load}}{\text{Tires per Axle}}" />
+      <Math tex="\text{Contact Area} = \frac{\text{Load per tire}}{\text{Tire Pressure}} \quad (\text{in}^2)" />
+      <Math tex="\text{Contact Length} = \frac{\text{Contact Area}}{\text{Tire Width}} \quad (\text{in})" />
       <div style={styles.varDef}>
         <p><strong>Single</strong> configuration: 2 tires/axle (1 per side)</p>
         <p><strong>Dual</strong> configuration: 4 tires/axle (2 per side), contact width per side = tire width × 2</p>
@@ -410,11 +420,11 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <p>An optional analysis that calculates the tightest horizontal or vertical curve the pipeline can tolerate given the remaining longitudinal stress margin.</p>
 
       <h2 style={styles.h2}>11.1 Formula</h2>
-      <F>R_min = (E × D) / (2 × σ_remaining)</F>
+      <Math tex="R_{min} = \frac{E \cdot D}{2\,\sigma_{remaining}}" />
       <div style={styles.varDef}>
-        <p><Var>σ_remaining</Var> = σ_allowable − |σ_L_existing|</p>
-        <p><Var>E</Var> = 30 × 10⁶ psi</p>
-        <p><Var>D</Var> = pipe outside diameter (inches)</p>
+        <p><V tex="\sigma_{remaining} = \sigma_{allowable} - |\sigma_{L,existing}|" /></p>
+        <p><V tex="E = 30 \times 10^6" /> psi</p>
+        <p><V tex="D" /> = pipe outside diameter (inches)</p>
       </div>
 
       <h2 style={styles.h2}>11.2 Governing Condition</h2>
@@ -444,9 +454,9 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <table style={styles.table}>
         <thead><tr><th style={styles.th}>Constant</th><th style={styles.th}>Value</th><th style={styles.th}>Usage</th></tr></thead>
         <tbody>
-          <tr><td style={styles.tdLeft}>E_steel</td><td style={styles.td}>30,000,000 psi</td><td style={styles.td}>All stress calculations</td></tr>
-          <tr><td style={styles.tdLeft}>Poisson's ratio (ν)</td><td style={styles.td}>0.3</td><td style={styles.td}>Longitudinal Poisson effect, local bending</td></tr>
-          <tr><td style={styles.tdLeft}>Thermal expansion (α)</td><td style={styles.td}>6.5 × 10⁻⁶ /°F</td><td style={styles.td}>Thermal longitudinal stress</td></tr>
+          <tr><td style={styles.tdLeft}><V tex="E_{steel}" /></td><td style={styles.td}>30,000,000 psi</td><td style={styles.td}>All stress calculations</td></tr>
+          <tr><td style={styles.tdLeft}>Poisson's ratio (<V tex="\nu" />)</td><td style={styles.td}>0.3</td><td style={styles.td}>Longitudinal Poisson effect, local bending</td></tr>
+          <tr><td style={styles.tdLeft}>Thermal expansion (<V tex="\alpha" />)</td><td style={styles.td}>6.5 × 10⁻⁶ /°F</td><td style={styles.td}>Thermal longitudinal stress</td></tr>
           <tr><td style={styles.tdLeft}>Boussinesq grid spacing</td><td style={styles.td}>6 inches</td><td style={styles.td}>Contact patch discretization</td></tr>
           <tr><td style={styles.tdLeft}>Pipe scan step</td><td style={styles.td}>3 inches</td><td style={styles.td}>Peak pressure detection</td></tr>
           <tr><td style={styles.tdLeft}>Depth reduction threshold</td><td style={styles.td}>60 inches</td><td style={styles.td}>Impact factor depth adjustment</td></tr>
@@ -490,32 +500,32 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <h2 style={styles.h2}>A.2 Step-by-Step Calculations</h2>
 
       <h3 style={styles.h3}>Step 1: Bedding Parameters</h3>
-      <p>Bedding angle = 90° → K_b = 0.157, K_z = 0.096, Θ = 105°</p>
+      <p>Bedding angle = 90° → <V tex="K_b = 0.157" />, <V tex="K_z = 0.096" />, <V tex="\Theta = 105°" /></p>
 
       <h3 style={styles.h3}>Step 2: E' (Modulus of Soil Reaction)</h3>
       <p>Soil type: Coarse w/ Fines, Compaction: 90%, Depth: 4 ft (range 0–5 ft)</p>
-      <p>From CEPA Table 2-3: <strong>E' = 1,000 psi</strong></p>
+      <p>From CEPA Table 2-3: <strong><V tex="E' = 1{,}000" /> psi</strong></p>
 
       <h3 style={styles.h3}>Step 3: Soil Load (Prism Method)</h3>
-      <F>P_soil = 120 × 4 / 144 = 3.333 psi</F>
+      <Math tex="P_{soil} = \frac{120 \times 4}{144} = 3.333 \;\text{psi}" />
 
       <h3 style={styles.h3}>Step 4: Boussinesq Surface Pressure</h3>
       <p>Track load per side = 80,000 / 2 = 40,000 lb</p>
       <p>Track area = 24 in × 120 in = 2,880 in²</p>
-      <p>Grid: n_W = ⌈24/6⌉ = 4, n_L = ⌈120/6⌉ = 20</p>
+      <p>Grid: <V tex="n_W = \lceil 24/6 \rceil = 4" />, <V tex="n_L = \lceil 120/6 \rceil = 20" /></p>
       <p>Point load = 40,000 / (4 × 20) = 500 lb per point</p>
       <p>Boussinesq is summed over both tracks at measurement points under the tracks and between the tracks. The maximum value is selected.</p>
 
       <h3 style={styles.h3}>Step 5: Impact Factor</h3>
-      <p>Vehicle class = Track → IF_base = 1.50</p>
-      <p>H_in = 48 in ≤ 60 in → no depth reduction → IF_depth = 1.50</p>
+      <p>Vehicle class = Track → <V tex="IF_{base} = 1.50" /></p>
+      <p><V tex="H_{in} = 48" /> in ≤ 60 in → no depth reduction → <V tex="IF_{depth} = 1.50" /></p>
 
       <h3 style={styles.h3}>Step 6: Hoop Stress</h3>
-      <p>Denominator = 1 + 3 × 0.096 × (0/30×10⁶) × (12.75/0.25)³ + 0.0915 × (1000/30×10⁶) × (12.75/0.25)³</p>
-      <p>σ_hoop_soil and σ_hoop_live calculated using Spangler formula.</p>
+      <Math tex="\text{Denom} = 1 + 3 \times 0.096 \times \frac{0}{30 \times 10^6} \times \left(\frac{12.75}{0.25}\right)^3 + 0.0915 \times \frac{1000}{30 \times 10^6} \times \left(\frac{12.75}{0.25}\right)^3" />
+      <p><V tex="\sigma_{hoop,soil}" /> and <V tex="\sigma_{hoop,live}" /> calculated using Spangler formula.</p>
 
       <h3 style={styles.h3}>Step 7: Longitudinal Stress</h3>
-      <p>Thermal component = 30×10⁶ × 6.5×10⁻⁶ × 0 = 0 psi</p>
+      <p>Thermal component = <V tex="30 \times 10^6 \times 6.5 \times 10^{-6} \times 0 = 0" /> psi</p>
       <p>Beam-on-elastic-foundation bending moment computed; local bending added.</p>
 
       <h3 style={styles.h3}>Step 8: Equivalent Stress (Tresca)</h3>
@@ -559,7 +569,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       {/* APPENDIX C */}
       <h1 style={styles.h1}>Appendix C: E' Lookup Table — CEPA Table 2-3</h1>
-      <p>Design values of E' (Modulus of Soil Reaction) in psi, organized by soil type, depth range, and degree of compaction.</p>
+      <p>Design values of <V tex="E'" /> (Modulus of Soil Reaction) in psi, organized by soil type, depth range, and degree of compaction.</p>
 
       <h2 style={styles.h2}>C.1 Fine-Grained Soils</h2>
       <table style={styles.table}>
