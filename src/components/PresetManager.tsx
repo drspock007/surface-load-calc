@@ -37,6 +37,7 @@ export const PresetManager = ({ mode, getCurrentValues, onLoad }: PresetManagerP
   const [presets, setPresets] = useState<PresetEntry[]>(() => getPresets(mode));
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [presetName, setPresetName] = useState("");
+  const [selectedPreset, setSelectedPreset] = useState<string>("");
 
   const refreshPresets = () => setPresets(getPresets(mode));
 
@@ -45,6 +46,7 @@ export const PresetManager = ({ mode, getCurrentValues, onLoad }: PresetManagerP
     if (preset) {
       onLoad(preset.values);
       toast.success(`Preset "${name}" loaded`);
+      setSelectedPreset("");
     }
   };
 
@@ -79,7 +81,7 @@ export const PresetManager = ({ mode, getCurrentValues, onLoad }: PresetManagerP
           <FolderOpen className="w-4 h-4" />
           Load Preset
         </Label>
-        <Select onValueChange={handleLoad}>
+        <Select value={selectedPreset} onValueChange={handleLoad}>
           <SelectTrigger>
             <SelectValue placeholder={presets.length === 0 ? "No saved presets" : "Select a preset..."} />
           </SelectTrigger>
