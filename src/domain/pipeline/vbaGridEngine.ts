@@ -8,6 +8,7 @@ import { calculatePassFail as calculatePassFailHelper } from './passFailHelpers'
 import { 
   calculateBoussinesqFromPoints, 
   generateStandardMeasurementPoints,
+  formatMaxLocationLabel,
   PointLoad 
 } from './boussinesqHelpers';
 import {
@@ -176,7 +177,7 @@ export function calculateGridLoadVBA(inputs: GridLoadInputs): GridLoadResults {
   
   const results: GridLoadResults = {
     maxSurfacePressureOnPipe: BsnqIF,
-    locationMaxLoad: boussinesq.maxLocation,
+    locationMaxLoad: formatMaxLocationLabel(boussinesq.maxY_in, inputs.unitsSystem),
     impactFactorUsed: impactResult.impactFactorDepth,
     stresses: {
       atZeroPressure: {

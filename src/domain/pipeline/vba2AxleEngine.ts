@@ -11,6 +11,7 @@ import {
   generateRectangularGrid, 
   generateStandardMeasurementPoints,
   generatePipeScanMeasurementPoints,
+  formatMaxLocationLabel,
   PointLoad 
 } from './boussinesqHelpers';
 import { calculateContactPatch, convertTirePressureToPsi } from './tirePatchCalculations';
@@ -351,7 +352,7 @@ export function calculate2AxleVehicleVBA(inputs: TwoAxleInputs): TwoAxleResults 
   // Assemble results
   const results: TwoAxleResults = {
     maxSurfacePressureOnPipe: BsnqIF,
-    locationMaxLoad: boussinesq.maxLocation,
+    locationMaxLoad: formatMaxLocationLabel(boussinesq.maxY_in, inputs.unitsSystem),
     impactFactorUsed: impactResult.impactFactorDepth,
     stresses: {
       atZeroPressure: {
