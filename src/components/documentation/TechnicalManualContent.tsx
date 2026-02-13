@@ -20,6 +20,9 @@ const styles: Record<string, React.CSSProperties> = {
   note: { background: '#fffbe6', border: '1px solid #e6d600', padding: '8px 12px', margin: '8px 0', fontSize: 12 },
   varDef: { marginLeft: 24, fontSize: 13 },
   pageBreak: { pageBreakBefore: 'always' as const },
+  siNote: { background: '#eef6ff', border: '1px solid #b3d4fc', borderLeft: '3px solid #2979ff', padding: '8px 14px', margin: '8px 0', fontSize: 12.5 },
+  siFormula: { background: '#eef6ff', padding: '10px 16px', margin: '8px 0', borderLeft: '3px solid #2979ff', display: 'block', overflowX: 'auto' as const },
+  unitNote: { background: '#f3f0ff', border: '1px solid #c4b5fd', borderLeft: '3px solid #7c3aed', padding: '8px 14px', margin: '8px 0', fontSize: 12 },
 };
 
 /* Display math block with orange left border */
@@ -28,11 +31,38 @@ const Math = ({ tex }: { tex: string }) => {
   return <div style={styles.formulaBlock} dangerouslySetInnerHTML={{ __html: html }} />;
 };
 
+/* Display math block with blue left border for SI equivalents */
+const MathSI = ({ tex }: { tex: string }) => {
+  const html = katex.renderToString(tex, { displayMode: true, throwOnError: false, trust: true });
+  return <div style={styles.siFormula} dangerouslySetInnerHTML={{ __html: html }} />;
+};
+
 /* Inline math for variable references */
 const V = ({ tex }: { tex: string }) => {
   const html = katex.renderToString(tex, { displayMode: false, throwOnError: false, trust: true });
   return <span dangerouslySetInnerHTML={{ __html: html }} />;
 };
+
+/* SI equivalent note block */
+const SINote = ({ children }: { children: React.ReactNode }) => (
+  <div style={styles.siNote}><strong style={{ color: '#1565c0' }}>SI Equivalent:</strong> {children}</div>
+);
+
+/* Unit conversion explanation note */
+const UnitNote = ({ children }: { children: React.ReactNode }) => (
+  <div style={styles.unitNote}><strong style={{ color: '#7c3aed' }}>Unit Note:</strong> {children}</div>
+);
+
+/* Helper to render E' table row with dual units */
+const EPrimeRow = ({ depth, depthSI, v85, v90, v95, v100 }: { depth: string; depthSI: string; v85: number; v90: number; v95: number; v100: number }) => (
+  <tr>
+    <td style={styles.td}>{depth}<br /><span style={{ fontSize: 11, color: '#1565c0' }}>({depthSI})</span></td>
+    <td style={styles.td}>{v85.toLocaleString()}<br /><span style={{ fontSize: 11, color: '#1565c0' }}>({(v85 * 6.895).toFixed(0)})</span></td>
+    <td style={styles.td}>{v90.toLocaleString()}<br /><span style={{ fontSize: 11, color: '#1565c0' }}>({(v90 * 6.895).toFixed(0)})</span></td>
+    <td style={styles.td}>{v95.toLocaleString()}<br /><span style={{ fontSize: 11, color: '#1565c0' }}>({(v95 * 6.895).toFixed(0)})</span></td>
+    <td style={styles.td}>{v100.toLocaleString()}<br /><span style={{ fontSize: 11, color: '#1565c0' }}>({(v100 * 6.895).toFixed(0)})</span></td>
+  </tr>
+);
 
 export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) => {
   const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -49,6 +79,17 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       <div style={styles.disclaimer}>
         <strong>DISCLAIMER:</strong> This tool is intended for screening-level analysis only. All results must be reviewed and validated by a qualified professional engineer before being used for design, construction, or operational decisions. The developers assume no liability for the use or misuse of results produced by this calculator.
+      </div>
+
+      {/* LEGEND */}
+      <div style={{ margin: '16px 0', padding: '12px 16px', background: '#fafafa', border: '1px solid #ddd', fontSize: 12.5 }}>
+        <strong>Reading Guide — Color Legend:</strong>
+        <div style={{ display: 'flex', gap: 24, marginTop: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 16, height: 16, background: '#f5f5f0', borderLeft: '3px solid #ff8f05', display: 'inline-block' }} /> EN formula (primary)</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 16, height: 16, background: '#eef6ff', borderLeft: '3px solid #2979ff', display: 'inline-block' }} /> SI equivalent</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 16, height: 16, background: '#f3f0ff', borderLeft: '3px solid #7c3aed', display: 'inline-block' }} /> Unit conversion note</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 16, height: 16, background: '#fffbe6', border: '1px solid #e6d600', display: 'inline-block' }} /> Implementation note</div>
+        </div>
       </div>
 
       {/* TABLE OF CONTENTS */}
@@ -106,6 +147,10 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
         <li>Pipe self-weight is not included</li>
       </ul>
 
+      <div style={styles.siNote}>
+        <strong style={{ color: '#1565c0' }}>Note for SI users:</strong> All formulas in this manual are presented in their original English unit form as defined by the CEPA methodology. Where formulas contain unit-dependent constants (e.g. 144, 1728), an SI equivalent is provided in a <span style={{ color: '#2979ff', fontWeight: 600 }}>blue box</span> below. Dimensionless formulas (Boussinesq, Spangler, Tresca, Von Mises) work identically in any consistent unit system.
+      </div>
+
       {/* CHAPTER 2 */}
       <h1 style={styles.h1}>2. Input Parameters</h1>
 
@@ -134,11 +179,11 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       <h2 style={styles.h2}>2.2 Material Constants</h2>
       <table style={styles.table}>
-        <thead><tr><th style={styles.th}>Constant</th><th style={styles.th}>Symbol</th><th style={styles.th}>Value</th></tr></thead>
+        <thead><tr><th style={styles.th}>Constant</th><th style={styles.th}>Symbol</th><th style={styles.th}>EN Value</th><th style={styles.th}>SI Value</th></tr></thead>
         <tbody>
-          <tr><td style={styles.tdLeft}>Young's Modulus of Steel</td><td style={styles.td}><V tex="E" /></td><td style={styles.td}>30,000,000 psi (207 GPa)</td></tr>
-          <tr><td style={styles.tdLeft}>Poisson's Ratio</td><td style={styles.td}><V tex="\nu" /></td><td style={styles.td}>0.3</td></tr>
-          <tr><td style={styles.tdLeft}>Thermal Expansion Coefficient</td><td style={styles.td}><V tex="\alpha" /></td><td style={styles.td}>6.5 × 10⁻⁶ /°F (11.7 × 10⁻⁶ /°C)</td></tr>
+          <tr><td style={styles.tdLeft}>Young's Modulus of Steel</td><td style={styles.td}><V tex="E" /></td><td style={styles.td}>30,000,000 psi</td><td style={styles.td}>207 GPa</td></tr>
+          <tr><td style={styles.tdLeft}>Poisson's Ratio</td><td style={styles.td}><V tex="\nu" /></td><td style={styles.td} colSpan={2}>0.3 (dimensionless)</td></tr>
+          <tr><td style={styles.tdLeft}>Thermal Expansion Coefficient</td><td style={styles.td}><V tex="\alpha" /></td><td style={styles.td}>6.5 × 10⁻⁶ /°F</td><td style={styles.td}>11.7 × 10⁻⁶ /°C</td></tr>
         </tbody>
       </table>
 
@@ -153,7 +198,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
             ['Depth of Cover', 'H', 'ft', 'm'],
             ['Bedding Angle', 'θ_{bed}', 'degrees', 'degrees'],
             ['Soil Friction Angle', 'φ', 'degrees', 'degrees'],
-            ['Soil Cohesion', 'c', 'psi', 'psi'],
+            ['Soil Cohesion', 'c', 'psi', 'kPa'],
             ['Coeff. of Lateral Earth Pressure', 'K_r', '—', '—'],
           ].map(([p, s, e, si], i) => (
             <tr key={i}><td style={styles.tdLeft}>{p}</td><td style={styles.td}>{s}</td><td style={styles.td}>{e}</td><td style={styles.td}>{si}</td></tr>
@@ -173,8 +218,14 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <Math tex="P_{soil} = \frac{\rho \times H}{144} \quad \text{(psi)}" />
       <div style={styles.varDef}>
         <p>where <V tex="\rho" /> = soil unit weight (lb/ft³), <V tex="H" /> = depth of cover (ft)</p>
-        <p>Division by 144 converts psf to psi.</p>
       </div>
+      <UnitNote>The constant <V tex="144 = 12^2" /> converts ft² to in² (i.e., psf → psi). It is not an empirical value.</UnitNote>
+      <SINote>
+        <MathSI tex="P_{soil} = \frac{\rho \times g \times H}{1000} \quad \text{(kPa)}" />
+        <div style={styles.varDef}>
+          <p>where <V tex="\rho" /> = soil density (kg/m³), <V tex="g = 9.81" /> m/s², <V tex="H" /> = depth of cover (m). Division by 1000 converts Pa to kPa.</p>
+        </div>
+      </SINote>
 
       <h2 style={styles.h2}>3.2 Trap Door Method</h2>
       <p>Accounts for arching effects in the soil above the pipe. Used when the cover-to-diameter ratio is sufficient for arching to develop.</p>
@@ -194,6 +245,16 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
         <p><V tex="\varphi" /> = soil friction angle (degrees)</p>
         <p><V tex="c" /> = soil cohesion (psi), default = 0</p>
       </div>
+      <UnitNote>
+        <V tex="1728 = 12^3" /> converts lb/ft³ to lb/in³ (pcf → pci). <V tex="144 = 12^2" /> converts psf to psi. <V tex="12" /> converts ft to in. These are purely geometric unit conversion factors.
+      </UnitNote>
+      <SINote>
+        In SI, the DenCoTerm becomes:
+        <MathSI tex="\text{DenCoTerm}_{SI} = \rho \cdot g - \frac{2c}{D_{m}} \quad \text{(Pa/m)}" />
+        <div style={styles.varDef}>
+          <p>where <V tex="\rho" /> in kg/m³, <V tex="g = 9.81" /> m/s², <V tex="c" /> in Pa, <V tex="D_m" /> = pipe diameter in m. Result in Pa; divide by 1000 for kPa.</p>
+        </div>
+      </SINote>
 
       {/* CHAPTER 4 */}
       <h1 style={styles.h1}>4. Boussinesq Surface Pressure</h1>
@@ -207,9 +268,10 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
         <p><V tex="R" /> = horizontal distance from point load to measurement point (inches)</p>
         <p><V tex="R = \sqrt{\Delta x^2 + \Delta y^2}" /></p>
       </div>
+      <SINote>This formula is <strong>dimensionless in form</strong> — it works identically in SI with <V tex="P" /> in N, <V tex="H" /> and <V tex="R" /> in m, giving <V tex="\sigma_z" /> in Pa. Use consistent units throughout.</SINote>
 
       <h2 style={styles.h2}>4.2 Grid Discretization</h2>
-      <p>Each rectangular contact patch is divided into a uniform grid with <strong>6-inch spacing</strong>. The number of grid cells:</p>
+      <p>Each rectangular contact patch is divided into a uniform grid with <strong>6-inch (152 mm)</strong> spacing. The number of grid cells:</p>
       <Math tex="n_W = \lceil W / 6 \rceil, \quad n_L = \lceil L / 6 \rceil" />
       <Math tex="\text{Point load} = \frac{\text{Total patch load}}{n_W \times n_L}" />
 
@@ -222,9 +284,9 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <p>Each axle has two tire patches (left and right) positioned at <V tex="\pm(\text{axleWidth}/2)" /> from the lane offset. For <strong>Single</strong> tire configuration (2 tires/axle), each side uses the tire width. For <strong>Dual</strong> configuration (4 tires/axle), each side uses tire width × 2. Each left/right patch receives half the axle load.</p>
 
       <h2 style={styles.h2}>4.4 Pipe-Axis Scanning</h2>
-      <p>The calculator scans along the pipeline axis (Y-direction) at <strong>3-inch intervals</strong> to identify the true peak Boussinesq pressure. This is critical for multi-axle vehicles where the maximum pressure occurs directly under one axle rather than at the vehicle center.</p>
+      <p>The calculator scans along the pipeline axis (Y-direction) at <strong>3-inch (76 mm) intervals</strong> to identify the true peak Boussinesq pressure. This is critical for multi-axle vehicles where the maximum pressure occurs directly under one axle rather than at the vehicle center.</p>
       <div style={styles.note}>
-        <strong>Note:</strong> The scan extends ±36 inches beyond the outermost axle positions and also evaluates exact axle positions to avoid missing peaks.
+        <strong>Note:</strong> The scan extends ±36 inches (±914 mm) beyond the outermost axle positions and also evaluates exact axle positions to avoid missing peaks.
       </div>
 
       {/* CHAPTER 5 */}
@@ -243,11 +305,18 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </table>
 
       <h2 style={styles.h2}>5.2 Depth Reduction</h2>
-      <p>For burial depths exceeding 60 inches (5 ft), the impact factor is reduced:</p>
+      <p>For burial depths exceeding <strong>60 inches (1.52 m)</strong>, the impact factor is reduced:</p>
       <Math tex="IF_{depth} = IF_{base} - 0.0025 \times (H_{in} - 60), \quad \min = 1.0" />
       <div style={styles.varDef}>
         <p>where <V tex="H_{in}" /> = depth of cover in inches</p>
       </div>
+      <UnitNote>The coefficient 0.0025 has units of <V tex="\text{in}^{-1}" />. It is an empirical reduction rate specific to the English unit formulation.</UnitNote>
+      <SINote>
+        <MathSI tex="IF_{depth} = IF_{base} - 0.0984 \times (H_{m} - 1.524), \quad \min = 1.0" />
+        <div style={styles.varDef}>
+          <p>where <V tex="H_m" /> = depth of cover in metres. The coefficient <V tex="0.0984 = 0.0025 \times 39.37" /> (in⁻¹ → m⁻¹) and <V tex="1.524 = 60 \times 0.0254" /> m.</p>
+        </div>
+      </SINote>
 
       {/* CHAPTER 6 */}
       <h1 style={styles.h1}>6. Hoop Stress (Spangler Formula)</h1>
@@ -269,9 +338,11 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
           ))}
         </tbody>
       </table>
+      <SINote>All bedding parameters are dimensionless — they apply identically in any unit system.</SINote>
 
       <h2 style={styles.h2}>6.2 Spangler Denominator</h2>
       <Math tex="\text{Denom} = 1 + 3\,K_z \cdot \frac{P_{int}}{E} \cdot \left(\frac{D}{t}\right)^3 + 0.0915 \cdot \frac{E'}{E} \cdot \left(\frac{D}{t}\right)^3" />
+      <SINote>This formula is dimensionless — all terms are ratios. Use consistent pressure units for <V tex="P_{int}" />, <V tex="E" />, and <V tex="E'" /> (all in psi or all in kPa).</SINote>
 
       <h2 style={styles.h2}>6.3 Hoop Stress Components</h2>
       <Math tex="\sigma_{hoop,soil} = \frac{3\,K_b \cdot P_{soil} \cdot (D/t)^2}{\text{Denom}}" />
@@ -300,6 +371,13 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       <h2 style={styles.h2}>7.2 Thermal Component</h2>
       <Math tex="\sigma_{L,thermal} = E \cdot \alpha \cdot \Delta T = 30 \times 10^6 \times 6.5 \times 10^{-6} \times \Delta T = 195\,\Delta T \;\text{(psi)}" />
+      <UnitNote>The constant 195 psi/°F arises from <V tex="E \cdot \alpha = 30 \times 10^6 \times 6.5 \times 10^{-6}" />. It is specific to English units (°F).</UnitNote>
+      <SINote>
+        <MathSI tex="\sigma_{L,thermal} = E \cdot \alpha \cdot \Delta T = 207{,}000 \times 11.7 \times 10^{-6} \times \Delta T = 1.344\,\Delta T \;\text{(MPa)}" />
+        <div style={styles.varDef}>
+          <p>where <V tex="E = 207{,}000" /> MPa, <V tex="\alpha = 11.7 \times 10^{-6}" /> /°C, <V tex="\Delta T" /> in °C.</p>
+        </div>
+      </SINote>
 
       <h2 style={styles.h2}>7.3 Live Load Bending — Beam on Elastic Foundation</h2>
 
@@ -308,17 +386,22 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <div style={styles.varDef}>
         <p><V tex="R_{out} = D/2" />, &nbsp; <V tex="R_{in} = R_{out} - t" /></p>
       </div>
+      <SINote>Dimensionless formula — use consistent length units (all in inches → result in in⁴; all in mm → result in mm⁴).</SINote>
 
       <h3 style={styles.h3}>Characteristic Parameter (Lambda)</h3>
       <Math tex="\lambda = \left(\frac{E' \cdot D \cdot \Theta / 360}{4\,E\,I}\right)^{0.25}" />
       <div style={styles.varDef}>
         <p><V tex="\Theta" /> = bedding parameter from Table 2-1 (degrees)</p>
       </div>
+      <SINote>Dimensionless formula — use consistent units throughout. <V tex="\Theta / 360" /> is a dimensionless fraction of a circle.</SINote>
 
       <h3 style={styles.h3}>Surface Load on Pipe</h3>
       <Math tex="W_{surf} = \sigma_{bsnq,max} \times \frac{2\pi H^2}{3} \times IF_{depth}" />
       <Math tex="L_{load} = H_{in} \times \tan(29.9°)" />
       <Math tex="P_{pipe} = \frac{W_{surf}}{\pi \cdot L_{load}^2}" />
+      <SINote>
+        In SI: <V tex="H" /> and <V tex="L_{load}" /> in mm, <V tex="W_{surf}" /> in N, <V tex="P_{pipe}" /> in N/mm². The 29.9° load spread angle is dimensionless.
+      </SINote>
 
       <h3 style={styles.h3}>Moment Distribution</h3>
       <p><strong>For <V tex="|x| \leq L_{load}" /></strong> (within load region):</p>
@@ -335,6 +418,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <h2 style={styles.h2}>7.4 Local Bending Component</h2>
       <Math tex="\beta = \left(12\,(1 - \nu^2)\right)^{1/8}" />
       <Math tex="\sigma_{L,local} = \frac{0.153}{1.56} \cdot \beta^4 \cdot \sigma_{hoop,live}" />
+      <SINote>These coefficients (0.153, 1.56) are dimensionless empirical constants — identical in any unit system.</SINote>
 
       <h2 style={styles.h2}>7.5 Total Longitudinal Stress</h2>
       <Math tex="\sigma_{L,live} = \sigma_{L,bend} + \sigma_{L,local}" />
@@ -352,6 +436,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <h2 style={styles.h2}>8.2 Von Mises Criterion</h2>
       <Math tex="\sigma_{eq} = \sqrt{\sigma_H^2 - \sigma_H\,\sigma_L + \sigma_L^2}" />
       <p>Evaluated for each combination; the maximum across all four is the governing equivalent stress.</p>
+      <SINote>Both Tresca and Von Mises are dimensionless stress combinations — they work identically in any unit system.</SINote>
 
       <h2 style={styles.h2}>8.3 Percent SMYS</h2>
       <Math tex="\%\text{SMYS} = \frac{\sigma_{eq,max}}{\text{SMYS}} \times 100" />
@@ -403,6 +488,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
         <p><strong>Single</strong> configuration: 2 tires/axle (1 per side)</p>
         <p><strong>Dual</strong> configuration: 4 tires/axle (2 per side), contact width per side = tire width × 2</p>
       </div>
+      <SINote>These formulas are dimensionless — use consistent units (all in mm and N, or all in inches and lb). The result will be in the same length/area units.</SINote>
 
       <h2 style={styles.h2}>10.2 Tire Pressure Unit Conversions</h2>
       <table style={styles.table}>
@@ -423,9 +509,15 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <Math tex="R_{min} = \frac{E \cdot D}{2\,\sigma_{remaining}}" />
       <div style={styles.varDef}>
         <p><V tex="\sigma_{remaining} = \sigma_{allowable} - |\sigma_{L,existing}|" /></p>
-        <p><V tex="E = 30 \times 10^6" /> psi</p>
-        <p><V tex="D" /> = pipe outside diameter (inches)</p>
+        <p><V tex="E = 30 \times 10^6" /> psi (207 GPa)</p>
+        <p><V tex="D" /> = pipe outside diameter: inches (mm)</p>
       </div>
+      <SINote>
+        <MathSI tex="R_{min} = \frac{E \cdot D}{2\,\sigma_{remaining}} \quad \text{(mm)}" />
+        <div style={styles.varDef}>
+          <p>With <V tex="E = 207{,}000" /> MPa and <V tex="D" /> in mm, <V tex="\sigma_{remaining}" /> in MPa → result in mm. Divide by 1000 for metres.</p>
+        </div>
+      </SINote>
 
       <h2 style={styles.h2}>11.2 Governing Condition</h2>
       <p>The bend radius is evaluated at both Zero Pressure and MOP conditions. The governing (most restrictive) case is the one with the <strong>smallest remaining margin</strong>. If the remaining margin is ≤ 0, no bend is permissible.</p>
@@ -434,7 +526,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <h1 style={styles.h1}>12. Unit Conversions</h1>
       <p>All internal calculations are performed in English (Imperial) units. The following conversion factors are applied when converting between SI and English systems:</p>
       <table style={styles.table}>
-        <thead><tr><th style={styles.th}>Quantity</th><th style={styles.th}>From</th><th style={styles.th}>To</th><th style={styles.th}>Factor</th></tr></thead>
+        <thead><tr><th style={styles.th}>Quantity</th><th style={styles.th}>SI</th><th style={styles.th}>EN</th><th style={styles.th}>Factor (SI → EN)</th></tr></thead>
         <tbody>
           {[
             ['Length', 'mm', 'in', '÷ 25.4'],
@@ -452,15 +544,29 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       <h2 style={styles.h2}>12.1 Numerical Constants Summary</h2>
       <table style={styles.table}>
-        <thead><tr><th style={styles.th}>Constant</th><th style={styles.th}>Value</th><th style={styles.th}>Usage</th></tr></thead>
+        <thead><tr><th style={styles.th}>Constant</th><th style={styles.th}>EN Value</th><th style={styles.th}>SI Value</th><th style={styles.th}>Usage</th></tr></thead>
         <tbody>
-          <tr><td style={styles.tdLeft}><V tex="E_{steel}" /></td><td style={styles.td}>30,000,000 psi</td><td style={styles.td}>All stress calculations</td></tr>
-          <tr><td style={styles.tdLeft}>Poisson's ratio (<V tex="\nu" />)</td><td style={styles.td}>0.3</td><td style={styles.td}>Longitudinal Poisson effect, local bending</td></tr>
-          <tr><td style={styles.tdLeft}>Thermal expansion (<V tex="\alpha" />)</td><td style={styles.td}>6.5 × 10⁻⁶ /°F</td><td style={styles.td}>Thermal longitudinal stress</td></tr>
-          <tr><td style={styles.tdLeft}>Boussinesq grid spacing</td><td style={styles.td}>6 inches</td><td style={styles.td}>Contact patch discretization</td></tr>
-          <tr><td style={styles.tdLeft}>Pipe scan step</td><td style={styles.td}>3 inches</td><td style={styles.td}>Peak pressure detection</td></tr>
-          <tr><td style={styles.tdLeft}>Depth reduction threshold</td><td style={styles.td}>60 inches</td><td style={styles.td}>Impact factor depth adjustment</td></tr>
-          <tr><td style={styles.tdLeft}>Load spread angle</td><td style={styles.td}>29.9°</td><td style={styles.td}>Load length for bending moment</td></tr>
+          <tr><td style={styles.tdLeft}><V tex="E_{steel}" /></td><td style={styles.td}>30,000,000 psi</td><td style={styles.td}>207 GPa</td><td style={styles.tdLeft}>All stress calculations</td></tr>
+          <tr><td style={styles.tdLeft}>Poisson's ratio (<V tex="\nu" />)</td><td style={styles.td} colSpan={2}>0.3 (dimensionless)</td><td style={styles.tdLeft}>Longitudinal Poisson effect, local bending</td></tr>
+          <tr><td style={styles.tdLeft}>Thermal expansion (<V tex="\alpha" />)</td><td style={styles.td}>6.5 × 10⁻⁶ /°F</td><td style={styles.td}>11.7 × 10⁻⁶ /°C</td><td style={styles.tdLeft}>Thermal longitudinal stress</td></tr>
+          <tr><td style={styles.tdLeft}><V tex="E \cdot \alpha" /></td><td style={styles.td}>195 psi/°F</td><td style={styles.td}>1.344 MPa/°C</td><td style={styles.tdLeft}>Thermal stress shortcut</td></tr>
+          <tr><td style={styles.tdLeft}>Boussinesq grid spacing</td><td style={styles.td}>6 inches</td><td style={styles.td}>152 mm</td><td style={styles.tdLeft}>Contact patch discretization</td></tr>
+          <tr><td style={styles.tdLeft}>Pipe scan step</td><td style={styles.td}>3 inches</td><td style={styles.td}>76 mm</td><td style={styles.tdLeft}>Peak pressure detection</td></tr>
+          <tr><td style={styles.tdLeft}>Depth reduction threshold</td><td style={styles.td}>60 inches (5 ft)</td><td style={styles.td}>1.52 m</td><td style={styles.tdLeft}>Impact factor depth adjustment</td></tr>
+          <tr><td style={styles.tdLeft}>Depth reduction rate</td><td style={styles.td}>0.0025 /in</td><td style={styles.td}>0.0984 /m</td><td style={styles.tdLeft}>Impact factor slope</td></tr>
+          <tr><td style={styles.tdLeft}>Load spread angle</td><td style={styles.td} colSpan={2}>29.9° (dimensionless)</td><td style={styles.tdLeft}>Load length for bending moment</td></tr>
+        </tbody>
+      </table>
+
+      <h2 style={styles.h2}>12.2 Unit-Dependent Constants in Formulas</h2>
+      <p>The following constants appear in the EN formulas and are purely unit-conversion factors (not empirical):</p>
+      <table style={styles.table}>
+        <thead><tr><th style={styles.th}>Constant</th><th style={styles.th}>Origin</th><th style={styles.th}>Purpose</th><th style={styles.th}>SI Equivalent</th></tr></thead>
+        <tbody>
+          <tr><td style={styles.td}>144</td><td style={styles.td}>12² = 144</td><td style={styles.tdLeft}>Converts ft² → in² (psf → psi)</td><td style={styles.td}>Not needed in SI</td></tr>
+          <tr><td style={styles.td}>1728</td><td style={styles.td}>12³ = 1,728</td><td style={styles.tdLeft}>Converts ft³ → in³ (pcf → pci)</td><td style={styles.td}>Not needed in SI</td></tr>
+          <tr><td style={styles.td}>12</td><td style={styles.td}>12 in/ft</td><td style={styles.tdLeft}>Converts ft → in</td><td style={styles.td}>Not needed in SI</td></tr>
+          <tr><td style={styles.td}>195</td><td style={styles.td}><V tex="E \cdot \alpha" /></td><td style={styles.tdLeft}>Thermal stress (psi/°F)</td><td style={styles.td}>1.344 MPa/°C</td></tr>
         </tbody>
       </table>
 
@@ -470,29 +576,27 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       <h2 style={styles.h2}>A.1 Input Data</h2>
       <table style={styles.table}>
-        <thead><tr><th style={styles.th}>Parameter</th><th style={styles.th}>Value</th></tr></thead>
+        <thead><tr><th style={styles.th}>Parameter</th><th style={styles.th}>EN Value</th><th style={styles.th}>SI Value</th></tr></thead>
         <tbody>
           {[
-            ['Pipe OD (D)', '12.75 in (NPS 12)'],
-            ['Wall Thickness (t)', '0.250 in'],
-            ['MOP', '0 psi (unpressurized)'],
-            ['SMYS', '52,000 psi (X52)'],
-            ['ΔT', '0 °F'],
-            ['Soil Density (ρ)', '120 lb/ft³'],
-            ['Depth of Cover (H)', '4 ft'],
-            ['Bedding Angle', '90°'],
-            ['Soil Load Method', 'Prism'],
-            ['E\' Method', 'Lookup — Coarse w/ Fines, 90% compaction'],
-            ['Track Separation', '6 ft'],
-            ['Track Length', '10 ft'],
-            ['Vehicle Weight', '80,000 lb'],
-            ['Track Width', '24 in'],
-            ['Vehicle Class', 'Track'],
-            ['Pavement Type', 'Flexible'],
-            ['Code Check', 'CSA Z662'],
-            ['Equiv. Stress Method', 'Tresca'],
-          ].map(([p, v], i) => (
-            <tr key={i}><td style={styles.tdLeft}>{p}</td><td style={styles.td}>{v}</td></tr>
+            ['Pipe OD (D)', '12.75 in (NPS 12)', '323.9 mm'],
+            ['Wall Thickness (t)', '0.250 in', '6.35 mm'],
+            ['MOP', '0 psi (unpressurized)', '0 kPa'],
+            ['SMYS', '52,000 psi (X52)', '358 MPa'],
+            ['ΔT', '0 °F', '0 °C'],
+            ['Soil Density (ρ)', '120 lb/ft³', '1,922 kg/m³'],
+            ['Depth of Cover (H)', '4 ft', '1.22 m'],
+            ['Bedding Angle', '90°', '90°'],
+            ['Soil Load Method', 'Prism', '—'],
+            ['E\' Method', 'Lookup — Coarse w/ Fines, 90%', '1,000 psi (6,895 kPa)'],
+            ['Track Separation', '6 ft', '1.83 m'],
+            ['Track Length', '10 ft', '3.05 m'],
+            ['Vehicle Weight', '80,000 lb', '36,287 kg'],
+            ['Track Width', '24 in', '610 mm'],
+            ['Vehicle Class', 'Track', '—'],
+            ['Code Check', 'CSA Z662', '—'],
+          ].map(([p, v, si], i) => (
+            <tr key={i}><td style={styles.tdLeft}>{p}</td><td style={styles.td}>{v}</td><td style={styles.td}>{si}</td></tr>
           ))}
         </tbody>
       </table>
@@ -503,36 +607,39 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <p>Bedding angle = 90° → <V tex="K_b = 0.157" />, <V tex="K_z = 0.096" />, <V tex="\Theta = 105°" /></p>
 
       <h3 style={styles.h3}>Step 2: E' (Modulus of Soil Reaction)</h3>
-      <p>Soil type: Coarse w/ Fines, Compaction: 90%, Depth: 4 ft (range 0–5 ft)</p>
-      <p>From CEPA Table 2-3: <strong><V tex="E' = 1{,}000" /> psi</strong></p>
+      <p>Soil type: Coarse w/ Fines, Compaction: 90%, Depth: 4 ft (1.22 m), range 0–5 ft (0–1.52 m)</p>
+      <p>From CEPA Table 2-3: <strong><V tex="E' = 1{,}000" /> psi (6,895 kPa)</strong></p>
 
       <h3 style={styles.h3}>Step 3: Soil Load (Prism Method)</h3>
       <Math tex="P_{soil} = \frac{120 \times 4}{144} = 3.333 \;\text{psi}" />
+      <SINote>
+        <V tex="P_{soil} = \frac{1{,}922 \times 9.81 \times 1.22}{1000} = 22.99 \;\text{kPa}" />
+      </SINote>
 
       <h3 style={styles.h3}>Step 4: Boussinesq Surface Pressure</h3>
-      <p>Track load per side = 80,000 / 2 = 40,000 lb</p>
-      <p>Track area = 24 in × 120 in = 2,880 in²</p>
+      <p>Track load per side = 80,000 / 2 = 40,000 lb (18,144 kg)</p>
+      <p>Track area = 24 in × 120 in = 2,880 in² (1.858 m²)</p>
       <p>Grid: <V tex="n_W = \lceil 24/6 \rceil = 4" />, <V tex="n_L = \lceil 120/6 \rceil = 20" /></p>
       <p>Point load = 40,000 / (4 × 20) = 500 lb per point</p>
       <p>Boussinesq is summed over both tracks at measurement points under the tracks and between the tracks. The maximum value is selected.</p>
 
       <h3 style={styles.h3}>Step 5: Impact Factor</h3>
       <p>Vehicle class = Track → <V tex="IF_{base} = 1.50" /></p>
-      <p><V tex="H_{in} = 48" /> in ≤ 60 in → no depth reduction → <V tex="IF_{depth} = 1.50" /></p>
+      <p><V tex="H_{in} = 48" /> in (1.22 m) ≤ 60 in (1.52 m) → no depth reduction → <V tex="IF_{depth} = 1.50" /></p>
 
       <h3 style={styles.h3}>Step 6: Hoop Stress</h3>
       <Math tex="\text{Denom} = 1 + 3 \times 0.096 \times \frac{0}{30 \times 10^6} \times \left(\frac{12.75}{0.25}\right)^3 + 0.0915 \times \frac{1000}{30 \times 10^6} \times \left(\frac{12.75}{0.25}\right)^3" />
       <p><V tex="\sigma_{hoop,soil}" /> and <V tex="\sigma_{hoop,live}" /> calculated using Spangler formula.</p>
 
       <h3 style={styles.h3}>Step 7: Longitudinal Stress</h3>
-      <p>Thermal component = <V tex="30 \times 10^6 \times 6.5 \times 10^{-6} \times 0 = 0" /> psi</p>
+      <p>Thermal component = <V tex="195 \times 0 = 0" /> psi (0 kPa)</p>
       <p>Beam-on-elastic-foundation bending moment computed; local bending added.</p>
 
       <h3 style={styles.h3}>Step 8: Equivalent Stress (Tresca)</h3>
       <p>All four (Hoop H/L) × (Long H/L) combinations evaluated. Maximum governs.</p>
 
       <h3 style={styles.h3}>Step 9: Pass/Fail</h3>
-      <p>CSA Z662 limit: 90% SMYS = 0.9 × 52,000 = 46,800 psi. All stress components compared against this limit.</p>
+      <p>CSA Z662 limit: 90% SMYS = 0.9 × 52,000 = 46,800 psi (322.7 MPa). All stress components compared against this limit.</p>
 
       {/* APPENDIX B */}
       <h1 style={styles.h1}>Appendix B: Worked Example — 2-Axle Vehicle</h1>
@@ -569,38 +676,38 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       {/* APPENDIX C */}
       <h1 style={styles.h1}>Appendix C: E' Lookup Table — CEPA Table 2-3</h1>
-      <p>Design values of <V tex="E'" /> (Modulus of Soil Reaction) in psi, organized by soil type, depth range, and degree of compaction.</p>
+      <p>Design values of <V tex="E'" /> (Modulus of Soil Reaction) in <strong>psi</strong> with <span style={{ color: '#1565c0' }}>(kPa)</span> equivalents. Organized by soil type, depth range, and degree of compaction.</p>
 
       <h2 style={styles.h2}>C.1 Fine-Grained Soils</h2>
       <table style={styles.table}>
-        <thead><tr><th style={styles.th}>Depth (ft)</th><th style={styles.th}>85%</th><th style={styles.th}>90%</th><th style={styles.th}>95%</th><th style={styles.th}>100%</th></tr></thead>
+        <thead><tr><th style={styles.th}>Depth ft<br /><span style={{ fontSize: 10, fontWeight: 400 }}>(m)</span></th><th style={styles.th}>85%<br /><span style={{ fontSize: 10, fontWeight: 400 }}>psi (kPa)</span></th><th style={styles.th}>90%<br /><span style={{ fontSize: 10, fontWeight: 400 }}>psi (kPa)</span></th><th style={styles.th}>95%<br /><span style={{ fontSize: 10, fontWeight: 400 }}>psi (kPa)</span></th><th style={styles.th}>100%<br /><span style={{ fontSize: 10, fontWeight: 400 }}>psi (kPa)</span></th></tr></thead>
         <tbody>
-          <tr><td style={styles.td}>0–5</td><td style={styles.td}>500</td><td style={styles.td}>700</td><td style={styles.td}>1,000</td><td style={styles.td}>1,500</td></tr>
-          <tr><td style={styles.td}>5–10</td><td style={styles.td}>600</td><td style={styles.td}>1,000</td><td style={styles.td}>1,400</td><td style={styles.td}>2,000</td></tr>
-          <tr><td style={styles.td}>10–15</td><td style={styles.td}>700</td><td style={styles.td}>1,200</td><td style={styles.td}>1,600</td><td style={styles.td}>2,300</td></tr>
-          <tr><td style={styles.td}>15–20</td><td style={styles.td}>800</td><td style={styles.td}>1,300</td><td style={styles.td}>1,800</td><td style={styles.td}>2,600</td></tr>
+          <EPrimeRow depth="0–5" depthSI="0–1.5" v85={500} v90={700} v95={1000} v100={1500} />
+          <EPrimeRow depth="5–10" depthSI="1.5–3.0" v85={600} v90={1000} v95={1400} v100={2000} />
+          <EPrimeRow depth="10–15" depthSI="3.0–4.6" v85={700} v90={1200} v95={1600} v100={2300} />
+          <EPrimeRow depth="15–20" depthSI="4.6–6.1" v85={800} v90={1300} v95={1800} v100={2600} />
         </tbody>
       </table>
 
       <h2 style={styles.h2}>C.2 Coarse-Grained Soils with Fines</h2>
       <table style={styles.table}>
-        <thead><tr><th style={styles.th}>Depth (ft)</th><th style={styles.th}>85%</th><th style={styles.th}>90%</th><th style={styles.th}>95%</th><th style={styles.th}>100%</th></tr></thead>
+        <thead><tr><th style={styles.th}>Depth ft<br /><span style={{ fontSize: 10, fontWeight: 400 }}>(m)</span></th><th style={styles.th}>85%<br /><span style={{ fontSize: 10, fontWeight: 400 }}>psi (kPa)</span></th><th style={styles.th}>90%<br /><span style={{ fontSize: 10, fontWeight: 400 }}>psi (kPa)</span></th><th style={styles.th}>95%<br /><span style={{ fontSize: 10, fontWeight: 400 }}>psi (kPa)</span></th><th style={styles.th}>100%<br /><span style={{ fontSize: 10, fontWeight: 400 }}>psi (kPa)</span></th></tr></thead>
         <tbody>
-          <tr><td style={styles.td}>0–5</td><td style={styles.td}>600</td><td style={styles.td}>1,000</td><td style={styles.td}>1,200</td><td style={styles.td}>1,900</td></tr>
-          <tr><td style={styles.td}>5–10</td><td style={styles.td}>900</td><td style={styles.td}>1,400</td><td style={styles.td}>1,800</td><td style={styles.td}>2,700</td></tr>
-          <tr><td style={styles.td}>10–15</td><td style={styles.td}>1,000</td><td style={styles.td}>1,500</td><td style={styles.td}>2,100</td><td style={styles.td}>3,200</td></tr>
-          <tr><td style={styles.td}>15–20</td><td style={styles.td}>1,100</td><td style={styles.td}>1,600</td><td style={styles.td}>2,400</td><td style={styles.td}>3,700</td></tr>
+          <EPrimeRow depth="0–5" depthSI="0–1.5" v85={600} v90={1000} v95={1200} v100={1900} />
+          <EPrimeRow depth="5–10" depthSI="1.5–3.0" v85={900} v90={1400} v95={1800} v100={2700} />
+          <EPrimeRow depth="10–15" depthSI="3.0–4.6" v85={1000} v90={1500} v95={2100} v100={3200} />
+          <EPrimeRow depth="15–20" depthSI="4.6–6.1" v85={1100} v90={1600} v95={2400} v100={3700} />
         </tbody>
       </table>
 
       <h2 style={styles.h2}>C.3 Coarse-Grained Soils without Fines</h2>
       <table style={styles.table}>
-        <thead><tr><th style={styles.th}>Depth (ft)</th><th style={styles.th}>85%</th><th style={styles.th}>90%</th><th style={styles.th}>95%</th><th style={styles.th}>100%</th></tr></thead>
+        <thead><tr><th style={styles.th}>Depth ft<br /><span style={{ fontSize: 10, fontWeight: 400 }}>(m)</span></th><th style={styles.th}>85%<br /><span style={{ fontSize: 10, fontWeight: 400 }}>psi (kPa)</span></th><th style={styles.th}>90%<br /><span style={{ fontSize: 10, fontWeight: 400 }}>psi (kPa)</span></th><th style={styles.th}>95%<br /><span style={{ fontSize: 10, fontWeight: 400 }}>psi (kPa)</span></th><th style={styles.th}>100%<br /><span style={{ fontSize: 10, fontWeight: 400 }}>psi (kPa)</span></th></tr></thead>
         <tbody>
-          <tr><td style={styles.td}>0–5</td><td style={styles.td}>700</td><td style={styles.td}>1,000</td><td style={styles.td}>1,600</td><td style={styles.td}>2,500</td></tr>
-          <tr><td style={styles.td}>5–10</td><td style={styles.td}>1,000</td><td style={styles.td}>1,500</td><td style={styles.td}>2,200</td><td style={styles.td}>3,300</td></tr>
-          <tr><td style={styles.td}>10–15</td><td style={styles.td}>1,050</td><td style={styles.td}>1,600</td><td style={styles.td}>2,400</td><td style={styles.td}>3,600</td></tr>
-          <tr><td style={styles.td}>15–20</td><td style={styles.td}>1,100</td><td style={styles.td}>1,700</td><td style={styles.td}>2,500</td><td style={styles.td}>3,800</td></tr>
+          <EPrimeRow depth="0–5" depthSI="0–1.5" v85={700} v90={1000} v95={1600} v100={2500} />
+          <EPrimeRow depth="5–10" depthSI="1.5–3.0" v85={1000} v90={1500} v95={2200} v100={3300} />
+          <EPrimeRow depth="10–15" depthSI="3.0–4.6" v85={1050} v90={1600} v95={2400} v100={3600} />
+          <EPrimeRow depth="15–20" depthSI="4.6–6.1" v85={1100} v90={1700} v95={2500} v100={3800} />
         </tbody>
       </table>
 
