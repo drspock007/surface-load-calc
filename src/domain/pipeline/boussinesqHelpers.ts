@@ -27,6 +27,7 @@ export function calculateBoussinesqFromPoints(
   pressures_psi: number[];
   maxPressure_psi: number;
   maxLocation: string;
+  maxY_in: number;
   influenceFactor: number;
   contactPressure_psf: number;
 } {
@@ -67,6 +68,7 @@ export function calculateBoussinesqFromPoints(
   const maxPressure_psi = Math.max(...pressures);
   const maxIndex = pressures.indexOf(maxPressure_psi);
   const maxLocation = measurementPoints[maxIndex].label;
+  const maxY_in = measurementPoints[maxIndex].y;
   
   // Influence factor (for reference, simplified)
   const influenceFactor = pressures.length > 0 ? maxPressure_psi / (contactPressure_psf / 144) : 1;
@@ -75,9 +77,23 @@ export function calculateBoussinesqFromPoints(
     pressures_psi: pressures,
     maxPressure_psi,
     maxLocation,
+    maxY_in,
     influenceFactor,
     contactPressure_psf,
   };
+}
+
+/**
+ * Format the max pressure location label in the user's unit system.
+ * EN: y in inches (e.g. "Pipe scan y=82\"")
+ * SI: y in metres (e.g. "Pipe scan y=2.08 m")
+ */
+export function formatMaxLocationLabel(maxY_in: number, unitsSystem: string): string {
+  if (unitsSystem === 'SI') {
+    const y_m = maxY_in * 0.0254;
+    return `Pipe scan y=${y_m.toFixed(2)} m`;
+  }
+  return `Pipe scan y=${maxY_in.toFixed(0)}"`;
 }
 
 /**
