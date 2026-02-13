@@ -68,6 +68,9 @@ const threeAxleSchema = z.object({
   vehicleClass: z.enum(["HIGHWAY", "FARM", "TRACK"]),
   equivStressMethod: z.enum(["TRESCA", "VON_MISES"]),
   codeCheck: z.enum(["B31_4", "B31_8", "CSA_Z662", "USER_DEFINED"]),
+  selectedNPS: z.string().optional(),
+  selectedSchedule: z.string().optional(),
+  selectedGrade: z.string().optional(),
   userDefinedLimits: z.object({
     hoopLimitPct: z.number().min(0).max(100),
     longLimitPct: z.number().min(0).max(100),
