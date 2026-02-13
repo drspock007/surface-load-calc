@@ -111,7 +111,7 @@ const Results = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Soil Unit Weight</p>
-                    <p className="text-lg font-semibold">{run.input.soilUnitWeight} kN/m³</p>
+                    <p className="text-lg font-semibold">{run.input.soilUnitWeight} kg/m³</p>
                   </div>
                 </div>
               </CardContent>
