@@ -8,6 +8,7 @@ import Calculator from "./pages/Calculator";
 import Results from "./pages/Results";
 import Runs from "./pages/Runs";
 import Sensitivity from "./pages/Sensitivity";
+import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/results" element={<Results />} />
           <Route path="/runs" element={<Runs />} />
           <Route path="/sensitivity" element={<Sensitivity />} />
+          <Route path="/documentation" element={<Documentation />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
