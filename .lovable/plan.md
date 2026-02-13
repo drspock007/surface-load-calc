@@ -1,40 +1,48 @@
 
-# Fix Preset Saving and Pipe Selector Restoration
 
-## Problems Found
+# Export / Import de Presets en fichier JSON
 
-### Bug 1: Presets "don't appear" after saving
-The `PresetManager` component initializes its preset list with `useState(() => getPresets(mode))`. This only runs once when the component mounts. The `refreshPresets()` call after saving does update the state correctly, BUT the `Select` component is **uncontrolled** (no `value` prop) -- so after loading a preset, the dropdown keeps showing the last selected preset name in the trigger, making it look like nothing changed. Additionally, if the user navigates away and comes back, the component remounts and should reload from localStorage correctly. The core display issue is that after saving a new preset, the Select trigger still shows the old selection text rather than resetting to "Select a preset...".
+## Objectif
 
-### Bug 2: Wall Thickness Schedule reverts to "Custom" on preset load
-The form schemas (in all 4 forms: Track, 2-Axle, 3-Axle, Grid) do **not** include `selectedNPS`, `selectedSchedule`, or `selectedGrade` fields. These fields are used by `PipeSelector` via `watch()` and `setValue()`, but since they are not in the Zod schema, they are **stripped out** by `react-hook-form` validation. When `getCurrentValues()` calls `watch()`, it returns all registered fields -- but `selectedNPS`, `selectedSchedule`, `selectedGrade` are not registered via `register()`, they are only managed via `setValue()`. So when saving a preset, these selector states may be included, BUT when loading a preset back, `setValue("selectedSchedule", value)` works -- however the value was never saved in the first place because `watch()` may not return unregistered fields.
+Permettre aux utilisateurs d'exporter leurs presets dans un fichier JSON portable et d'importer des presets depuis un fichier, pour partager entre collegues ou transferer entre machines.
 
-## Solution
+## Format du fichier
 
-### Fix 1: PresetManager -- add controlled state and reset after save/load
+```text
+{
+  "version": 1,
+  "mode": "track",
+  "exportedAt": "2026-02-13T...",
+  "presets": [
+    { "name": "Highway 24in", "values": {...}, "createdAt": "..." }
+  ]
+}
+```
 
-- Add a `selectedPreset` state to control the `Select` value
-- Reset it to empty after loading (so the dropdown shows "Select a preset..." again, ready for next selection)
-- This makes it clear that presets exist and can be re-selected
+Nom automatique du fichier : `presets-track-2026-02-13.json`
 
-### Fix 2: Add selector fields to all form schemas
+## Comportement
 
-Add these optional fields to the Zod schema in all 4 forms:
-- `selectedNPS: z.string().optional()`
-- `selectedSchedule: z.string().optional()`
-- `selectedGrade: z.string().optional()`
+- **Export** : telecharge un fichier `.json` avec tous les presets du mode actif
+- **Import** : ouvre un selecteur de fichier, valide le contenu (Zod), verifie que le mode correspond, fusionne avec les presets existants (sans ecraser les doublons par nom), et respecte la limite de 20
 
-And add matching `defaultValues` entries. This ensures:
-1. `watch()` returns these values when saving a preset
-2. `setValue()` properly restores them when loading a preset
-3. The NPS, Schedule, and Grade dropdowns show the correct saved selection
+## Modifications
 
-### Files to modify
+### `src/utils/presetStorage.ts`
+- Ajouter un schema Zod pour le fichier d'export (`version`, `mode`, `exportedAt`, `presets`)
+- Ajouter `exportPresetsToJSON(mode)` : retourne la string JSON formatee
+- Ajouter `importPresetsFromJSON(mode, jsonString)` : valide, verifie le mode, fusionne intelligemment, retourne un resultat (nombre importes, nombre ignores)
 
-| File | Change |
-|------|--------|
-| `src/components/PresetManager.tsx` | Add controlled `Select` value with reset after load |
-| `src/components/PipelineTrackForm/index.tsx` | Add `selectedNPS`, `selectedSchedule`, `selectedGrade` to schema and defaults |
-| `src/components/TwoAxleForm.tsx` | Same schema additions |
-| `src/components/ThreeAxleForm.tsx` | Same schema additions |
-| `src/components/GridLoadForm.tsx` | Same schema additions |
+### `src/components/PresetManager.tsx`
+- Ajouter deux boutons : **Export** (icone Download) et **Import** (icone Upload)
+- Export : appelle `exportPresetsToJSON`, cree un Blob et declenche le telechargement
+- Import : ouvre un `<input type="file" accept=".json">` cache, lit le fichier, appelle `importPresetsFromJSON`, affiche un toast avec le resultat, rafraichit la liste
+- Disposition : les deux boutons cote a cote sous le bouton "Save Preset"
+
+## Validation a l'import
+- Taille max du fichier : 1 MB
+- Schema Zod complet (structure, types, limites de longueur)
+- Le champ `mode` doit correspondre au mode actuel (sinon erreur claire)
+- Les presets dont le nom existe deja sont ignores (pas ecrases)
+- La limite de 20 presets par mode est respectee (les surplus sont ignores avec avertissement)
+
