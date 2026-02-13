@@ -1,17 +1,34 @@
 
-
-# Correction de l'unite de Soil Density
+# Afficher la position du maximum de pression dans les unites de l'utilisateur
 
 ## Probleme
 
-Sur la page Results, la densite du sol affiche **kN/m³** au lieu de **kg/m³** pour le systeme SI. La valeur 1600 correspond bien a des kg/m³ (densite massique), pas a des kN/m³ (poids volumique).
+La position du maximum de pression Boussinesq (`Max Pressure Location`) est toujours affichee en pouces (ex: `y=82"`), meme quand l'utilisateur travaille en SI.
 
-## Correction
+## Solution
 
-Un seul changement dans `src/components/InputParametersCard.tsx`, ligne 17 :
+### Etape 1 : Ajouter la valeur brute Y dans le resultat Boussinesq
 
-- **Avant** : `density: system === 'EN' ? 'pcf' : 'kN/m³'`
-- **Apres** : `density: system === 'EN' ? 'pcf' : 'kg/m³'`
+Dans `src/domain/pipeline/boussinesqHelpers.ts` :
+- Ajouter `maxY_in: number` au type de retour de `calculateBoussinesqFromPoints`
+- Stocker la coordonnee Y brute (en pouces) du point de pression maximale
 
-Aussi verifier `src/pages/Results.tsx` ligne 114 qui utilise un affichage legacy en dur avec `kN/m³` - a corriger egalement en `kg/m³`.
+### Etape 2 : Formater le label dans chaque moteur de calcul
 
+Dans `src/domain/pipeline/vba2AxleEngine.ts` et `vba3AxleEngine.ts` :
+- Apres avoir obtenu le resultat Boussinesq, formater `locationMaxLoad` selon le systeme d'unites :
+  - EN : `"Pipe scan y=82"` (pouces)
+  - SI : `"Pipe scan y=2.08 m"` (conversion pouces vers metres, 1 in = 0.0254 m)
+
+### Etape 3 : Appliquer la meme logique au Grid engine
+
+Dans `src/domain/pipeline/vbaGridEngine.ts`, meme conversion si applicable.
+
+## Fichiers modifies
+
+| Fichier | Modification |
+|---------|-------------|
+| `src/domain/pipeline/boussinesqHelpers.ts` | Ajouter `maxY_in` au retour |
+| `src/domain/pipeline/vba2AxleEngine.ts` | Formater le label selon unitsSystem |
+| `src/domain/pipeline/vba3AxleEngine.ts` | Formater le label selon unitsSystem |
+| `src/domain/pipeline/vbaGridEngine.ts` | Formater le label selon unitsSystem (si applicable) |
