@@ -1,64 +1,49 @@
 
 
-# Grid Load Diagram
+# Ajouter les divisions X et Y au diagramme Grid Load
 
-## What gets built
+## Ce qui change
 
-A dynamic SVG diagram (top-down view) inserted into the Grid Load form, showing:
+Le rectangle de la grille affichera des **lignes internes** representant les subdivisions en X et Y, montrant visuellement comment la zone chargee est decoupee en sous-cellules pour le calcul Boussinesq.
 
-- A **rectangular loaded area** (hatched or shaded) representing the grid, with labeled dimensions (Grid Length and Grid Width)
-- A **horizontal dashed blue pipeline** running left-to-right through the center of the view
-- **Offset X** dimension arrow showing lateral displacement from pipe centerline to grid center
-- **Offset Y** dimension arrow showing longitudinal displacement along the pipe axis
-- **Total Load or Uniform Pressure** label displayed above the grid rectangle
-- All labels update in real-time as form values change (same pattern as TrackVehicleDiagram)
-
-The diagram visually clarifies the meaning of Offset X (perpendicular to pipeline) vs Offset Y (along pipeline), which is the most common source of confusion for this calculation mode.
-
-## Visual layout (top-down view)
+## Rendu visuel
 
 ```text
-        Grid Width
-      |<--------->|
-  --- +===========+ ---
-  |   |  hatched  |  |   Grid Length
-  |   |   area    |  |   (along Y)
-  --- +===========+ ---
-            |
-            |<-- Offset X -->|
-  ============================= Pipeline (dashed blue, horizontal)
-            |
-            Offset Y (vertical distance from pipe to grid center)
+      Grid Width
+    |<--------->|
+    +--+--+--+--+   ---
+    |  |  |  |  |    |
+    +--+--+--+--+    | Grid Length
+    |  |  |  |  |    |
+    +--+--+--+--+   ---
 ```
 
-## Technical details
+Les lignes internes sont fines et semi-transparentes pour ne pas surcharger le dessin. Un petit label "10 x 10" (ou les valeurs actuelles) est affiche dans un coin du rectangle.
 
-### New file
-`src/components/GridLoadDiagram.tsx` -- a single component (~120 lines)
+## Modification
 
-**Props:** `gridLength`, `gridWidth`, `gridOffsetX`, `gridOffsetY`, `totalLoad`, `uniformPressure`, `loadType`, `unitsSystem`
+### `src/components/GridLoadDiagram.tsx`
 
-**Behavior:**
-- Uses the same styling conventions as TrackVehicleDiagram (muted background, border, primary-colored labels, monospace values)
-- Pipeline always drawn horizontally at the vertical center of the SVG
-- Grid rectangle positioned relative to pipeline center using Offset X and Offset Y
-- Dimension lines with end ticks for Length, Width, Offset X, Offset Y
-- Load value shown in a primary-colored pill above the grid
+**Props ajoutees :** `gridDivisionsX` et `gridDivisionsY` (type `number`)
 
-### Modified file
-`src/components/GridLoadForm.tsx` -- import and render `GridLoadDiagram` inside the "Grid Load Properties" card, right after the inputs (before the closing `</CardContent>`)
+**Rendu :**
+- Lignes verticales internes : `nX - 1` lignes espacees regulierement dans le rectangle
+- Lignes horizontales internes : `nY - 1` lignes espacees regulierement
+- Style : trait fin (0.5px), couleur foreground a ~20% opacite, pour rester discret
+- Label compact en bas a droite du rectangle : `{nX} x {nY}` dans un petit pill
 
-Pass watched values as props:
+### `src/components/GridLoadForm.tsx`
+
+Ajouter les deux props supplementaires dans l'appel au composant :
 ```
-<GridLoadDiagram
-  gridLength={watch("gridLength")}
-  gridWidth={watch("gridWidth")}
-  gridOffsetX={watch("gridOffsetX")}
-  gridOffsetY={watch("gridOffsetY")}
-  totalLoad={watch("totalLoad")}
-  uniformPressure={watch("uniformPressure")}
-  loadType={loadType}
-  unitsSystem={unitsSystem}
-/>
+gridDivisionsX={watch("gridDivisionsX")}
+gridDivisionsY={watch("gridDivisionsY")}
 ```
+
+## Fichiers a modifier
+
+| Fichier | Modification |
+|---------|-------------|
+| `src/components/GridLoadDiagram.tsx` | Ajouter props `gridDivisionsX/Y`, dessiner les lignes internes + label |
+| `src/components/GridLoadForm.tsx` | Passer les deux nouvelles props au composant |
 
