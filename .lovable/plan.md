@@ -1,49 +1,32 @@
 
 
-# Ajouter les divisions X et Y au diagramme Grid Load
+# Titre et description du site
 
-## Ce qui change
+## Changements
 
-Le rectangle de la grille affichera des **lignes internes** representant les subdivisions en X et Y, montrant visuellement comment la zone chargee est decoupee en sous-cellules pour le calcul Boussinesq.
+Mise a jour du titre et de la description dans deux fichiers pour refleter explicitement le contexte CEPA et tuyaux enterres.
 
-## Rendu visuel
+### Titre propose (max 60 caracteres)
+**CEPA Buried Pipeline Surface Loading Calculator** (49 caracteres)
 
-```text
-      Grid Width
-    |<--------->|
-    +--+--+--+--+   ---
-    |  |  |  |  |    |
-    +--+--+--+--+    | Grid Length
-    |  |  |  |  |    |
-    +--+--+--+--+   ---
-```
-
-Les lignes internes sont fines et semi-transparentes pour ne pas surcharger le dessin. Un petit label "10 x 10" (ou les valeurs actuelles) est affiche dans un coin du rectangle.
-
-## Modification
-
-### `src/components/GridLoadDiagram.tsx`
-
-**Props ajoutees :** `gridDivisionsX` et `gridDivisionsY` (type `number`)
-
-**Rendu :**
-- Lignes verticales internes : `nX - 1` lignes espacees regulierement dans le rectangle
-- Lignes horizontales internes : `nY - 1` lignes espacees regulierement
-- Style : trait fin (0.5px), couleur foreground a ~20% opacite, pour rester discret
-- Label compact en bas a droite du rectangle : `{nX} x {nY}` dans un petit pill
-
-### `src/components/GridLoadForm.tsx`
-
-Ajouter les deux props supplementaires dans l'appel au composant :
-```
-gridDivisionsX={watch("gridDivisionsX")}
-gridDivisionsY={watch("gridDivisionsY")}
-```
+### Description proposee (max 160 caracteres)
+**Assess stress on buried pipelines from surface vehicle and equipment loads using CEPA methodology. Supports track, axle, and grid load configurations.** (155 caracteres)
 
 ## Fichiers a modifier
 
 | Fichier | Modification |
 |---------|-------------|
-| `src/components/GridLoadDiagram.tsx` | Ajouter props `gridDivisionsX/Y`, dessiner les lignes internes + label |
-| `src/components/GridLoadForm.tsx` | Passer les deux nouvelles props au composant |
+| `index.html` | Mettre a jour `<title>`, `<meta name="description">`, `<meta property="og:title">`, `<meta property="og:description">`, `<meta name="twitter:card">` |
+| `src/pages/Home.tsx` | Mettre a jour le `<h1>` et le paragraphe de description sur la page d'accueil pour correspondre |
+
+## Detail des changements
+
+### `index.html`
+- `<title>` : "CEPA Buried Pipeline Surface Loading Calculator"
+- `<meta description>` : "Assess stress on buried pipelines from surface vehicle and equipment loads using CEPA methodology. Supports track, axle, and grid load configurations."
+- Memes valeurs pour les balises Open Graph (`og:title`, `og:description`)
+
+### `src/pages/Home.tsx`
+- `<h1>` : "CEPA Buried Pipeline Surface Loading Calculator"
+- Paragraphe descriptif : "Evaluate the impact of surface vehicle and equipment loads on buried pipelines using the CEPA methodology. Analyze contact pressure, Boussinesq stress distribution, and combined stress conditions for track vehicles, wheeled axles, and grid loads."
 
