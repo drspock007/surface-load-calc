@@ -1,48 +1,64 @@
 
 
-# Export / Import de Presets en fichier JSON
+# Grid Load Diagram
 
-## Objectif
+## What gets built
 
-Permettre aux utilisateurs d'exporter leurs presets dans un fichier JSON portable et d'importer des presets depuis un fichier, pour partager entre collegues ou transferer entre machines.
+A dynamic SVG diagram (top-down view) inserted into the Grid Load form, showing:
 
-## Format du fichier
+- A **rectangular loaded area** (hatched or shaded) representing the grid, with labeled dimensions (Grid Length and Grid Width)
+- A **horizontal dashed blue pipeline** running left-to-right through the center of the view
+- **Offset X** dimension arrow showing lateral displacement from pipe centerline to grid center
+- **Offset Y** dimension arrow showing longitudinal displacement along the pipe axis
+- **Total Load or Uniform Pressure** label displayed above the grid rectangle
+- All labels update in real-time as form values change (same pattern as TrackVehicleDiagram)
+
+The diagram visually clarifies the meaning of Offset X (perpendicular to pipeline) vs Offset Y (along pipeline), which is the most common source of confusion for this calculation mode.
+
+## Visual layout (top-down view)
 
 ```text
-{
-  "version": 1,
-  "mode": "track",
-  "exportedAt": "2026-02-13T...",
-  "presets": [
-    { "name": "Highway 24in", "values": {...}, "createdAt": "..." }
-  ]
-}
+        Grid Width
+      |<--------->|
+  --- +===========+ ---
+  |   |  hatched  |  |   Grid Length
+  |   |   area    |  |   (along Y)
+  --- +===========+ ---
+            |
+            |<-- Offset X -->|
+  ============================= Pipeline (dashed blue, horizontal)
+            |
+            Offset Y (vertical distance from pipe to grid center)
 ```
 
-Nom automatique du fichier : `presets-track-2026-02-13.json`
+## Technical details
 
-## Comportement
+### New file
+`src/components/GridLoadDiagram.tsx` -- a single component (~120 lines)
 
-- **Export** : telecharge un fichier `.json` avec tous les presets du mode actif
-- **Import** : ouvre un selecteur de fichier, valide le contenu (Zod), verifie que le mode correspond, fusionne avec les presets existants (sans ecraser les doublons par nom), et respecte la limite de 20
+**Props:** `gridLength`, `gridWidth`, `gridOffsetX`, `gridOffsetY`, `totalLoad`, `uniformPressure`, `loadType`, `unitsSystem`
 
-## Modifications
+**Behavior:**
+- Uses the same styling conventions as TrackVehicleDiagram (muted background, border, primary-colored labels, monospace values)
+- Pipeline always drawn horizontally at the vertical center of the SVG
+- Grid rectangle positioned relative to pipeline center using Offset X and Offset Y
+- Dimension lines with end ticks for Length, Width, Offset X, Offset Y
+- Load value shown in a primary-colored pill above the grid
 
-### `src/utils/presetStorage.ts`
-- Ajouter un schema Zod pour le fichier d'export (`version`, `mode`, `exportedAt`, `presets`)
-- Ajouter `exportPresetsToJSON(mode)` : retourne la string JSON formatee
-- Ajouter `importPresetsFromJSON(mode, jsonString)` : valide, verifie le mode, fusionne intelligemment, retourne un resultat (nombre importes, nombre ignores)
+### Modified file
+`src/components/GridLoadForm.tsx` -- import and render `GridLoadDiagram` inside the "Grid Load Properties" card, right after the inputs (before the closing `</CardContent>`)
 
-### `src/components/PresetManager.tsx`
-- Ajouter deux boutons : **Export** (icone Download) et **Import** (icone Upload)
-- Export : appelle `exportPresetsToJSON`, cree un Blob et declenche le telechargement
-- Import : ouvre un `<input type="file" accept=".json">` cache, lit le fichier, appelle `importPresetsFromJSON`, affiche un toast avec le resultat, rafraichit la liste
-- Disposition : les deux boutons cote a cote sous le bouton "Save Preset"
-
-## Validation a l'import
-- Taille max du fichier : 1 MB
-- Schema Zod complet (structure, types, limites de longueur)
-- Le champ `mode` doit correspondre au mode actuel (sinon erreur claire)
-- Les presets dont le nom existe deja sont ignores (pas ecrases)
-- La limite de 20 presets par mode est respectee (les surplus sont ignores avec avertissement)
+Pass watched values as props:
+```
+<GridLoadDiagram
+  gridLength={watch("gridLength")}
+  gridWidth={watch("gridWidth")}
+  gridOffsetX={watch("gridOffsetX")}
+  gridOffsetY={watch("gridOffsetY")}
+  totalLoad={watch("totalLoad")}
+  uniformPressure={watch("uniformPressure")}
+  loadType={loadType}
+  unitsSystem={unitsSystem}
+/>
+```
 
