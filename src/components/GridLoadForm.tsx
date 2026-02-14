@@ -15,6 +15,7 @@ import { PipeSelector } from "./PipelineTrackForm/PipeSelector";
 import { SoilLoadSection } from "./PipelineTrackForm/SoilLoadSection";
 import { AnalysisParametersSection } from "./AnalysisParametersSection";
 import { SoilDensitySelector } from "./SoilDensitySelector";
+import { GridLoadDiagram } from "./GridLoadDiagram";
 import { convertFormValue } from "@/domain/pipeline/unitConversions";
 import { createEnsurePositive } from "@/hooks/useEnsurePositive";
 
@@ -361,6 +362,16 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
               <Input type="number" min="1" max="50" {...register("gridDivisionsY", { valueAsNumber: true })} />
             </div>
           </div>
+          <GridLoadDiagram
+            gridLength={watch("gridLength")}
+            gridWidth={watch("gridWidth")}
+            gridOffsetX={watch("gridOffsetX")}
+            gridOffsetY={watch("gridOffsetY")}
+            totalLoad={watch("totalLoad")}
+            uniformPressure={watch("uniformPressure")}
+            loadType={loadType}
+            unitsSystem={unitsSystem}
+          />
         </CardContent>
       </Card>
 
