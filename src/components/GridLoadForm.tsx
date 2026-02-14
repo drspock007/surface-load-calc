@@ -371,6 +371,8 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
             uniformPressure={watch("uniformPressure")}
             loadType={loadType}
             unitsSystem={unitsSystem}
+            gridDivisionsX={watch("gridDivisionsX")}
+            gridDivisionsY={watch("gridDivisionsY")}
           />
         </CardContent>
       </Card>

@@ -7,6 +7,8 @@ interface GridLoadDiagramProps {
   uniformPressure?: number;
   loadType: "TOTAL_LOAD" | "UNIFORM_PRESSURE";
   unitsSystem: "EN" | "SI";
+  gridDivisionsX: number;
+  gridDivisionsY: number;
 }
 
 export const GridLoadDiagram = ({
@@ -18,6 +20,8 @@ export const GridLoadDiagram = ({
   uniformPressure,
   loadType,
   unitsSystem,
+  gridDivisionsX,
+  gridDivisionsY,
 }: GridLoadDiagramProps) => {
   const depthUnit = unitsSystem === "EN" ? "ft" : "m";
   const forceUnit = unitsSystem === "EN" ? "lb" : "kg";
@@ -77,6 +81,24 @@ export const GridLoadDiagram = ({
         {/* Grid rectangle */}
         <rect x={gridLeft} y={gridTop} width={rectW} height={rectH} fill="hsl(var(--primary)/0.15)" stroke="hsl(var(--primary))" strokeWidth="2" rx="3" />
         <rect x={gridLeft} y={gridTop} width={rectW} height={rectH} fill="url(#gridHatch)" rx="3" />
+
+        {/* Grid subdivision lines */}
+        {Array.from({ length: (gridDivisionsX || 1) - 1 }, (_, i) => {
+          const x = gridLeft + ((i + 1) * rectW) / (gridDivisionsX || 1);
+          return <line key={`vd${i}`} x1={x} y1={gridTop} x2={x} y2={gridTop + rectH} stroke="hsl(var(--foreground))" strokeWidth="0.5" opacity="0.2" />;
+        })}
+        {Array.from({ length: (gridDivisionsY || 1) - 1 }, (_, i) => {
+          const y = gridTop + ((i + 1) * rectH) / (gridDivisionsY || 1);
+          return <line key={`hd${i}`} x1={gridLeft} y1={y} x2={gridLeft + rectW} y2={y} stroke="hsl(var(--foreground))" strokeWidth="0.5" opacity="0.2" />;
+        })}
+
+        {/* Divisions label */}
+        <g transform={`translate(${gridLeft + rectW - 4}, ${gridTop + rectH + 14})`}>
+          <rect x="-28" y="-10" width="56" height="16" fill="hsl(var(--muted-foreground))" rx="3" opacity="0.8" />
+          <text x="0" y="3" textAnchor="middle" fill="hsl(var(--background))" fontSize="9" fontWeight="bold" fontFamily="monospace">
+            {gridDivisionsX} × {gridDivisionsY}
+          </text>
+        </g>
 
         {/* Load label pill above grid */}
         <g transform={`translate(${gridCenterX}, ${gridTop - 18})`}>
