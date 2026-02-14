@@ -13,11 +13,10 @@ const Home = () => {
             <Calculator className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-foreground">
-            Surface Loading Stress Calculator
+            CEPA Buried Pipeline Surface Loading Calculator
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Calculate stress distribution from surface loads on soil. Analyze contact pressure,
-            stress at depth, and total stress conditions for foundation and geotechnical applications.
+            Evaluate the impact of surface vehicle and equipment loads on buried pipelines using the CEPA methodology. Analyze contact pressure, Boussinesq stress distribution, and combined stress conditions for track vehicles, wheeled axles, and grid loads.
           </p>
           <Link to="/calculator">
             <Button size="lg" className="mt-4">
