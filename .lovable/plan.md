@@ -1,32 +1,33 @@
 
 
-# Titre et description du site
+# Corriger et completer les en-tetes SEO
 
-## Changements
+## Changements prevus dans `index.html`
 
-Mise a jour du titre et de la description dans deux fichiers pour refleter explicitement le contexte CEPA et tuyaux enterres.
+### 1. Corriger le titre et les descriptions (branding CEPA)
 
-### Titre propose (max 60 caracteres)
-**CEPA Buried Pipeline Surface Loading Calculator** (49 caracteres)
+- `<title>` : "CEPA Buried Pipeline Surface Loading Calculator"
+- `<meta name="description">` : "Assess stress on buried pipelines from surface vehicle and equipment loads using CEPA methodology. Supports track, axle, and grid load configurations."
+- Memes valeurs pour `og:title`, `og:description`, `twitter:title`, `twitter:description`
 
-### Description proposee (max 160 caracteres)
-**Assess stress on buried pipelines from surface vehicle and equipment loads using CEPA methodology. Supports track, axle, and grid load configurations.** (155 caracteres)
+### 2. Ajouter les elements SEO manquants
 
-## Fichiers a modifier
+| Balise | Valeur |
+|--------|--------|
+| `<meta name="keywords">` | "CEPA, buried pipeline, surface loading, Boussinesq, stress calculator, pipeline engineering, track vehicle, axle load, grid load" |
+| `<link rel="canonical">` | "https://bpcalc.giovannimalagninoconsulting.com/" |
+| `<meta property="og:url">` | "https://bpcalc.giovannimalagninoconsulting.com/" |
+| `<meta name="theme-color">` | "#ff8f05" |
+| `<meta name="robots">` | "index, follow" |
+
+### 3. Nettoyer
+
+- Retirer `<meta name="twitter:site" content="@Lovable" />`
+- Mettre a jour `<meta name="author">` vers "Giovanni Malagnino Consulting"
+
+## Fichier modifie
 
 | Fichier | Modification |
 |---------|-------------|
-| `index.html` | Mettre a jour `<title>`, `<meta name="description">`, `<meta property="og:title">`, `<meta property="og:description">`, `<meta name="twitter:card">` |
-| `src/pages/Home.tsx` | Mettre a jour le `<h1>` et le paragraphe de description sur la page d'accueil pour correspondre |
-
-## Detail des changements
-
-### `index.html`
-- `<title>` : "CEPA Buried Pipeline Surface Loading Calculator"
-- `<meta description>` : "Assess stress on buried pipelines from surface vehicle and equipment loads using CEPA methodology. Supports track, axle, and grid load configurations."
-- Memes valeurs pour les balises Open Graph (`og:title`, `og:description`)
-
-### `src/pages/Home.tsx`
-- `<h1>` : "CEPA Buried Pipeline Surface Loading Calculator"
-- Paragraphe descriptif : "Evaluate the impact of surface vehicle and equipment loads on buried pipelines using the CEPA methodology. Analyze contact pressure, Boussinesq stress distribution, and combined stress conditions for track vehicles, wheeled axles, and grid loads."
+| `index.html` | Mise a jour de toutes les balises meta existantes et ajout des balises manquantes |
 
