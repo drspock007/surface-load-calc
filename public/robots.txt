@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://bpcalc.giovannimalagninoconsulting.com/sitemap.xml
