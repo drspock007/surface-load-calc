@@ -38,7 +38,13 @@ const Sensitivity = () => {
     return SENSITIVITY_PARAMETERS.filter(p => p.modes.includes(selectedMode));
   }, [selectedMode]);
 
-  // Reset parameter selection when mode changes
+  // Get available runs for the selected mode
+  const availableRuns = useMemo(() => {
+    const runs = storage.getRuns();
+    return runs.filter(r => r.mode === selectedMode);
+  }, [selectedMode]);
+
+  // Reset parameter selection and base case when mode changes
   const handleModeChange = (newMode: CalculationMode) => {
     setSelectedMode(newMode);
     const newAvailableParams = SENSITIVITY_PARAMETERS.filter(p => p.modes.includes(newMode));
@@ -59,26 +65,15 @@ const Sensitivity = () => {
     }
   };
 
-  // Load the most recent run of selected mode as base case
-  const loadBaseCase = () => {
-    const runs = storage.getRuns();
-    const modeRuns = runs.filter(r => r.mode === selectedMode);
-    
-    if (modeRuns.length === 0) {
-      toast({
-        title: "No Base Case",
-        description: `Please run a ${getModeLabel(selectedMode)} calculation first`,
-        variant: "destructive",
-      });
-      return;
-    }
+  /** Load a specific run as the base case by its ID */
+  const handleRunSelect = (runId: string) => {
+    const run = availableRuns.find(r => r.id === runId);
+    if (!run) return;
 
-    const latestRun = modeRuns[0];
-    setBaseInputs(latestRun.input);
-    
+    setBaseInputs(run.input);
     toast({
       title: "Base Case Loaded",
-      description: `Using "${latestRun.input.calculationName}"`,
+      description: `Using "${run.input.calculationName}"`,
     });
   };
 
@@ -218,13 +213,27 @@ const Sensitivity = () => {
                   </Select>
                 </div>
 
-                <Button 
-                  onClick={loadBaseCase} 
-                  variant="outline" 
-                  className="w-full"
-                >
-                  Load Base Case ({getModeLabel(selectedMode)})
-                </Button>
+                <div className="space-y-2">
+                  <Label>Base Case</Label>
+                  {availableRuns.length === 0 ? (
+                    <p className="text-sm text-muted-foreground p-3 bg-muted rounded-md">
+                      No saved runs — run a {getModeLabel(selectedMode)} calculation first
+                    </p>
+                  ) : (
+                    <Select onValueChange={handleRunSelect}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a saved run..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableRuns.map(run => (
+                          <SelectItem key={run.id} value={run.id}>
+                            {run.input.calculationName} — {new Date(run.timestamp).toLocaleDateString()}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
 
                 {baseInputs && (
                   <div className="text-sm p-3 bg-muted rounded-md">
