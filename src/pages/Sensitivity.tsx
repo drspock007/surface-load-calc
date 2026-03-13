@@ -65,26 +65,15 @@ const Sensitivity = () => {
     }
   };
 
-  // Load the most recent run of selected mode as base case
-  const loadBaseCase = () => {
-    const runs = storage.getRuns();
-    const modeRuns = runs.filter(r => r.mode === selectedMode);
-    
-    if (modeRuns.length === 0) {
-      toast({
-        title: "No Base Case",
-        description: `Please run a ${getModeLabel(selectedMode)} calculation first`,
-        variant: "destructive",
-      });
-      return;
-    }
+  /** Load a specific run as the base case by its ID */
+  const handleRunSelect = (runId: string) => {
+    const run = availableRuns.find(r => r.id === runId);
+    if (!run) return;
 
-    const latestRun = modeRuns[0];
-    setBaseInputs(latestRun.input);
-    
+    setBaseInputs(run.input);
     toast({
       title: "Base Case Loaded",
-      description: `Using "${latestRun.input.calculationName}"`,
+      description: `Using "${run.input.calculationName}"`,
     });
   };
 
