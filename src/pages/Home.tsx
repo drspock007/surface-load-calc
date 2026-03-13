@@ -9,8 +9,8 @@ const Home = () => {
     <Layout>
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-engineering-gradient rounded-xl mb-4">
-            <Calculator className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-xl mb-4">
+            <Calculator className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-4xl font-bold text-foreground">
             CEPA Buried Pipeline Surface Loading Calculator
