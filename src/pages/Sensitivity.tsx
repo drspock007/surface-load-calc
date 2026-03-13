@@ -213,13 +213,27 @@ const Sensitivity = () => {
                   </Select>
                 </div>
 
-                <Button 
-                  onClick={loadBaseCase} 
-                  variant="outline" 
-                  className="w-full"
-                >
-                  Load Base Case ({getModeLabel(selectedMode)})
-                </Button>
+                <div className="space-y-2">
+                  <Label>Base Case</Label>
+                  {availableRuns.length === 0 ? (
+                    <p className="text-sm text-muted-foreground p-3 bg-muted rounded-md">
+                      No saved runs — run a {getModeLabel(selectedMode)} calculation first
+                    </p>
+                  ) : (
+                    <Select onValueChange={handleRunSelect}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a saved run..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableRuns.map(run => (
+                          <SelectItem key={run.id} value={run.id}>
+                            {run.input.calculationName} — {new Date(run.timestamp).toLocaleDateString()}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
 
                 {baseInputs && (
                   <div className="text-sm p-3 bg-muted rounded-md">
