@@ -227,7 +227,7 @@ const Sensitivity = () => {
                 </Button>
 
                 {baseInputs && (
-                  <div className="text-sm p-3 bg-secondary rounded-md">
+                  <div className="text-sm p-3 bg-muted rounded-md">
                     <div className="font-medium">Base Case:</div>
                     <div className="text-muted-foreground">{baseInputs.calculationName}</div>
                     <div className="text-xs mt-1">
