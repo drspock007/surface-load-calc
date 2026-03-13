@@ -38,7 +38,13 @@ const Sensitivity = () => {
     return SENSITIVITY_PARAMETERS.filter(p => p.modes.includes(selectedMode));
   }, [selectedMode]);
 
-  // Reset parameter selection when mode changes
+  // Get available runs for the selected mode
+  const availableRuns = useMemo(() => {
+    const runs = storage.getRuns();
+    return runs.filter(r => r.mode === selectedMode);
+  }, [selectedMode]);
+
+  // Reset parameter selection and base case when mode changes
   const handleModeChange = (newMode: CalculationMode) => {
     setSelectedMode(newMode);
     const newAvailableParams = SENSITIVITY_PARAMETERS.filter(p => p.modes.includes(newMode));
