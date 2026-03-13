@@ -1,16 +1,14 @@
 
 
-# Fix: Base Case info box is unreadable (black background)
+# Ajouter Google Analytics (gtag.js)
 
-## Problem
-The "Base Case" info box at line 230 uses `bg-secondary` which is now black (`0 0% 10%`) after the color palette update. The text inside is also dark, making it completely unreadable.
+## Changement
 
-## Fix
-Replace `bg-secondary` with `bg-muted` (a lighter gray) on the base case info div, and ensure the text uses appropriate foreground colors.
+Ajouter le script Google Analytics (G-9R8WYBPDC1) dans le `<head>` de `index.html`, juste apres la balise `<meta charset>` pour un chargement optimal.
 
-| File | Change |
-|------|--------|
-| `src/pages/Sensitivity.tsx` line 230 | Change `bg-secondary` to `bg-muted` |
+## Fichier modifie
 
-This is a one-line class change, no logic or structure affected.
+| Fichier | Modification |
+|---------|-------------|
+| `index.html` | Ajout du snippet gtag.js dans le `<head>` |
 
