@@ -23,42 +23,51 @@ export const Layout = ({ children }: LayoutProps) => {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <a
-              href="https://giovannimalagninoconsulting.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center"
-            >
-              <img
-                src={logo}
-                alt="Giovanni Malagnino Consulting"
-                className="h-10 w-auto hover:opacity-80 transition-opacity"
-              />
-            </a>
-
-            <nav className="flex gap-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
-                      isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary hover:text-secondary-foreground"
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="hidden sm:inline">{item.label}</span>
-                  </Link>
-                );
-              })}
-            </nav>
+          {/* Top band: logo (left) + tagline (right) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center py-6">
+            <div className="flex justify-center md:justify-start">
+              <a
+                href="https://giovannimalagninoconsulting.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block"
+              >
+                <img
+                  src={logo}
+                  alt="Giovanni Malagnino Consulting"
+                  className="h-24 w-auto hover:opacity-80 transition-opacity"
+                />
+              </a>
+            </div>
+            <div className="text-center md:text-left text-foreground text-lg leading-relaxed">
+              <p>Engineering</p>
+              <p>Consulting</p>
+              <p>Project management</p>
+            </div>
           </div>
+
+          {/* Navigation row */}
+          <nav className="flex flex-wrap gap-1 justify-center md:justify-end pb-3">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary hover:text-secondary-foreground"
+                  )}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
       </header>
 
@@ -66,3 +75,4 @@ export const Layout = ({ children }: LayoutProps) => {
     </div>
   );
 };
+
