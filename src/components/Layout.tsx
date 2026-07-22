@@ -39,10 +39,13 @@ export const Layout = ({ children }: LayoutProps) => {
                 />
               </a>
             </div>
-            <div className="text-center md:text-left text-foreground text-lg leading-relaxed">
+            <div
+              className="text-center md:text-left text-foreground text-[27px] leading-relaxed"
+              style={{ fontFamily: '"Habibi", Georgia, "Times New Roman", serif' }}
+            >
               <p>Engineering</p>
               <p>Consulting</p>
-              <p>Project management</p>
+              <p>Projet management</p>
             </div>
           </div>
 
