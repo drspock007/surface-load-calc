@@ -93,5 +93,8 @@
 
   body {
     @apply bg-background text-foreground;
+    border-left: 24px solid hsl(var(--primary));
+    border-right: 24px solid hsl(var(--primary));
+    min-height: 100vh;
   }
 }
