@@ -47,6 +47,7 @@ export const Layout = ({ children }: LayoutProps) => {
                 fontWeight: 500,
                 letterSpacing: '2px',
                 lineHeight: '23.8px',
+                paddingBottom: '27px',
                 textShadow: 'rgba(0, 0, 0, 0.4) 2.16px 2.16px 2.16px',
               }}
             >
