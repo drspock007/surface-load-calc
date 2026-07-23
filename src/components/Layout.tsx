@@ -40,15 +40,22 @@ export const Layout = ({ children }: LayoutProps) => {
               </a>
             </div>
             <div
-              className="text-center md:text-left text-foreground"
+              className="text-left text-foreground"
               style={{
+                backgroundColor: 'transparent',
+                color: '#020202',
+                display: 'block',
                 fontFamily: '"Habibi", Georgia, "Times New Roman", serif',
                 fontSize: '27px',
                 fontWeight: 500,
                 letterSpacing: '2px',
-                lineHeight: '23.8px',
-                paddingBottom: '27px',
+                lineHeight: '1.7em',
+                margin: 0,
+                padding: '0 0 1em 0',
+                position: 'static',
+                textAlign: 'left',
                 textShadow: 'rgba(0, 0, 0, 0.4) 2.16px 2.16px 2.16px',
+                textTransform: 'none',
               }}
             >
               <p>Engineering</p>
