@@ -40,8 +40,15 @@ export const Layout = ({ children }: LayoutProps) => {
               </a>
             </div>
             <div
-              className="text-center md:text-left text-foreground text-[27px] leading-relaxed"
-              style={{ fontFamily: '"Habibi", Georgia, "Times New Roman", serif' }}
+              className="text-center md:text-left text-foreground"
+              style={{
+                fontFamily: '"Habibi", Georgia, "Times New Roman", serif',
+                fontSize: '27px',
+                fontWeight: 500,
+                letterSpacing: '2px',
+                lineHeight: '23.8px',
+                textShadow: 'rgba(0, 0, 0, 0.4) 2.16px 2.16px 2.16px',
+              }}
             >
               <p>Engineering</p>
               <p>Consulting</p>
