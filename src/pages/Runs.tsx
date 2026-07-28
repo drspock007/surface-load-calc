@@ -10,7 +10,7 @@ import { Trash2, Download, Upload, Eye, Calculator, AlertCircle, CheckCircle2, X
 import { useToast } from "@/hooks/use-toast";
 import { InputParametersCard } from "@/components/InputParametersCard";
 import {
-import { SEO } from "@/components/SEO";
+
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
