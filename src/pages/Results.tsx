@@ -70,7 +70,7 @@ const Results = () => {
     <Layout>
       <div className="max-w-4xl mx-auto" ref={targetRef}>
         <div className="mb-6 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back to previous page">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
