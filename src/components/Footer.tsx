@@ -1,27 +1,51 @@
 import { Facebook, Linkedin } from "lucide-react";
 
-/** Site footer mirroring giovannimalagninoconsulting.com: Italy address, Canada address, social links. */
+/** Site footer mirroring giovannimalagninoconsulting.com: Italy address, Canada address, social links.
+ * Typography, colors, and social icon styling are matched to the source site's computed styles:
+ * Roboto 14px/500, color #020202, white background; 32x32 icons with 3px radius, brand-color backgrounds. */
 export const Footer = () => {
+  const textStyle: React.CSSProperties = {
+    fontFamily: 'Roboto, Helvetica, Arial, Lucida, sans-serif',
+    fontSize: '14px',
+    fontWeight: 500,
+    lineHeight: '23.8px',
+    color: '#020202',
+    letterSpacing: 'normal',
+    margin: 0,
+  };
+
+  const linkStyle: React.CSSProperties = { ...textStyle, textDecoration: 'none' };
+
+  const iconLinkBase: React.CSSProperties = {
+    width: 32,
+    height: 32,
+    borderRadius: 3,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#ffffff',
+    textDecoration: 'none',
+  };
+
   return (
-    <footer className="border-t border-border bg-card mt-8">
+    <footer style={{ backgroundColor: '#ffffff' }}>
       <div className="container mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-foreground">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Column 1: Italy */}
-          <div className="text-center md:text-left space-y-1">
-            <p className="font-semibold">Giovanni Malagnino Consulting</p>
-            <p>Address in Italy:</p>
-            <p>Via Selva 79</p>
-            <p>63835 Montappone FM</p>
-            <p>Italie</p>
-            <p>
-              <a href="tel:+393927290392" className="hover:text-primary transition-colors">
-                +39 392 729 0392
-              </a>
+          <div className="text-center md:text-left space-y-1" style={textStyle}>
+            <p style={textStyle}>Giovanni Malagnino Consulting</p>
+            <p style={textStyle}>Address in Italy:</p>
+            <p style={textStyle}>Via Selva 79</p>
+            <p style={textStyle}>63835 Montappone FM</p>
+            <p style={textStyle}>Italie</p>
+            <p style={textStyle}>
+              <a href="tel:+393927290392" style={linkStyle}>+39 392 729 0392</a>
             </p>
-            <p>
+            <p style={textStyle}>
               <a
                 href="mailto:giovanni@giovannimalagninoconsulting.com"
-                className="hover:text-primary transition-colors break-all"
+                style={linkStyle}
+                className="break-all"
               >
                 giovanni@giovannimalagninoconsulting.com
               </a>
@@ -29,38 +53,36 @@ export const Footer = () => {
           </div>
 
           {/* Column 2: Canada */}
-          <div className="text-center md:text-left space-y-1">
-            <p>&nbsp;</p>
-            <p>Address in Canada:</p>
-            <p>1395, Rue Fleury Est, Bureau 102.2</p>
-            <p>Montréal, QC, H2C 1R7</p>
-            <p>Canada</p>
-            <p>
-              <a href="tel:+14384480997" className="hover:text-primary transition-colors">
-                +1 438 448 0997
-              </a>
+          <div className="text-center md:text-left space-y-1" style={textStyle}>
+            <p style={textStyle}>&nbsp;</p>
+            <p style={textStyle}>Address in Canada:</p>
+            <p style={textStyle}>1395, Rue Fleury Est, Bureau 102.2</p>
+            <p style={textStyle}>Montréal, QC, H2C 1R7</p>
+            <p style={textStyle}>Canada</p>
+            <p style={textStyle}>
+              <a href="tel:+14384480997" style={linkStyle}>+1 438 448 0997</a>
             </p>
           </div>
 
-          {/* Column 3: Social links */}
-          <div className="flex items-start justify-center md:justify-end gap-3">
+          {/* Column 3: Social links (Facebook brand blue #3B5998, LinkedIn brand blue #007BB6) */}
+          <div className="flex items-start justify-center md:justify-end gap-2">
             <a
               href="https://www.facebook.com/giovannimalagninoconsulting"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Follow on Facebook"
-              className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:opacity-80 transition-opacity"
+              style={{ ...iconLinkBase, backgroundColor: '#3B5998' }}
             >
-              <Facebook className="w-5 h-5" />
+              <Facebook size={16} fill="#ffffff" strokeWidth={0} />
             </a>
             <a
               href="https://www.linkedin.com/in/giovannimalagnino/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Follow on LinkedIn"
-              className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:opacity-80 transition-opacity"
+              style={{ ...iconLinkBase, backgroundColor: '#007BB6' }}
             >
-              <Linkedin className="w-5 h-5" />
+              <Linkedin size={16} fill="#ffffff" strokeWidth={0} />
             </a>
           </div>
         </div>
