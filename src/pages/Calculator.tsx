@@ -15,6 +15,7 @@ import { PipelineTrackInputs } from "@/domain/pipeline/types";
 import { TwoAxleInputs } from "@/domain/pipeline/types2Axle";
 import { ThreeAxleInputs } from "@/domain/pipeline/types3Axle";
 import { GridLoadInputs } from "@/domain/pipeline/typesGrid";
+import { SEO } from "@/components/SEO";
 
 const Calculator = () => {
   const navigate = useNavigate();
@@ -127,6 +128,7 @@ const Calculator = () => {
 
   return (
     <Layout>
+      <SEO title="Calculator | CEPA Buried Pipeline Surface Loading" description="Run CEPA buried pipeline surface load calculations for track vehicles, 2-axle, 3-axle, and grid loads with instant stress results." path="/calculator" />
       <div className="max-w-3xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">New Calculation</h1>
