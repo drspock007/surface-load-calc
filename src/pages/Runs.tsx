@@ -169,6 +169,7 @@ const Runs = () => {
                         size="icon"
                         onClick={() => handleView(run)}
                         title="View results"
+                        aria-label={`View results for ${run.input.calculationName}`}
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -177,6 +178,7 @@ const Runs = () => {
                         size="icon"
                         onClick={() => setDeleteId(run.id)}
                         title="Delete"
+                        aria-label={`Delete calculation ${run.input.calculationName}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
