@@ -86,6 +86,7 @@ export const Footer = () => {
               <Linkedin size={16} fill="#ffffff" strokeWidth={0} />
             </a>
           </div>
+        </div>
 
         {/* Copyright + version bar */}
         <div className="mt-8 pt-4 border-t border-border text-center">
