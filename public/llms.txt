@@ -1,0 +1,14 @@
+# CEPA Buried Pipeline Surface Loading Calculator
+
+> Assess stress and safety on buried pipelines from surface vehicle and equipment loads using the CEPA Surface Loading Calculator methodology.
+
+This site provides an engineering calculator for buried pipelines subject to surface loading. It implements the CEPA Surface Loading Calculator methodology (based on CEPA 2014) to compute hoop, longitudinal, and equivalent stresses from track vehicles, 2-axle trucks, 3-axle trucks, and distributed grid loads. Results are presented as absolute stresses and as a percentage of the pipe's specified minimum yield strength (SMYS). Users can save calculation presets locally, compare multiple runs, and run sensitivity analyses.
+
+## Pages
+
+- [Home](/): Overview of the CEPA Buried Pipeline Surface Loading Calculator and quick access to the engineering tools.
+- [Calculator](/calculator): Configure a single pipeline loading scenario: pipe geometry, material properties, soil cover, load type, and vehicle/grid parameters.
+- [Results](/results): Detailed stress output from the last calculation, including hoop, longitudinal, and equivalent stress, impact factor, and maximum pressure location.
+- [Runs](/runs): Compare saved calculation runs side-by-side with exportable result tables.
+- [Sensitivity](/sensitivity): Analyze how changing one input parameter affects the resulting stress across multiple cases.
+- [Documentation](/documentation): Technical reference manual explaining the formulas, assumptions, units, and methodology behind the calculator.
