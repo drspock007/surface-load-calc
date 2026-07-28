@@ -72,7 +72,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       {/* FRONT MATTER */}
       <div style={{ textAlign: 'center', marginBottom: 40, paddingTop: 60 }}>
         <div style={{ width: 60, height: 60, background: 'linear-gradient(135deg, #ff8f05, #e67e00)', borderRadius: 8, margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 28, fontWeight: 700 }}>σ</div>
-        <h1 style={{ ...styles.title, marginBottom: 8 }}>CEPA Surface Loading Stress Calculator</h1>
+        <h2 style={{ ...styles.title, marginBottom: 8 }}>CEPA Surface Loading Stress Calculator</h2>
         <h2 style={{ ...styles.subtitle, fontSize: 20, fontWeight: 400, fontStyle: 'italic' }}>Technical Reference Manual</h2>
         <p style={{ color: '#666', fontSize: 13, marginTop: 16 }}>Version 1.0 — Generated {today}</p>
       </div>
