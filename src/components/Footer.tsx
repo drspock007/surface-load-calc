@@ -86,13 +86,10 @@ export const Footer = () => {
               <Linkedin size={16} fill="#ffffff" strokeWidth={0} />
             </a>
           </div>
-        </div>
-      </div>
 
-      {/* Copyright and version bar spans the full page width. */}
-      <div className="w-full border-t border-border" style={{ backgroundColor: '#ffffff' }}>
-        <div className="container mx-auto px-4 py-4 text-center">
-          <p className="text-xs text-muted-foreground" style={textStyle}>
+        {/* Copyright + version bar */}
+        <div className="mt-8 pt-4 border-t border-border text-center">
+          <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()}{" "}
             <a
               href="https://www.giovannimalagninoconsulting.com"
@@ -102,7 +99,7 @@ export const Footer = () => {
             >
               Giovanni Malagnino Consulting
             </a>
-            {" "}— CEPA Buried Pipeline Surface Loading Calculator — All rights reserved. — v202607281808
+            {" "}— CEPA Buried Pipeline Surface Loading Calculator — All rights reserved. — v202607281820
           </p>
         </div>
       </div>
