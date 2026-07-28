@@ -21,7 +21,7 @@ export const Layout = ({ children }: LayoutProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-card shadow-sm">
         <div className="container mx-auto px-4">
           {/* Top band: logo (left) + tagline (right) */}
