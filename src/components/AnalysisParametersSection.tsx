@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { PavementType, VehicleClass, EquivStressMethod, CodeCheck, UnitsSystem } from "@/domain/pipeline/types";
 import { getCodeLabel, getCodeDescription, CODE_PROFILES } from "@/domain/pipeline/codeProfiles";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface AnalysisParametersSectionProps {
   register: UseFormRegister<any>;
@@ -37,7 +38,7 @@ export const AnalysisParametersSection = ({
       <CardContent className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="vehicleClass">Vehicle Class *</Label>
+            <Label htmlFor="vehicleClass">Vehicle Class *<InfoTooltip text="Highway = paved roads (IF ~1.10). Farm/Construction = off-road wheeled (IF ~1.25). Track = crawler equipment (no dynamic impact)." /></Label>
             <Select
               value={watch("vehicleClass")}
               onValueChange={(v) => setValue("vehicleClass", v as VehicleClass)}
@@ -54,7 +55,7 @@ export const AnalysisParametersSection = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="pavementType">Pavement Type *</Label>
+            <Label htmlFor="pavementType">Pavement Type *<InfoTooltip text="Rigid = concrete slab distributes load laterally. Flexible = asphalt or unpaved, load transfers directly to subgrade." /></Label>
             <Select
               value={watch("pavementType")}
               onValueChange={(v) => setValue("pavementType", v as PavementType)}
@@ -72,7 +73,7 @@ export const AnalysisParametersSection = ({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="equivStressMethod">Equivalent Stress Method *</Label>
+            <Label htmlFor="equivStressMethod">Equivalent Stress Method *<InfoTooltip text="Tresca = max shear (σH − σL), more conservative. Von Mises = distortion energy, standard for ductile steel." /></Label>
             <Select
               value={watch("equivStressMethod")}
               onValueChange={(v) => setValue("equivStressMethod", v as EquivStressMethod)}
@@ -88,7 +89,7 @@ export const AnalysisParametersSection = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="codeCheck">Code Check *</Label>
+            <Label htmlFor="codeCheck">Code Check *<InfoTooltip text="Governing pipeline design code. Sets the allowable stress limits as a percentage of SMYS for hoop, longitudinal and equivalent stresses." /></Label>
             <Select
               value={watch("codeCheck")}
               onValueChange={(v) => setValue("codeCheck", v as CodeCheck)}

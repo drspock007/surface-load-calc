@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UnitsSystem } from "@/domain/pipeline/types";
 import { PIPE_SIZES, STEEL_GRADES, getWallThicknessOptions, getPipeOD, getWallThickness, getSMYS } from "@/domain/pipeline/pipePresets";
 import { createEnsurePositive } from "@/hooks/useEnsurePositive";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface PipeSelectorProps {
   register: UseFormRegister<any>;
@@ -74,7 +75,7 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
     <div className="space-y-4">
       {/* NPS Selection */}
       <div className="space-y-2">
-        <Label htmlFor="selectedNPS">Nominal Pipe Size (NPS)</Label>
+        <Label htmlFor="selectedNPS">Nominal Pipe Size (NPS)<InfoTooltip text="Standard ASME B36.10 designation. Choosing an NPS auto-fills the outer diameter." /></Label>
         <Select value={selectedNPS} onValueChange={handleNPSChange}>
           <SelectTrigger id="selectedNPS">
             <SelectValue placeholder="Select NPS..." />
@@ -92,7 +93,7 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
 
       {/* Pipe OD */}
       <div className="space-y-2">
-        <Label htmlFor="pipeOD">Pipe Outer Diameter ({unitLabels.length})</Label>
+        <Label htmlFor="pipeOD">Pipe Outer Diameter ({unitLabels.length})<InfoTooltip text="Outer diameter of the pipe. Locked when an NPS preset is selected." /></Label>
         <Input
           id="pipeOD"
           type="number"
@@ -110,7 +111,7 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
 
       {/* Wall Thickness Selection */}
       <div className="space-y-2">
-        <Label htmlFor="selectedSchedule">Wall Thickness Schedule</Label>
+        <Label htmlFor="selectedSchedule">Wall Thickness Schedule<InfoTooltip text="ASME B36.10 schedule (STD, XS, XXS, 40, 80, …). Sets the wall thickness for the selected NPS." /></Label>
         <Select 
           value={selectedSchedule} 
           onValueChange={handleScheduleChange}
@@ -132,7 +133,7 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
 
       {/* Pipe WT */}
       <div className="space-y-2">
-        <Label htmlFor="pipeWT">Pipe Wall Thickness ({unitLabels.length})</Label>
+        <Label htmlFor="pipeWT">Pipe Wall Thickness ({unitLabels.length})<InfoTooltip text="Wall thickness (t). Locked when a schedule preset is selected." /></Label>
         <Input
           id="pipeWT"
           type="number"
@@ -150,7 +151,7 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
 
       {/* Steel Grade Selection */}
       <div className="space-y-2">
-        <Label htmlFor="selectedGrade">Steel Grade</Label>
+        <Label htmlFor="selectedGrade">Steel Grade<InfoTooltip text="API 5L pipe grade (X42, X52, X60, X65, X70, X80…). Selecting a grade auto-fills SMYS." /></Label>
         <Select value={selectedGrade} onValueChange={handleGradeChange}>
           <SelectTrigger id="selectedGrade">
             <SelectValue placeholder="Select grade..." />
@@ -168,7 +169,7 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
 
       {/* SMYS */}
       <div className="space-y-2">
-        <Label htmlFor="SMYS">Specified Minimum Yield Strength ({unitLabels.smys})</Label>
+        <Label htmlFor="SMYS">Specified Minimum Yield Strength ({unitLabels.smys})<InfoTooltip text="Specified Minimum Yield Strength of the pipe material. Always entered in MPa in SI mode." /></Label>
         <Input
           id="SMYS"
           type="number"
