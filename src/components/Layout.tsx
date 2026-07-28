@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Calculator, Home, History, TrendingUp, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
+import { Footer } from "./Footer";
 
 interface LayoutProps {
   children: React.ReactNode;
