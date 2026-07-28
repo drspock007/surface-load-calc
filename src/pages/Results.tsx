@@ -14,6 +14,7 @@ import { GridLoadResults } from "@/domain/pipeline/typesGrid";
 import { UnitsSystem } from "@/domain/pipeline/types";
 import { InputParametersCard } from "@/components/InputParametersCard";
 import { SEO } from "@/components/SEO";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 // Unit labels based on system
 const getUnitLabels = (system: UnitsSystem) => ({
@@ -160,15 +161,15 @@ const Results = () => {
                     <p className="text-lg font-semibold">{run.input.unitsSystem === 'EN' ? 'English (psi, in, ft, lb)' : 'Metric (kPa, mm, m, kg)'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Impact Factor</p>
+                    <p className="text-sm text-muted-foreground">Impact Factor<InfoTooltip text="Dynamic amplification factor applied to the surface load. Base value depends on vehicle class (Highway ~1.10, Farm ~1.25, Track = 1.00) and is linearly reduced when cover depth exceeds 60 in." /></p>
                     <p className="text-lg font-semibold">{formatValue(pipelineResult.impactFactorUsed)}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Max Pressure Location</p>
+                    <p className="text-sm text-muted-foreground">Max Pressure Location<InfoTooltip text="Coordinate along the pipe axis (Y) where the Boussinesq surface pressure peaks. Found by scanning the pipe in 3-inch steps." /></p>
                     <p className="text-lg font-semibold">{pipelineResult.locationMaxLoad}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Max Surface Pressure on Pipe</p>
+                    <p className="text-sm text-muted-foreground">Max Surface Pressure on Pipe<InfoTooltip text="Peak vertical pressure at the top of the pipe from surface loading (Boussinesq integration over the loaded patches)." /></p>
                     <p className="text-lg font-semibold">
                       {formatValue(pipelineResult.maxSurfacePressureOnPipe)} {units.stress}
                     </p>
@@ -184,7 +185,7 @@ const Results = () => {
               <CardContent className="space-y-6">
                 <div>
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    Hoop Stresses
+                    Hoop Stresses<InfoTooltip text="Circumferential stress in the pipe wall. High = maximum compressive (at the crown, from earth + live load). Low = minimum (at springline). Positive = tensile from internal pressure." />
                   </h3>
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="p-3 bg-muted/50 rounded">
@@ -208,7 +209,7 @@ const Results = () => {
                 </div>
 
                 <div className="border-t pt-4">
-                  <h3 className="font-semibold mb-3">Longitudinal Stresses</h3>
+                  <h3 className="font-semibold mb-3">Longitudinal Stresses<InfoTooltip text="Axial stress along the pipe. Combines Poisson effect from hoop, thermal expansion (ΔT × E × α) and bending from surface load. Impact factor is applied once per VBA logic." /></h3>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="p-3 bg-muted/50 rounded">
                       <p className="text-xs text-muted-foreground mb-1">At Zero Pressure</p>
@@ -231,7 +232,7 @@ const Results = () => {
                 </div>
 
                 <div className="border-t pt-4">
-                  <h3 className="font-semibold mb-3">Equivalent Stresses ({run.input.equivStressMethod})</h3>
+                  <h3 className="font-semibold mb-3">Equivalent Stresses ({run.input.equivStressMethod})<InfoTooltip text="Combined stress used against the SMYS limit. Tresca = σH − σL (max shear). Von Mises = √(σH² − σH·σL + σL²). Reported as % SMYS for code check." /></h3>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="p-3 bg-muted/50 rounded">
                       <p className="text-xs text-muted-foreground mb-1">At Zero Pressure</p>
