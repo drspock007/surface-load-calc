@@ -19,6 +19,7 @@ import { convertFormValue } from "@/domain/pipeline/unitConversions";
 import { calculateContactPatch, convertTirePressureToPsi, convertTirePressureBetweenUnits } from "@/domain/pipeline/tirePatchCalculations";
 import { ThreeAxleDiagram } from "./ThreeAxleDiagram";
 import { createEnsurePositive } from "@/hooks/useEnsurePositive";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 const threeAxleSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),
@@ -415,11 +416,11 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
           {/* MOP, ΔT, Soil Density */}
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>MOP ({unitLabels.pressure})</Label>
+              <Label>MOP ({unitLabels.pressure})<InfoTooltip text="Maximum Operating Pressure — internal pressure used to compute hoop stress." /></Label>
               <Input type="number" step="any" min="0" {...register("MOP", { valueAsNumber: true })} {...ensurePositive("MOP")} />
             </div>
             <div className="space-y-2">
-              <Label>ΔT ({unitLabels.temp})</Label>
+              <Label>ΔT ({unitLabels.temp})<InfoTooltip text="Temperature differential (operating − installation)." /></Label>
               <Input type="number" step="any" {...register("deltaT", { valueAsNumber: true })} />
             </div>
             <SoilDensitySelector
@@ -430,11 +431,11 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>Cover Depth ({unitLabels.depth})</Label>
+              <Label>Cover Depth ({unitLabels.depth})<InfoTooltip text="Vertical distance from ground surface to top of pipe." /></Label>
               <Input type="number" step="any" min="0" {...register("depthCover", { valueAsNumber: true })} {...ensurePositive("depthCover")} />
             </div>
             <div className="space-y-2">
-              <Label>Bedding Angle (°)</Label>
+              <Label>Bedding Angle (°)<InfoTooltip text="Angular width of pipe support in the trench (CEPA Table 2-1)." /></Label>
               <Select value={watch("beddingAngleDeg")?.toString()} onValueChange={(v) => setValue("beddingAngleDeg", parseInt(v))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -486,25 +487,25 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
 
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>Axle 1-2 Spacing ({unitLabels.depth})</Label>
+              <Label>Axle 1-2 Spacing ({unitLabels.depth})<InfoTooltip text="Distance between axle 1 and axle 2 centerlines." /></Label>
               <Input type="number" step="any" min="0" {...register("axle1To2Spacing", { valueAsNumber: true })} {...ensurePositive("axle1To2Spacing")} />
             </div>
             <div className="space-y-2">
-              <Label>Axle 2-3 Spacing ({unitLabels.depth})</Label>
+              <Label>Axle 2-3 Spacing ({unitLabels.depth})<InfoTooltip text="Distance between axle 2 and axle 3 centerlines." /></Label>
               <Input type="number" step="any" min="0" {...register("axle2To3Spacing", { valueAsNumber: true })} {...ensurePositive("axle2To3Spacing")} />
             </div>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>Axle 1 Load ({unitLabels.force})</Label>
+              <Label>Axle 1 Load ({unitLabels.force})<InfoTooltip text="Total load carried by axle 1 (front)." /></Label>
               <Input type="number" step="any" min="0" {...register("axle1Load", { valueAsNumber: true })} {...ensurePositive("axle1Load")} />
             </div>
             <div className="space-y-2">
-              <Label>Axle 2 Load ({unitLabels.force})</Label>
+              <Label>Axle 2 Load ({unitLabels.force})<InfoTooltip text="Total load carried by axle 2 (middle)." /></Label>
               <Input type="number" step="any" min="0" {...register("axle2Load", { valueAsNumber: true })} {...ensurePositive("axle2Load")} />
             </div>
             <div className="space-y-2">
-              <Label>Axle 3 Load ({unitLabels.force})</Label>
+              <Label>Axle 3 Load ({unitLabels.force})<InfoTooltip text="Total load carried by axle 3 (rear)." /></Label>
               <Input type="number" step="any" min="0" {...register("axle3Load", { valueAsNumber: true })} {...ensurePositive("axle3Load")} />
             </div>
           </div>
@@ -512,7 +513,7 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
           {/* Contact Patch Mode Toggle */}
           <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
             <div className="flex items-center justify-between">
-              <Label htmlFor="contact-mode-3" className="text-sm font-medium">Contact Patch Method</Label>
+              <Label htmlFor="contact-mode-3" className="text-sm font-medium">Contact Patch Method<InfoTooltip text="Manual = enter tire footprint dimensions directly. Auto = compute contact length from tire pressure, load and tire width." /></Label>
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground">
                   {contactPatchMode === "MANUAL" ? "Manual Entry" : "From Tire Pressure"}
@@ -727,7 +728,7 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
           </div>
           
           <div className="space-y-2">
-            <Label>Axle Width ({unitLabels.length})</Label>
+            <Label>Axle Width ({unitLabels.length})<InfoTooltip text="Track width of the vehicle: center-to-center distance between left and right tire groups." /></Label>
             <Input type="number" step="any" min="0" {...register("axleWidth", { valueAsNumber: true })} />
           </div>
         </CardContent>

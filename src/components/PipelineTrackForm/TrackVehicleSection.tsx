@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { UnitsSystem } from "@/domain/pipeline/types";
 import { createEnsurePositive } from "@/hooks/useEnsurePositive";
 import { TrackVehicleDiagram } from "@/components/TrackVehicleDiagram";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface TrackVehicleSectionProps {
   register: UseFormRegister<any>;
@@ -48,7 +49,7 @@ export const TrackVehicleSection = ({
         />
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="trackLength">Track Length ({unitLabels.length}) *</Label>
+            <Label htmlFor="trackLength">Track Length ({unitLabels.length}) *<InfoTooltip text="Length of the track footprint in contact with the ground (along the direction of travel)." /></Label>
             <Input
               id="trackLength"
               type="number"
@@ -61,7 +62,7 @@ export const TrackVehicleSection = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="trackWidth">Track Width ({unitLabels.length}) *</Label>
+            <Label htmlFor="trackWidth">Track Width ({unitLabels.length}) *<InfoTooltip text="Width of a single track shoe (transverse to direction of travel)." /></Label>
             <Input
               id="trackWidth"
               type="number"
@@ -76,7 +77,7 @@ export const TrackVehicleSection = ({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="trackSeparation">Track Separation ({unitLabels.length}) *</Label>
+            <Label htmlFor="trackSeparation">Track Separation ({unitLabels.length}) *<InfoTooltip text="Centerline-to-centerline distance between the two tracks." /></Label>
             <Input
               id="trackSeparation"
               type="number"
@@ -89,7 +90,7 @@ export const TrackVehicleSection = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="trackVehicleWeight">Vehicle Weight ({unitLabels.force}) *</Label>
+            <Label htmlFor="trackVehicleWeight">Vehicle Weight ({unitLabels.force}) *<InfoTooltip text="Total gross weight of the tracked vehicle, distributed equally between both tracks." /></Label>
             <Input
               id="trackVehicleWeight"
               type="number"

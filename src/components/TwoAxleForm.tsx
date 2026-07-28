@@ -19,6 +19,7 @@ import { convertFormValue } from "@/domain/pipeline/unitConversions";
 import { calculateContactPatch, convertTirePressureToPsi, convertTirePressureBetweenUnits } from "@/domain/pipeline/tirePatchCalculations";
 import { TwoAxleDiagram } from "./TwoAxleDiagram";
 import { createEnsurePositive } from "@/hooks/useEnsurePositive";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 const twoAxleSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),
@@ -354,11 +355,11 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
           {/* MOP, ΔT, Soil Density */}
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>MOP ({unitLabels.pressure})</Label>
+              <Label>MOP ({unitLabels.pressure})<InfoTooltip text="Maximum Operating Pressure — internal pressure used to compute hoop stress." /></Label>
               <Input type="number" step="any" min="0" {...register("MOP", { valueAsNumber: true })} {...ensurePositive("MOP")} />
             </div>
             <div className="space-y-2">
-              <Label>ΔT ({unitLabels.temp})</Label>
+              <Label>ΔT ({unitLabels.temp})<InfoTooltip text="Temperature differential between operating and installation temperature." /></Label>
               <Input type="number" step="any" {...register("deltaT", { valueAsNumber: true })} />
             </div>
             <SoilDensitySelector
@@ -369,11 +370,11 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>Cover Depth ({unitLabels.depth})</Label>
+              <Label>Cover Depth ({unitLabels.depth})<InfoTooltip text="Vertical distance from ground surface to top of pipe." /></Label>
               <Input type="number" step="any" min="0" {...register("depthCover", { valueAsNumber: true })} {...ensurePositive("depthCover")} />
             </div>
             <div className="space-y-2">
-              <Label>Bedding Angle (°)</Label>
+              <Label>Bedding Angle (°)<InfoTooltip text="Angular width of pipe support in the trench (CEPA Table 2-1)." /></Label>
               <Select value={watch("beddingAngleDeg")?.toString()} onValueChange={(v) => setValue("beddingAngleDeg", parseInt(v))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -418,16 +419,16 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
           />
 
           <div className="space-y-2">
-            <Label>Axle Spacing ({unitLabels.depth})</Label>
+            <Label>Axle Spacing ({unitLabels.depth})<InfoTooltip text="Distance between axle 1 and axle 2 centerlines, measured along the direction of travel." /></Label>
             <Input type="number" step="any" min="0" {...register("axleSpacing", { valueAsNumber: true })} {...ensurePositive("axleSpacing")} />
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Axle 1 Load ({unitLabels.force})</Label>
+              <Label>Axle 1 Load ({unitLabels.force})<InfoTooltip text="Total load carried by axle 1 (front). Split equally between left and right wheel groups." /></Label>
               <Input type="number" step="any" min="0" {...register("axle1Load", { valueAsNumber: true })} {...ensurePositive("axle1Load")} />
             </div>
             <div className="space-y-2">
-              <Label>Axle 2 Load ({unitLabels.force})</Label>
+              <Label>Axle 2 Load ({unitLabels.force})<InfoTooltip text="Total load carried by axle 2 (rear). Split equally between left and right wheel groups." /></Label>
               <Input type="number" step="any" min="0" {...register("axle2Load", { valueAsNumber: true })} {...ensurePositive("axle2Load")} />
             </div>
           </div>
@@ -435,7 +436,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
           {/* Contact Patch Mode Toggle */}
           <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
             <div className="flex items-center justify-between">
-              <Label htmlFor="contact-mode" className="text-sm font-medium">Contact Patch Method</Label>
+              <Label htmlFor="contact-mode" className="text-sm font-medium">Contact Patch Method<InfoTooltip text="Manual = enter tire footprint dimensions directly. Auto = compute contact length from tire pressure, load and tire width." /></Label>
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground">
                   {contactPatchMode === "MANUAL" ? "Manual Entry" : "From Tire Pressure"}
@@ -586,7 +587,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
           </div>
           
           <div className="space-y-2">
-            <Label>Axle Width ({unitLabels.length})</Label>
+            <Label>Axle Width ({unitLabels.length})<InfoTooltip text="Track width of the vehicle: center-to-center distance between left and right tire groups on the same axle." /></Label>
             <Input type="number" step="any" min="0" {...register("axleWidth", { valueAsNumber: true })} {...ensurePositive("axleWidth")} />
           </div>
         </CardContent>

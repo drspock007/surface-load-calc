@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UnitsSystem } from "@/domain/pipeline/types";
 import { createEnsurePositive } from "@/hooks/useEnsurePositive";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface SoilDensitySelectorProps {
   setValue: UseFormSetValue<any>;
@@ -81,7 +82,7 @@ export const SoilDensitySelector = ({ setValue, watch, unitsSystem }: SoilDensit
 
   return (
     <div className="space-y-2">
-      <Label>Soil Density ({unitLabel}) *</Label>
+      <Label>Soil Density ({unitLabel}) *<InfoTooltip text="Bulk unit weight of the backfill above the pipe. Presets follow common CEPA reference values (Loose to Saturated)." /></Label>
       <Select value={selectValue} onValueChange={handleSelectChange}>
         <SelectTrigger>
           <SelectValue placeholder="Select soil density" />

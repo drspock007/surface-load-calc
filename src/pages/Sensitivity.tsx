@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { storage } from "@/utils/storage";
 import { CalculationMode } from "@/types/calculation";
 import { SEO } from "@/components/SEO";
+import { InfoTooltip } from "@/components/InfoTooltip";
 import {
 
   SENSITIVITY_PARAMETERS,
@@ -199,7 +200,7 @@ const Sensitivity = () => {
                 )}
 
                 <div className="space-y-2">
-                  <Label>Calculation Mode</Label>
+                  <Label>Calculation Mode<InfoTooltip text="Which calculation engine to run the sensitivity sweep against. Must match the base case." /></Label>
                   <Select
                     value={selectedMode}
                     onValueChange={(v) => handleModeChange(v as CalculationMode)}
@@ -217,7 +218,7 @@ const Sensitivity = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Base Case</Label>
+                  <Label>Base Case<InfoTooltip text="A previously saved calculation used as the reference. All other parameters are held constant while the selected one is swept." /></Label>
                   {availableRuns.length === 0 ? (
                     <p className="text-sm text-muted-foreground p-3 bg-muted rounded-md">
                       No saved runs — run a {getModeLabel(selectedMode)} calculation first
@@ -252,7 +253,7 @@ const Sensitivity = () => {
                 )}
 
                 <div className="space-y-2">
-                  <Label>Parameter to Vary</Label>
+                  <Label>Parameter to Vary<InfoTooltip text="Input parameter whose value will be swept over the specified range. Only this parameter changes; all others are taken from the base case." /></Label>
                   <Select
                     value={selectedParameter}
                     onValueChange={setSelectedParameter}
@@ -278,7 +279,7 @@ const Sensitivity = () => {
 
                   <TabsContent value="percentage" className="space-y-3">
                     <div className="space-y-2">
-                      <Label>Range (±%)</Label>
+                      <Label>Range (±%)<InfoTooltip text="Sweep the parameter from base × (1 − range%) to base × (1 + range%)." /></Label>
                       <Input
                         type="number"
                         value={percentRange}
@@ -287,7 +288,7 @@ const Sensitivity = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Step (%)</Label>
+                      <Label>Step (%)<InfoTooltip text="Increment between consecutive sweep values, expressed as a percentage of the base value." /></Label>
                       <Input
                         type="number"
                         value={percentStep}
@@ -299,7 +300,7 @@ const Sensitivity = () => {
 
                   <TabsContent value="absolute" className="space-y-3">
                     <div className="space-y-2">
-                      <Label>Min ({paramUnit})</Label>
+                      <Label>Min ({paramUnit})<InfoTooltip text="Lower bound of the sweep in absolute units." /></Label>
                       <Input
                         type="number"
                         value={minValue}
@@ -307,7 +308,7 @@ const Sensitivity = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Max ({paramUnit})</Label>
+                      <Label>Max ({paramUnit})<InfoTooltip text="Upper bound of the sweep in absolute units." /></Label>
                       <Input
                         type="number"
                         value={maxValue}
@@ -315,7 +316,7 @@ const Sensitivity = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Step ({paramUnit})</Label>
+                      <Label>Step ({paramUnit})<InfoTooltip text="Increment between consecutive sweep values in absolute units." /></Label>
                       <Input
                         type="number"
                         value={stepValue}

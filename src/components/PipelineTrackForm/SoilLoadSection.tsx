@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SoilLoadMethod, EPrimeMethod, SoilType, UnitsSystem } from "@/domain/pipeline/types";
 import { createEnsurePositive } from "@/hooks/useEnsurePositive";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface SoilLoadSectionProps {
   register: UseFormRegister<any>;
@@ -39,7 +40,7 @@ export const SoilLoadSection = ({
       <CardContent className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="soilLoadMethod">Soil Load Method *</Label>
+            <Label htmlFor="soilLoadMethod">Soil Load Method *<InfoTooltip text="Prism = full weight of soil column above pipe (conservative). Trap Door = arching model reducing load with friction." /></Label>
             <Select
               value={watch("soilLoadMethod")}
               onValueChange={(v) => setValue("soilLoadMethod", v as SoilLoadMethod)}
@@ -56,7 +57,7 @@ export const SoilLoadSection = ({
 
           {soilLoadMethod === "TRAP_DOOR" && (
             <div className="space-y-2">
-              <Label htmlFor="frictionAngleDeg">Friction Angle (°) *</Label>
+              <Label htmlFor="frictionAngleDeg">Friction Angle (°) *<InfoTooltip text="Internal friction angle of the backfill (typ. 25-40°). Used only for the Trap Door soil load method." /></Label>
               <Input
                 id="frictionAngleDeg"
                 type="number"
@@ -74,7 +75,7 @@ export const SoilLoadSection = ({
           <h4 className="font-semibold mb-3">E' (Modulus of Soil Reaction)</h4>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="ePrimeMethod">Method *</Label>
+              <Label htmlFor="ePrimeMethod">Method *<InfoTooltip text="E' = modulus of soil reaction. Lookup uses CEPA Table 2-3 by soil type and compaction. User Defined lets you enter a value directly." /></Label>
               <Select
                 value={watch("ePrimeMethod")}
                 onValueChange={(v) => setValue("ePrimeMethod", v as EPrimeMethod)}
@@ -106,7 +107,7 @@ export const SoilLoadSection = ({
             {ePrimeMethod === "LOOKUP" && (
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="soilType">Soil Type *</Label>
+                  <Label htmlFor="soilType">Soil Type *<InfoTooltip text="CEPA soil classification driving the E' lookup in Table 2-3." /></Label>
                   <Select
                     value={watch("soilType")}
                     onValueChange={(v) => setValue("soilType", v as SoilType)}
@@ -123,7 +124,7 @@ export const SoilLoadSection = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="compaction">Compaction (%) *</Label>
+                  <Label htmlFor="compaction">Compaction (%) *<InfoTooltip text="Percentage of Standard Proctor Density of the backfill. Higher compaction = higher E'." /></Label>
                   <Select
                     value={watch("compaction")?.toString()}
                     onValueChange={(v) => setValue("compaction", parseInt(v))}

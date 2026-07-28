@@ -18,6 +18,7 @@ import { SoilDensitySelector } from "./SoilDensitySelector";
 import { GridLoadDiagram } from "./GridLoadDiagram";
 import { convertFormValue } from "@/domain/pipeline/unitConversions";
 import { createEnsurePositive } from "@/hooks/useEnsurePositive";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 const gridLoadSchema = z.object({
   calculationName: z.string().min(1, "Name is required"),
@@ -259,11 +260,11 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
           {/* MOP, ΔT, Soil Density */}
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>MOP ({unitLabels.pressure})</Label>
+              <Label>MOP ({unitLabels.pressure})<InfoTooltip text="Maximum Operating Pressure — internal pressure used to compute hoop stress." /></Label>
               <Input type="number" step="any" min="0" {...register("MOP", { valueAsNumber: true })} {...ensurePositive("MOP")} />
             </div>
             <div className="space-y-2">
-              <Label>ΔT ({unitLabels.temp})</Label>
+              <Label>ΔT ({unitLabels.temp})<InfoTooltip text="Temperature differential (operating − installation)." /></Label>
               <Input type="number" step="any" {...register("deltaT", { valueAsNumber: true })} />
             </div>
             <SoilDensitySelector
@@ -274,11 +275,11 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>Cover Depth ({unitLabels.depth})</Label>
+              <Label>Cover Depth ({unitLabels.depth})<InfoTooltip text="Vertical distance from ground surface to top of pipe." /></Label>
               <Input type="number" step="any" min="0" {...register("depthCover", { valueAsNumber: true })} {...ensurePositive("depthCover")} />
             </div>
             <div className="space-y-2">
-              <Label>Bedding Angle (°)</Label>
+              <Label>Bedding Angle (°)<InfoTooltip text="Angular width of pipe support in the trench (CEPA Table 2-1)." /></Label>
               <Select value={watch("beddingAngleDeg")?.toString()} onValueChange={(v) => setValue("beddingAngleDeg", parseInt(v))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -306,7 +307,7 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Load Type</Label>
+            <Label>Load Type<InfoTooltip text="Total Load = enter the full weight on the area. Uniform Pressure = enter pressure applied over the area." /></Label>
             <Select value={watch("loadType")} onValueChange={(v) => setValue("loadType", v as "TOTAL_LOAD" | "UNIFORM_PRESSURE")}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -318,47 +319,47 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
           
           {loadType === "TOTAL_LOAD" && (
             <div className="space-y-2">
-              <Label>Total Load ({unitLabels.force})</Label>
+              <Label>Total Load ({unitLabels.force})<InfoTooltip text="Total weight applied over the grid area." /></Label>
               <Input type="number" step="any" min="0" {...register("totalLoad", { valueAsNumber: true })} {...ensurePositive("totalLoad")} />
             </div>
           )}
           
           {loadType === "UNIFORM_PRESSURE" && (
             <div className="space-y-2">
-              <Label>Uniform Pressure ({unitLabels.pressure})</Label>
+              <Label>Uniform Pressure ({unitLabels.pressure})<InfoTooltip text="Uniform pressure applied over the grid area." /></Label>
               <Input type="number" step="any" min="0" {...register("uniformPressure", { valueAsNumber: true })} {...ensurePositive("uniformPressure")} />
             </div>
           )}
           
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Grid Length ({unitLabels.depth})</Label>
+              <Label>Grid Length ({unitLabels.depth})<InfoTooltip text="Loaded area dimension along the pipe axis." /></Label>
               <Input type="number" step="any" min="0" {...register("gridLength", { valueAsNumber: true })} {...ensurePositive("gridLength")} />
             </div>
             <div className="space-y-2">
-              <Label>Grid Width ({unitLabels.depth})</Label>
+              <Label>Grid Width ({unitLabels.depth})<InfoTooltip text="Loaded area dimension perpendicular to the pipe axis." /></Label>
               <Input type="number" step="any" min="0" {...register("gridWidth", { valueAsNumber: true })} {...ensurePositive("gridWidth")} />
             </div>
           </div>
           
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Offset X ({unitLabels.depth})</Label>
+              <Label>Offset X ({unitLabels.depth})<InfoTooltip text="Horizontal offset of the loaded area center from the pipe axis (transverse direction)." /></Label>
               <Input type="number" step="any" {...register("gridOffsetX", { valueAsNumber: true })} />
             </div>
             <div className="space-y-2">
-              <Label>Offset Y ({unitLabels.depth})</Label>
+              <Label>Offset Y ({unitLabels.depth})<InfoTooltip text="Longitudinal offset of the loaded area center along the pipe axis." /></Label>
               <Input type="number" step="any" {...register("gridOffsetY", { valueAsNumber: true })} />
             </div>
           </div>
           
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Divisions X (1-50)</Label>
+              <Label>Divisions X (1-50)<InfoTooltip text="Number of sub-patches along X used to integrate Boussinesq stress. Higher = more accurate but slower." /></Label>
               <Input type="number" min="1" max="50" {...register("gridDivisionsX", { valueAsNumber: true })} />
             </div>
             <div className="space-y-2">
-              <Label>Divisions Y (1-50)</Label>
+              <Label>Divisions Y (1-50)<InfoTooltip text="Number of sub-patches along Y used to integrate Boussinesq stress. Higher = more accurate but slower." /></Label>
               <Input type="number" min="1" max="50" {...register("gridDivisionsY", { valueAsNumber: true })} />
             </div>
           </div>

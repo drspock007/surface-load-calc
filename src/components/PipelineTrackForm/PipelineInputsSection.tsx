@@ -7,6 +7,7 @@ import { UnitsSystem } from "@/domain/pipeline/types";
 import { PipeSelector } from "./PipeSelector";
 import { SoilDensitySelector } from "@/components/SoilDensitySelector";
 import { createEnsurePositive } from "@/hooks/useEnsurePositive";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface PipelineInputsSectionProps {
   register: UseFormRegister<any>;
@@ -48,7 +49,7 @@ export const PipelineInputsSection = ({
         {/* MOP, ΔT, Soil Density */}
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <Label htmlFor="MOP">MOP ({unitLabels.pressure}) *</Label>
+            <Label htmlFor="MOP">MOP ({unitLabels.pressure}) *<InfoTooltip text="Maximum Operating Pressure — internal pressure used to compute hoop stress." /></Label>
             <Input
               id="MOP"
               type="number"
@@ -61,7 +62,7 @@ export const PipelineInputsSection = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="deltaT">ΔT ({unitLabels.temp})</Label>
+            <Label htmlFor="deltaT">ΔT ({unitLabels.temp})<InfoTooltip text="Temperature differential between operating and installation temperature. Drives longitudinal thermal stress." /></Label>
             <Input
               id="deltaT"
               type="number"
@@ -79,7 +80,7 @@ export const PipelineInputsSection = ({
 
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <Label htmlFor="depthCover">Cover Depth ({unitLabels.depth}) *</Label>
+            <Label htmlFor="depthCover">Cover Depth ({unitLabels.depth}) *<InfoTooltip text="Vertical distance from ground surface to the top of the pipe (H)." /></Label>
             <Input
               id="depthCover"
               type="number"
@@ -92,7 +93,7 @@ export const PipelineInputsSection = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="beddingAngleDeg">Bedding Angle (°) *</Label>
+            <Label htmlFor="beddingAngleDeg">Bedding Angle (°) *<InfoTooltip text="Angular width of pipe support in the trench. Sets Kb, Kz and θ from CEPA Table 2-1." /></Label>
             <Select
               value={watch("beddingAngleDeg")?.toString()}
               onValueChange={(v) => setValue("beddingAngleDeg", parseInt(v))}
