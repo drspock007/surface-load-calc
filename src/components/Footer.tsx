@@ -1,8 +1,9 @@
 import { Facebook, Linkedin } from "lucide-react";
 
-/** Site footer mirroring giovannimalagninoconsulting.com: Italy address, Canada address, social links.
- * Typography, colors, and social icon styling are matched to the source site's computed styles:
- * Roboto 14px/500, color #020202, white background; 32x32 icons with 3px radius, brand-color backgrounds. */
+/** Site footer mirroring giovannimalagninoconsulting.com: Italy address, Canada address, social links,
+ *  plus a copyright bar and build-time version stamp for the CEPA Buried Pipeline Surface Loading Calculator.
+ *  Typography, colors, and social icon styling are matched to the source site's computed styles:
+ *  Roboto 14px/500, color #020202, white background; 32x32 icons with 3px radius, brand-color backgrounds. */
 export const Footer = () => {
   const textStyle: React.CSSProperties = {
     fontFamily: 'Roboto, Helvetica, Arial, Lucida, sans-serif',
@@ -84,6 +85,22 @@ export const Footer = () => {
             >
               <Linkedin size={16} fill="#ffffff" strokeWidth={0} />
             </a>
+          </div>
+
+          {/* Copyright and version bar in YYYYMMDDHHMM format. */}
+          <div className="mt-8 pt-4 border-t border-border text-center">
+            <p className="text-xs text-muted-foreground">
+              © {new Date().getFullYear()}{" "}
+              <a
+                href="https://www.giovannimalagninoconsulting.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-foreground transition-colors"
+              >
+                Giovanni Malagnino Consulting
+              </a>
+              {" "}— CEPA Buried Pipeline Surface Loading Calculator — All rights reserved. — v202607281808
+            </p>
           </div>
         </div>
       </div>
