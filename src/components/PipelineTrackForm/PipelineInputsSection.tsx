@@ -7,6 +7,7 @@ import { UnitsSystem } from "@/domain/pipeline/types";
 import { PipeSelector } from "./PipeSelector";
 import { SoilDensitySelector } from "@/components/SoilDensitySelector";
 import { createEnsurePositive } from "@/hooks/useEnsurePositive";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface PipelineInputsSectionProps {
   register: UseFormRegister<any>;
