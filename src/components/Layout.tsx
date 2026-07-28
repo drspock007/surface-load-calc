@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Calculator, Home, History, TrendingUp, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
+import { Footer } from "./Footer";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -20,7 +21,7 @@ export const Layout = ({ children }: LayoutProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border bg-card shadow-sm">
         <div className="container mx-auto px-4">
           {/* Top band: logo (left) + tagline (right) */}
@@ -89,7 +90,8 @@ export const Layout = ({ children }: LayoutProps) => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">{children}</main>
+      <main className="container mx-auto px-4 py-8 flex-1">{children}</main>
+      <Footer />
     </div>
   );
 };
