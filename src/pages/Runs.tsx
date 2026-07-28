@@ -10,6 +10,7 @@ import { Trash2, Download, Upload, Eye, Calculator, AlertCircle, CheckCircle2, X
 import { useToast } from "@/hooks/use-toast";
 import { InputParametersCard } from "@/components/InputParametersCard";
 import {
+import { SEO } from "@/components/SEO";
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -91,6 +92,7 @@ const Runs = () => {
 
   return (
     <Layout>
+      <SEO title="Saved Runs | CEPA Buried Pipeline Surface Loading Calculator" description="View, manage, import and export saved CEPA buried pipeline surface load calculation runs with all input parameters and results." path="/runs" />
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>

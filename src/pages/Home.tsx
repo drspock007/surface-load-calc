@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calculator, FileText, History, Download, Upload, AlertTriangle } from "lucide-react";
 import { Layout } from "@/components/Layout";
+import { SEO } from "@/components/SEO";
 
 const Home = () => {
   return (
     <Layout>
+      <SEO title="CEPA Buried Pipeline Surface Loading Calculator" description="Calculate stress on buried pipelines from surface vehicle and equipment loads using CEPA methodology. Track, axle, and grid load analysis." path="/" />
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="text-center space-y-4">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-xl mb-4">

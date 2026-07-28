@@ -13,6 +13,7 @@ import { ThreeAxleResults } from "@/domain/pipeline/types3Axle";
 import { GridLoadResults } from "@/domain/pipeline/typesGrid";
 import { UnitsSystem } from "@/domain/pipeline/types";
 import { InputParametersCard } from "@/components/InputParametersCard";
+import { SEO } from "@/components/SEO";
 
 // Unit labels based on system
 const getUnitLabels = (system: UnitsSystem) => ({
@@ -38,6 +39,7 @@ const Results = () => {
   if (!run) {
     return (
       <Layout>
+      <SEO title="Results | CEPA Buried Pipeline Surface Loading Calculator" description="Detailed CEPA stress analysis results: hoop, longitudinal, equivalent stress and SMYS compliance for buried pipelines under surface loads." path="/results" />
         <div className="max-w-2xl mx-auto text-center py-12">
           <p className="text-muted-foreground mb-4">No calculation results to display</p>
           <Button onClick={() => navigate("/calculator")}>Go to Calculator</Button>

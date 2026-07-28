@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { storage } from "@/utils/storage";
 import { CalculationMode } from "@/types/calculation";
 import {
+import { SEO } from "@/components/SEO";
   SENSITIVITY_PARAMETERS,
   generateSensitivitySweep,
   exportToCSV,
@@ -169,6 +170,7 @@ const Sensitivity = () => {
 
   return (
     <Layout>
+      <SEO title="Sensitivity Analysis | CEPA Buried Pipeline Calculator" description="Perform parametric sensitivity sweeps on CEPA buried pipeline calculations to see how depth, load, and soil affect stress outcomes." path="/sensitivity" />
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">Sensitivity Analysis</h1>
