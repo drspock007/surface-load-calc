@@ -72,7 +72,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       {/* FRONT MATTER */}
       <div style={{ textAlign: 'center', marginBottom: 40, paddingTop: 60 }}>
         <div style={{ width: 60, height: 60, background: 'linear-gradient(135deg, #ff8f05, #e67e00)', borderRadius: 8, margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 28, fontWeight: 700 }}>σ</div>
-        <h1 style={{ ...styles.title, marginBottom: 8 }}>CEPA Surface Loading Stress Calculator</h1>
+        <h1 style={{ ...styles.title, marginBottom: 8 }}>CEPA Surface Loading Stress Calculator</h2>
         <h2 style={{ ...styles.subtitle, fontSize: 20, fontWeight: 400, fontStyle: 'italic' }}>Technical Reference Manual</h2>
         <p style={{ color: '#666', fontSize: 13, marginTop: 16 }}>Version 1.0 — Generated {today}</p>
       </div>
@@ -117,7 +117,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </div>
 
       {/* CHAPTER 1 */}
-      <h1 style={styles.h1}>1. Introduction and Scope</h1>
+      <h2 style={styles.h1}>1. Introduction and Scope</h2>
       <p>This document describes the calculation methodology implemented in the CEPA Surface Loading Stress Calculator. The tool performs screening-level stress analysis of buried steel pipelines subjected to surface vehicle loads, following the methodology defined in the <strong>CEPA Surface Loading Calculator User Manual</strong>.</p>
 
       <h2 style={styles.h2}>1.1 Purpose</h2>
@@ -152,7 +152,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </div>
 
       {/* CHAPTER 2 */}
-      <h1 style={styles.h1}>2. Input Parameters</h1>
+      <h2 style={styles.h1}>2. Input Parameters</h2>
 
       <h2 style={styles.h2}>2.1 Pipe Properties</h2>
       <table style={styles.table}>
@@ -210,7 +210,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <p><V tex="E'" /> can be determined via direct lookup from CEPA Table 2-3 (based on soil type, compaction level, and depth range) or entered as a user-defined value. The complete lookup table is reproduced in <strong>Appendix C</strong>.</p>
 
       {/* CHAPTER 3 */}
-      <h1 style={styles.h1}>3. Soil Load Calculation</h1>
+      <h2 style={styles.h1}>3. Soil Load Calculation</h2>
       <p>Two methods are available for computing the earth pressure acting on the pipe crown.</p>
 
       <h2 style={styles.h2}>3.1 Prism Method</h2>
@@ -257,7 +257,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </SINote>
 
       {/* CHAPTER 4 */}
-      <h1 style={styles.h1}>4. Boussinesq Surface Pressure</h1>
+      <h2 style={styles.h1}>4. Boussinesq Surface Pressure</h2>
       <p>Surface loads are transferred to pipe depth using Boussinesq elastic half-space theory. Each vehicle contact patch is discretized into a grid of point loads, and the vertical stress at each measurement point is computed as the superposition of all point load contributions.</p>
 
       <h2 style={styles.h2}>4.1 Point Load Formula</h2>
@@ -290,7 +290,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </div>
 
       {/* CHAPTER 5 */}
-      <h1 style={styles.h1}>5. Impact Factor</h1>
+      <h2 style={styles.h1}>5. Impact Factor</h2>
       <p>A dynamic amplification factor is applied to the surface load to account for vehicle vibration and dynamic effects.</p>
 
       <h2 style={styles.h2}>5.1 Base Impact Factor</h2>
@@ -319,7 +319,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </SINote>
 
       {/* CHAPTER 6 */}
-      <h1 style={styles.h1}>6. Hoop Stress (Spangler Formula)</h1>
+      <h2 style={styles.h1}>6. Hoop Stress (Spangler Formula)</h2>
 
       <h2 style={styles.h2}>6.1 Bedding Parameters — CEPA Table 2-1</h2>
       <table style={styles.table}>
@@ -361,7 +361,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </div>
 
       {/* CHAPTER 7 */}
-      <h1 style={styles.h1}>7. Longitudinal Stress</h1>
+      <h2 style={styles.h1}>7. Longitudinal Stress</h2>
       <p>Total longitudinal stress consists of multiple components:</p>
       <Math tex="\sigma_L = \sigma_{L,bend} + \sigma_{L,local} + \nu\,\sigma_{hoop,soil} \pm \nu\,\sigma_{hoop,int} + E\,\alpha\,\Delta T" />
 
@@ -426,7 +426,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <Math tex="\sigma_{L,low} = \nu\,\sigma_{hoop,int} + \sigma_{thermal} - \nu\,\sigma_{hoop,soil} - \sigma_{L,live}" />
 
       {/* CHAPTER 8 */}
-      <h1 style={styles.h1}>8. Equivalent Stress and %SMYS</h1>
+      <h2 style={styles.h1}>8. Equivalent Stress and %SMYS</h2>
       <p>Equivalent stress is computed for all four combinations of (Hoop High/Low) × (Long High/Low):</p>
 
       <h2 style={styles.h2}>8.1 Tresca Criterion</h2>
@@ -442,7 +442,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <Math tex="\%\text{SMYS} = \frac{\sigma_{eq,max}}{\text{SMYS}} \times 100" />
 
       {/* CHAPTER 9 */}
-      <h1 style={styles.h1}>9. Pass/Fail Criteria</h1>
+      <h2 style={styles.h1}>9. Pass/Fail Criteria</h2>
 
       <h2 style={styles.h2}>9.1 Code Profiles</h2>
       <table style={styles.table}>
@@ -477,7 +477,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </ul>
 
       {/* CHAPTER 10 */}
-      <h1 style={styles.h1}>10. Tire Contact Patch Calculation</h1>
+      <h2 style={styles.h1}>10. Tire Contact Patch Calculation</h2>
       <p>For 2-Axle and 3-Axle vehicles, the tire contact patch dimensions can be calculated automatically from the axle load and tire inflation pressure.</p>
 
       <h2 style={styles.h2}>10.1 AUTO Mode Formula</h2>
@@ -502,7 +502,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </table>
 
       {/* CHAPTER 11 */}
-      <h1 style={styles.h1}>11. Minimum Bend Radius</h1>
+      <h2 style={styles.h1}>11. Minimum Bend Radius</h2>
       <p>An optional analysis that calculates the tightest horizontal or vertical curve the pipeline can tolerate given the remaining longitudinal stress margin.</p>
 
       <h2 style={styles.h2}>11.1 Formula</h2>
@@ -523,7 +523,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <p>The bend radius is evaluated at both Zero Pressure and MOP conditions. The governing (most restrictive) case is the one with the <strong>smallest remaining margin</strong>. If the remaining margin is ≤ 0, no bend is permissible.</p>
 
       {/* CHAPTER 12 */}
-      <h1 style={styles.h1}>12. Unit Conversions</h1>
+      <h2 style={styles.h1}>12. Unit Conversions</h2>
       <p>All internal calculations are performed in English (Imperial) units. The following conversion factors are applied when converting between SI and English systems:</p>
       <table style={styles.table}>
         <thead><tr><th style={styles.th}>Quantity</th><th style={styles.th}>SI</th><th style={styles.th}>EN</th><th style={styles.th}>Factor (SI → EN)</th></tr></thead>
@@ -571,7 +571,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </table>
 
       {/* APPENDIX A */}
-      <h1 style={styles.h1}>Appendix A: Worked Example — Track Vehicle</h1>
+      <h2 style={styles.h1}>Appendix A: Worked Example — Track Vehicle</h2>
       <p>This example follows CEPA Manual Example 2.</p>
 
       <h2 style={styles.h2}>A.1 Input Data</h2>
@@ -642,7 +642,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       <p>CSA Z662 limit: 90% SMYS = 0.9 × 52,000 = 46,800 psi (322.7 MPa). All stress components compared against this limit.</p>
 
       {/* APPENDIX B */}
-      <h1 style={styles.h1}>Appendix B: Worked Example — 2-Axle Vehicle</h1>
+      <h2 style={styles.h1}>Appendix B: Worked Example — 2-Axle Vehicle</h2>
 
       <h2 style={styles.h2}>B.1 Input Data</h2>
       <table style={styles.table}>
@@ -675,7 +675,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </table>
 
       {/* APPENDIX C */}
-      <h1 style={styles.h1}>Appendix C: E' Lookup Table — CEPA Table 2-3</h1>
+      <h2 style={styles.h1}>Appendix C: E' Lookup Table — CEPA Table 2-3</h2>
       <p>Design values of <V tex="E'" /> (Modulus of Soil Reaction) in <strong>psi</strong> with <span style={{ color: '#1565c0' }}>(kPa)</span> equivalents. Organized by soil type, depth range, and degree of compaction.</p>
 
       <h2 style={styles.h2}>C.1 Fine-Grained Soils</h2>
