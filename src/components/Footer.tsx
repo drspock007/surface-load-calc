@@ -1,9 +1,7 @@
-import { Facebook, Linkedin } from "lucide-react";
+import { Facebook, Linkedin, Phone } from "lucide-react";
 
-/** Site footer mirroring giovannimalagninoconsulting.com: Italy address, Canada address, social links,
- *  plus a copyright bar and build-time version stamp for the CEPA Buried Pipeline Surface Loading Calculator.
- *  Typography, colors, and social icon styling are matched to the source site's computed styles:
- *  Roboto 14px/500, color #020202, white background; 32x32 icons with 3px radius, brand-color backgrounds. */
+/** Site footer mirroring giovannimalagninoconsulting.com branding.
+ *  Italy + Canada phone numbers, social links, copyright bar with version stamp. */
 export const Footer = () => {
   const textStyle: React.CSSProperties = {
     fontFamily: 'Roboto, Helvetica, Arial, Lucida, sans-serif',
@@ -35,11 +33,9 @@ export const Footer = () => {
           {/* Column 1: Italy */}
           <div className="text-center md:text-left space-y-1" style={textStyle}>
             <p style={textStyle}>Giovanni Malagnino Consulting</p>
-            <p style={textStyle}>Address in Italy:</p>
-            <p style={textStyle}>Via Selva 79</p>
-            <p style={textStyle}>63835 Montappone FM</p>
-            <p style={textStyle}>Italie</p>
-            <p style={textStyle}>
+            <p style={textStyle}>Italy</p>
+            <p style={{ ...textStyle, display: 'flex', alignItems: 'center', gap: 6 }} className="justify-center md:justify-start">
+              <Phone size={14} aria-hidden="true" />
               <a href="tel:+393927290392" style={linkStyle}>+39 392 729 0392</a>
             </p>
             <p style={textStyle}>
@@ -56,16 +52,14 @@ export const Footer = () => {
           {/* Column 2: Canada */}
           <div className="text-center md:text-left space-y-1" style={textStyle}>
             <p style={textStyle}>&nbsp;</p>
-            <p style={textStyle}>Address in Canada:</p>
-            <p style={textStyle}>1395, Rue Fleury Est, Bureau 102.2</p>
-            <p style={textStyle}>Montréal, QC, H2C 1R7</p>
             <p style={textStyle}>Canada</p>
-            <p style={textStyle}>
+            <p style={{ ...textStyle, display: 'flex', alignItems: 'center', gap: 6 }} className="justify-center md:justify-start">
+              <Phone size={14} aria-hidden="true" />
               <a href="tel:+14384480997" style={linkStyle}>+1 438 448 0997</a>
             </p>
           </div>
 
-          {/* Column 3: Social links (Facebook brand blue #3B5998, LinkedIn brand blue #007BB6) */}
+          {/* Column 3: Social links */}
           <div className="flex items-start justify-center md:justify-end gap-2">
             <a
               href="https://www.facebook.com/giovannimalagninoconsulting"
@@ -89,7 +83,7 @@ export const Footer = () => {
         </div>
 
         {/* Copyright + version bar */}
-        <div className="mt-8 pt-4 border-t border-border text-center">
+        <div className="mt-6 pt-4 border-t border-border text-center space-y-1">
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()}{" "}
             <a
@@ -100,10 +94,13 @@ export const Footer = () => {
             >
               Giovanni Malagnino Consulting
             </a>
-            {" "}— CEPA Buried Pipeline Surface Loading Calculator — All rights reserved. — v202607281820
+            {" "}— CEPA Buried Pipeline Surface Loading Calculator — All rights reserved.
           </p>
+          <p className="text-[10px] text-muted-foreground">v20260729204100</p>
         </div>
       </div>
     </footer>
   );
 };
+
+export default Footer;
