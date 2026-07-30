@@ -10,6 +10,8 @@ import Runs from "./pages/Runs";
 import Sensitivity from "./pages/Sensitivity";
 import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
+import AnalyticsTracker from "./components/AnalyticsTracker";
+import PrivacyNotice from "./components/privacy/PrivacyNotice";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +21,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <AnalyticsTracker />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/calculator" element={<Calculator />} />
@@ -29,8 +32,10 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <PrivacyNotice />
       </BrowserRouter>
     </TooltipProvider>
+
   </QueryClientProvider>
 );
 
