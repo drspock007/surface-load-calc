@@ -16,6 +16,10 @@ let initialized = false;
 /** Injects the gtag.js script once and configures GA4. */
 export const initAnalytics = () => {
   if (initialized || typeof window === "undefined") return;
+  if (!MEASUREMENT_ID) {
+    console.warn("Google Analytics connector is not configured: measurement ID missing.");
+    return;
+  }
   initialized = true;
 
   const script = document.createElement("script");
