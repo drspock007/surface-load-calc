@@ -10,6 +10,8 @@ import Runs from "./pages/Runs";
 import Sensitivity from "./pages/Sensitivity";
 import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
+import AnalyticsTracker from "./components/AnalyticsTracker";
+import PrivacyNotice from "./components/privacy/PrivacyNotice";
 
 const queryClient = new QueryClient();
 
