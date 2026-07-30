@@ -1,5 +1,8 @@
 // Google Analytics (GA4) initialization, loaded only after visitor consent.
-const MEASUREMENT_ID = "G-9R8WYBPDC1";
+// Measurement ID comes from the Lovable Google Analytics connector.
+const MEASUREMENT_ID = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY as
+  | string
+  | undefined;
 
 declare global {
   interface Window {
@@ -13,6 +16,10 @@ let initialized = false;
 /** Injects the gtag.js script once and configures GA4. */
 export const initAnalytics = () => {
   if (initialized || typeof window === "undefined") return;
+  if (!MEASUREMENT_ID) {
+    console.warn("Google Analytics connector is not configured: measurement ID missing.");
+    return;
+  }
   initialized = true;
 
   const script = document.createElement("script");
