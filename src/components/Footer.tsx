@@ -96,7 +96,7 @@ export const Footer = () => {
             </a>
             {" "}— CEPA Buried Pipeline Surface Loading Calculator — All rights reserved.
           </p>
-          <p className="text-[10px] text-muted-foreground">v20260730210500</p>
+          <p className="text-[10px] text-muted-foreground">v20260804033844</p>
         </div>
       </div>
     </footer>
