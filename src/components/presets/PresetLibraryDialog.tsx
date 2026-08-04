@@ -179,42 +179,7 @@ export const PresetLibraryDialog = ({
             )}
           </div>
 
-          <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-start">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                if (presets.length === 0) return toast.error("No preset to export");
-                downloadJSON(`presets-${mode}-${stamp}.json`, buildExportPayload([mode]));
-                toast.success(`${presets.length} preset(s) exported`);
-              }}
-            >
-              <Download className="mr-1.5 h-4 w-4" />
-              Export this mode
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                downloadJSON(`presets-all-${stamp}.json`, buildExportPayload(PRESET_MODES));
-                toast.success("All presets exported");
-              }}
-            >
-              <Download className="mr-1.5 h-4 w-4" />
-              Export all modes
-            </Button>
-            <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
-              <Upload className="mr-1.5 h-4 w-4" />
-              Import
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json,application/json"
-              className="hidden"
-              onChange={onFileChange}
-            />
-          </DialogFooter>
+          <PresetTransferBar mode={mode} count={presets.length} onFileParsed={setPendingImport} />
         </DialogContent>
       </Dialog>
 
