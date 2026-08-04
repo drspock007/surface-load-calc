@@ -19,7 +19,13 @@ import {
 } from "@/components/ui/select";
 import { Download, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { PresetEntry, PRESET_MODES, PresetMode, MODE_LABELS } from "@/utils/presetStorage/schema";
+import {
+  PresetEntry,
+  PRESET_MODES,
+  PresetMode,
+  MODE_LABELS,
+  MAX_IMPORT_BYTES,
+} from "@/utils/presetStorage/schema";
 import {
   deletePreset,
   duplicatePreset,
@@ -29,7 +35,6 @@ import {
 import {
   buildExportPayload,
   downloadJSON,
-  MAX_IMPORT_BYTES,
   ParsedImport,
   parseImportFile,
 } from "@/utils/presetStorage/transfer";
