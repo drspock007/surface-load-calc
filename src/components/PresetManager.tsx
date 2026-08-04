@@ -38,11 +38,9 @@ export const PresetManager = ({ mode, getCurrentValues, onLoad }: PresetManagerP
   const [presetName, setPresetName] = useState("");
   const [conflictName, setConflictName] = useState<string | null>(null);
 
-  // Values are captured without the per-calculation name
-  const valuesToSave = () => {
-    const { calculationName, ...rest } = getCurrentValues();
-    return rest;
-  };
+  // The calculation name is stored with the preset as well
+  const valuesToSave = () => ({ ...getCurrentValues() });
+
 
   const report = (result: { ok: boolean; error?: string }, success: string) => {
     if (result.ok) {

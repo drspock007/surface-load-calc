@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Calculator as CalcIcon } from "lucide-react";
-import { PresetManager } from "@/components/PresetManager";
+import { CalculationNameCard } from "@/components/CalculationNameCard";
+import { useFormDraft } from "@/hooks/useFormDraft";
 import { TwoAxleInputs, UnitsSystem, SoilLoadMethod, EPrimeMethod, BeddingAngleDeg, EquivStressMethod, CodeCheck, SoilType, Compaction, PavementType, VehicleClass, TirePressureUnit } from "@/domain/pipeline/types2Axle";
 import { PipeSelector } from "./PipelineTrackForm/PipeSelector";
 import { SoilLoadSection } from "./PipelineTrackForm/SoilLoadSection";
@@ -84,10 +85,13 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
   const defaultValues: TwoAxleFormData = {
     calculationName: "",
     unitsSystem: "SI",
-    pipeOD: 36,
-    pipeWT: 0.5,
+    pipeOD: 114.3,
+    pipeWT: 6.02,
     MOP: 7070,
-    SMYS: 52000,
+    SMYS: 359,
+    selectedNPS: "4",
+    selectedSchedule: "Sch 40 / STD",
+    selectedGrade: "API 5L X52",
     deltaT: 10,
     soilDensity: 1600,
     depthCover: 1.2,
@@ -122,9 +126,13 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
     codeCheck: "B31_4",
   };
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<TwoAxleFormData>({
+  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<TwoAxleFormData>({
     resolver: zodResolver(twoAxleSchema),
     defaultValues,
+  });
+
+  useFormDraft<TwoAxleFormData>("2axle", watch, reset, (values) => {
+    if (values.unitsSystem) setUnitsSystem(values.unitsSystem as UnitsSystem);
   });
 
   const ensurePositive = createEnsurePositive(setValue);
@@ -311,32 +319,6 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
         </CardHeader>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Calculation Name</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Input placeholder="e.g., Highway Vehicle Crossing" {...register("calculationName")} />
-            {errors.calculationName && <p className="text-sm text-destructive mt-1">{errors.calculationName.message}</p>}
-          </div>
-          <PresetManager
-            mode="2axle"
-            getCurrentValues={() => watch() as unknown as Record<string, unknown>}
-            onLoad={(values) => {
-              const vals = values as Record<string, unknown>;
-              if (vals.unitsSystem && vals.unitsSystem !== unitsSystem) {
-                setUnitsSystem(vals.unitsSystem as "EN" | "SI");
-              }
-              Object.entries(vals).forEach(([key, val]) => {
-                if (key !== "calculationName") {
-                  setValue(key as keyof TwoAxleFormData, val as any);
-                }
-              });
-            }}
-          />
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
@@ -599,6 +581,17 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
         watch={watch}
         setValue={setValue}
         unitsSystem={unitsSystem}
+      />
+
+      <CalculationNameCard
+        mode="2axle"
+        placeholder="e.g., Highway Vehicle Crossing"
+        register={register}
+        errors={errors}
+        watch={() => watch() as unknown as Record<string, unknown>}
+        setValue={setValue}
+        unitsSystem={unitsSystem}
+        setUnitsSystem={setUnitsSystem}
       />
 
       <Button type="submit" className="w-full" size="lg">

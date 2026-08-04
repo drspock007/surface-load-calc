@@ -37,9 +37,17 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
       if (od !== null) {
         setValue("pipeOD", od);
       }
-      // Reset schedule when NPS changes
-      setValue("selectedSchedule", "Custom");
-      setValue("pipeWT", "");
+      // Default the schedule to STD when the pipe size changes
+      const options = getWallThicknessOptions(nps);
+      const std = options.find((o) => o.schedule.includes("STD"));
+      if (std) {
+        setValue("selectedSchedule", std.schedule);
+        const wt = getWallThickness(nps, std.schedule, unitsSystem);
+        if (wt !== null) setValue("pipeWT", wt);
+      } else {
+        setValue("selectedSchedule", "Custom");
+        setValue("pipeWT", "");
+      }
     }
   };
 
@@ -52,6 +60,7 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
       }
     }
   };
+
 
   const handleGradeChange = (grade: string) => {
     setValue("selectedGrade", grade);

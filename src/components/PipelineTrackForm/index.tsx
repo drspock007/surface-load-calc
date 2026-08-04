@@ -3,12 +3,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Calculator as CalcIcon } from "lucide-react";
-import { PresetManager } from "@/components/PresetManager";
+import { CalculationNameCard } from "@/components/CalculationNameCard";
+import { useFormDraft } from "@/hooks/useFormDraft";
 import { 
   PipelineTrackInputs, 
   UnitsSystem,
@@ -72,10 +73,13 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
   const defaultValues: PipelineFormData = {
     calculationName: "",
     unitsSystem: "SI",
-    pipeOD: 36,
-    pipeWT: 0.5,
+    pipeOD: 114.3,
+    pipeWT: 6.02,
     MOP: 7070,
-    SMYS: 52000,
+    SMYS: 359,
+    selectedNPS: "4",
+    selectedSchedule: "Sch 40 / STD",
+    selectedGrade: "API 5L X52",
     deltaT: 10,
     soilDensity: 1600,
     depthCover: 1.2,
@@ -97,9 +101,13 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
     codeCheck: "B31_4",
   };
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<PipelineFormData>({
+  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<PipelineFormData>({
     resolver: zodResolver(pipelineSchema),
     defaultValues,
+  });
+
+  useFormDraft<PipelineFormData>("track", watch, reset, (values) => {
+    if (values.unitsSystem) setUnitsSystem(values.unitsSystem as UnitsSystem);
   });
 
   const ensurePositive = createEnsurePositive(setValue);
@@ -196,39 +204,6 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
         </CardHeader>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Calculation Name</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name *</Label>
-            <Input
-              id="name"
-              placeholder="e.g., Pipeline Crossing Analysis 1"
-              {...register("calculationName")}
-            />
-            {errors.calculationName && (
-              <p className="text-sm text-destructive">{errors.calculationName.message}</p>
-            )}
-          </div>
-          <PresetManager
-            mode="track"
-            getCurrentValues={() => watch() as unknown as Record<string, unknown>}
-            onLoad={(values) => {
-              const vals = values as Record<string, unknown>;
-              if (vals.unitsSystem && vals.unitsSystem !== unitsSystem) {
-                setUnitsSystem(vals.unitsSystem as "EN" | "SI");
-              }
-              Object.entries(vals).forEach(([key, val]) => {
-                if (key !== "calculationName") {
-                  setValue(key as keyof PipelineFormData, val as any);
-                }
-              });
-            }}
-          />
-        </CardContent>
-      </Card>
 
       <PipelineInputsSection 
         register={register} 
@@ -263,6 +238,17 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
       />
 
       <div className="flex gap-3">
+      <CalculationNameCard
+        mode="track"
+        placeholder="e.g., Pipeline Crossing Analysis 1"
+        register={register}
+        errors={errors}
+        watch={() => watch() as unknown as Record<string, unknown>}
+        setValue={setValue}
+        unitsSystem={unitsSystem}
+        setUnitsSystem={setUnitsSystem}
+      />
+
         <Button type="submit" className="flex-1" size="lg">
           <CalcIcon className="w-5 h-5 mr-2" />
           Calculate Pipeline Track
