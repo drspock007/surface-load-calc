@@ -41,3 +41,9 @@ export const trackPageView = (path: string) => {
   if (!initialized || !window.gtag) return;
   window.gtag("event", "page_view", { page_path: path });
 };
+
+/** Sends a custom GA4 event; no-op when analytics was never initialized. */
+export const trackEvent = (name: string, params?: Record<string, unknown>) => {
+  if (!initialized || !window.gtag) return;
+  window.gtag("event", name, params ?? {});
+};
