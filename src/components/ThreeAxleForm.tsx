@@ -147,7 +147,7 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
     defaultValues,
   });
 
-  useFormDraft<ThreeAxleFormData>(\"3axle\", watch, reset, (values) => {
+  useFormDraft<ThreeAxleFormData>("3axle", watch, reset, (values) => {
     if (values.unitsSystem) setUnitsSystem(values.unitsSystem as UnitsSystem);
   });
 

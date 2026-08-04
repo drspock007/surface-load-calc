@@ -131,7 +131,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
     defaultValues,
   });
 
-  useFormDraft<TwoAxleFormData>(\"2axle\", watch, reset, (values) => {
+  useFormDraft<TwoAxleFormData>("2axle", watch, reset, (values) => {
     if (values.unitsSystem) setUnitsSystem(values.unitsSystem as UnitsSystem);
   });
 

@@ -106,7 +106,7 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
     defaultValues,
   });
 
-  useFormDraft<PipelineFormData>(\"track\", watch, reset, (values) => {
+  useFormDraft<PipelineFormData>("track", watch, reset, (values) => {
     if (values.unitsSystem) setUnitsSystem(values.unitsSystem as UnitsSystem);
   });
 
