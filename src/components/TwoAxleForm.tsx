@@ -583,6 +583,10 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
         unitsSystem={unitsSystem}
       />
 
+      <Button type="submit" className="w-full" size="lg">
+        <CalcIcon className="w-5 h-5 mr-2" />
+        Calculate 2-Axle Vehicle Loading
+      </Button>
       <CalculationNameCard
         mode="2axle"
         placeholder="e.g., Highway Vehicle Crossing"
@@ -594,10 +598,6 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
         setUnitsSystem={setUnitsSystem}
       />
 
-      <Button type="submit" className="w-full" size="lg">
-        <CalcIcon className="w-5 h-5 mr-2" />
-        Calculate 2-Axle Vehicle Loading
-      </Button>
     </form>
   );
 };

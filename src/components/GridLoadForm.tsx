@@ -368,6 +368,10 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
         unitsSystem={unitsSystem}
       />
 
+      <Button type="submit" className="w-full" size="lg">
+        <CalcIcon className="w-5 h-5 mr-2" />
+        Calculate Grid Load
+      </Button>
       <CalculationNameCard
         mode="grid"
         placeholder="e.g., Storage Area Load"
@@ -379,10 +383,6 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
         setUnitsSystem={setUnitsSystem}
       />
 
-      <Button type="submit" className="w-full" size="lg">
-        <CalcIcon className="w-5 h-5 mr-2" />
-        Calculate Grid Load
-      </Button>
     </form>
   );
 };

@@ -238,6 +238,11 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
       />
 
       <div className="flex gap-3">
+        <Button type="submit" className="flex-1" size="lg">
+          <CalcIcon className="w-5 h-5 mr-2" />
+          Calculate Pipeline Track
+        </Button>
+      </div>
       <CalculationNameCard
         mode="track"
         placeholder="e.g., Pipeline Crossing Analysis 1"
@@ -249,11 +254,6 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
         setUnitsSystem={setUnitsSystem}
       />
 
-        <Button type="submit" className="flex-1" size="lg">
-          <CalcIcon className="w-5 h-5 mr-2" />
-          Calculate Pipeline Track
-        </Button>
-      </div>
     </form>
   );
 };
