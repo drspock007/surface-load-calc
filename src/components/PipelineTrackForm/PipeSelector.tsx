@@ -51,6 +51,16 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
     }
   };
 
+  const handleScheduleChange = (schedule: string) => {
+    setValue("selectedSchedule", schedule);
+    if (schedule !== "Custom" && selectedNPS !== "CUSTOM") {
+      const wt = getWallThickness(selectedNPS, schedule, unitsSystem);
+      if (wt !== null) {
+        setValue("pipeWT", wt);
+      }
+    }
+  };
+
 
   const handleGradeChange = (grade: string) => {
     setValue("selectedGrade", grade);
