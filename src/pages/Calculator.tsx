@@ -16,6 +16,7 @@ import { TwoAxleInputs } from "@/domain/pipeline/types2Axle";
 import { ThreeAxleInputs } from "@/domain/pipeline/types3Axle";
 import { GridLoadInputs } from "@/domain/pipeline/typesGrid";
 import { SEO } from "@/components/SEO";
+import { trackEvent } from "@/lib/analytics";
 
 const Calculator = () => {
   const navigate = useNavigate();
@@ -137,7 +138,11 @@ const Calculator = () => {
           </p>
         </div>
 
-        <Tabs value={mode} onValueChange={(v) => setMode(v as CalculationMode)} className="mb-6">
+        <Tabs value={mode} onValueChange={(v) => {
+            setMode(v as CalculationMode);
+            // GA4: track analysis type selection
+            trackEvent("analysis_mode_select", { analysis_mode: v });
+          }} className="mb-6">
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-2 px-1">Pipeline Loading Analysis</h3>

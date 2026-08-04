@@ -3,6 +3,7 @@ import { Calculator, Home, History, TrendingUp, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
 import { Footer } from "./Footer";
+import { trackEvent } from "@/lib/analytics";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -74,6 +75,8 @@ export const Layout = ({ children }: LayoutProps) => {
                 <Link
                   key={item.path}
                   to={item.path}
+                  // GA4: track main navigation clicks
+                  onClick={() => trackEvent("nav_click", { nav_label: item.label, nav_path: item.path })}
                   className={cn(
                     "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
                     isActive
