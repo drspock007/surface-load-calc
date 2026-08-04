@@ -145,7 +145,7 @@ const Calculator = () => {
           }} className="mb-6">
           <div className="space-y-4">
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-2 px-1">Pipeline Loading Analysis</h3>
+              <h2 className="text-sm font-medium text-muted-foreground mb-2 px-1">Pipeline Loading Analysis</h2>
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="PIPELINE_TRACK">Track Vehicle</TabsTrigger>
                 <TabsTrigger value="2_AXLE">2-Axle</TabsTrigger>
