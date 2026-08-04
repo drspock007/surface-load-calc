@@ -52,7 +52,6 @@ export const PresetLibraryDialog = ({
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("updated");
   const [pendingImport, setPendingImport] = useState<ParsedImport | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handle = (result: { ok: boolean; error?: string }, success: string) => {
     if (result.ok) {
@@ -71,32 +70,6 @@ export const PresetLibraryDialog = ({
         : b.updatedAt.localeCompare(a.updatedAt),
     );
 
-  const stamp = new Date().toISOString().slice(0, 10);
-
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    if (file.size > MAX_IMPORT_BYTES) {
-      toast.error("File too large (max 1 MB)");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const { data, error } = parseImportFile(reader.result as string);
-      if (error || !data) {
-        toast.error(error ?? "Invalid file");
-        return;
-      }
-      const count = PRESET_MODES.reduce((n, m) => n + (data[m]?.length ?? 0), 0);
-      if (count === 0) {
-        toast.error("This file contains no preset");
-        return;
-      }
-      setPendingImport(data);
-    };
-    reader.readAsText(file);
-  };
 
   return (
     <>
