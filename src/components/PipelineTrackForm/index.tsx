@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -177,6 +178,8 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
       setValue("soilCohesion", convertFormValue(currentValues.soilCohesion, oldSystem, newSystem, 'pressure') ?? 0);
     }
     
+    // GA4: track unit system switches
+    trackEvent("units_system_change", { units_system: newSystem });
     setUnitsSystem(newSystem);
     setValue("unitsSystem", newSystem);
   };
