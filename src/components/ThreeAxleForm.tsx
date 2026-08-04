@@ -724,6 +724,10 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
         unitsSystem={unitsSystem}
       />
 
+      <Button type="submit" className="w-full" size="lg">
+        <CalcIcon className="w-5 h-5 mr-2" />
+        Calculate 3-Axle Vehicle Loading
+      </Button>
       <CalculationNameCard
         mode="3axle"
         placeholder="e.g., Truck Crossing Analysis"
@@ -735,10 +739,6 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
         setUnitsSystem={setUnitsSystem}
       />
 
-      <Button type="submit" className="w-full" size="lg">
-        <CalcIcon className="w-5 h-5 mr-2" />
-        Calculate 3-Axle Vehicle Loading
-      </Button>
     </form>
   );
 };
