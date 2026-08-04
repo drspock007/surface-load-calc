@@ -1,12 +1,10 @@
-import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -17,29 +15,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Download, Upload } from "lucide-react";
 import { toast } from "sonner";
-import {
-  PresetEntry,
-  PRESET_MODES,
-  PresetMode,
-  MODE_LABELS,
-  MAX_IMPORT_BYTES,
-} from "@/utils/presetStorage/schema";
+import { PresetEntry, PresetMode, MODE_LABELS } from "@/utils/presetStorage/schema";
 import {
   deletePreset,
   duplicatePreset,
   overwritePreset,
   renamePreset,
 } from "@/utils/presetStorage/crud";
-import {
-  buildExportPayload,
-  downloadJSON,
-  ParsedImport,
-  parseImportFile,
-} from "@/utils/presetStorage/transfer";
+import { ParsedImport } from "@/utils/presetStorage/transfer";
 import { PresetRow } from "./PresetRow";
 import { PresetImportPreview } from "./PresetImportPreview";
+import { PresetTransferBar } from "./PresetTransferBar";
 
 interface PresetLibraryDialogProps {
   open: boolean;
