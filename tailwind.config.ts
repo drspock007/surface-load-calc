@@ -13,12 +13,21 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+        serif: ["Habibi", "Georgia", "Times New Roman", "serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        "primary-strong": "hsl(var(--primary-strong))",
+        "success-strong": "hsl(var(--success-strong))",
+        "warning-strong": "hsl(var(--warning-strong))",
+        "danger-strong": "hsl(var(--danger-strong))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
