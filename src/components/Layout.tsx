@@ -66,7 +66,7 @@ export const Layout = ({ children }: LayoutProps) => {
           </div>
 
           {/* Navigation row */}
-          <nav className="flex flex-wrap gap-1 justify-center md:justify-end pb-3">
+          <nav className="flex flex-wrap items-center gap-1 justify-center md:justify-end pb-3">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -88,6 +88,9 @@ export const Layout = ({ children }: LayoutProps) => {
                 </Link>
               );
             })}
+            <div className="ml-2">
+              <ThemeToggle />
+            </div>
           </nav>
         </div>
       </header>
