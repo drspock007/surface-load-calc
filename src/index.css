@@ -2,87 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design system tokens aligned with Giovanni Malagnino Consulting branding.
-   Primary orange #ff8e04, black foreground, white background. All values HSL. */
+/* GMC visual identity design tokens.
+   Amber hsl(34 100% 51%) is the single accent color. All values HSL triplets. */
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    --foreground: 222 47% 11%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card: 210 40% 98%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 28 100% 51%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 34 100% 51%;
+    --primary-foreground: 222 47% 11%;
+    --primary-strong: 26 92% 30%;
 
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 100%;
+    --success-strong: 152 75% 24%;
+    --warning-strong: 30 95% 28%;
+    --danger-strong: 0 74% 38%;
 
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 35%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --accent: 28 100% 51%;
-    --accent-foreground: 0 0% 100%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 40%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --accent: 34 100% 51%;
+    --accent-foreground: 222 47% 11%;
 
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 28 100% 51%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --radius: 0.375rem;
+    --border: 214 32% 88%;
+    --input: 214 32% 88%;
+    --ring: 34 100% 51%;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 10%;
-    --sidebar-primary: 28 100% 51%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 28 100% 96%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 0 0% 89.8%;
-    --sidebar-ring: 28 100% 51%;
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 34 100% 51%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 88%;
+    --sidebar-ring: 34 100% 51%;
   }
 
   .dark {
-    --background: 0 0% 10%;
-    --foreground: 0 0% 98%;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 15%;
-    --card-foreground: 0 0% 98%;
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 217 33% 17%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 28 100% 51%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 34 100% 51%;
+    --primary-foreground: 222 47% 11%;
+    --primary-strong: 34 100% 60%;
 
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 0 0% 98%;
+    --success-strong: 152 62% 60%;
+    --warning-strong: 42 96% 62%;
+    --danger-strong: 0 88% 72%;
 
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 63.9%;
+    --secondary: 217 33% 22%;
+    --secondary-foreground: 210 40% 98%;
 
-    --accent: 28 100% 51%;
-    --accent-foreground: 0 0% 100%;
+    --muted: 217 33% 22%;
+    --muted-foreground: 215 20% 65%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --accent: 34 100% 51%;
+    --accent-foreground: 222 47% 11%;
 
-    --border: 0 0% 25%;
-    --input: 0 0% 25%;
-    --ring: 28 100% 51%;
-    --sidebar-background: 0 0% 10%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 28 100% 51%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 20%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 25%;
-    --sidebar-ring: 28 100% 51%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 25%;
+    --input: 217 33% 25%;
+    --ring: 34 100% 51%;
+
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 34 100% 51%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 217 33% 22%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 25%;
+    --sidebar-ring: 34 100% 51%;
   }
 }
 
@@ -93,8 +104,17 @@
 
   body {
     @apply bg-background text-foreground;
-    border-left: 24px solid hsl(var(--primary));
-    border-right: 24px solid hsl(var(--primary));
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+    /* Amber page frame: reduced on mobile, never removed */
+    border-left: 12px solid hsl(var(--primary));
+    border-right: 12px solid hsl(var(--primary));
     min-height: 100vh;
+  }
+
+  @media (min-width: 768px) {
+    body {
+      border-left-width: 24px;
+      border-right-width: 24px;
+    }
   }
 }

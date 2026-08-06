@@ -8,7 +8,7 @@ export const Footer = () => {
     fontSize: '14px',
     fontWeight: 500,
     lineHeight: '23.8px',
-    color: '#020202',
+    color: 'hsl(var(--foreground))',
     letterSpacing: 'normal',
     margin: 0,
   };
@@ -27,7 +27,7 @@ export const Footer = () => {
   };
 
   return (
-    <footer style={{ backgroundColor: '#ffffff' }}>
+    <footer className="bg-card border-t border-border">
       <div className="container mx-auto px-4 py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Column 1: Italy */}
@@ -96,7 +96,7 @@ export const Footer = () => {
             </a>
             {" "}— CEPA Buried Pipeline Surface Loading Calculator — All rights reserved.
           </p>
-          <p className="text-[10px] text-muted-foreground">v20260804041000</p>
+          <p className="text-[10px] text-muted-foreground font-mono">v20260806005500</p>
         </div>
       </div>
     </footer>

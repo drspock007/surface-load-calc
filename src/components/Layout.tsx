@@ -3,6 +3,7 @@ import { Calculator, Home, History, TrendingUp, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
 import { Footer } from "./Footer";
+import ThemeToggle from "./ThemeToggle";
 import { trackEvent } from "@/lib/analytics";
 
 interface LayoutProps {
@@ -42,10 +43,9 @@ export const Layout = ({ children }: LayoutProps) => {
               </a>
             </div>
             <div
-              className="text-left text-foreground"
+              className="text-center md:text-left text-foreground"
               style={{
                 backgroundColor: 'transparent',
-                color: '#020202',
                 display: 'block',
                 fontFamily: '"Habibi", Georgia, "Times New Roman", serif',
                 fontSize: '27px',
@@ -55,7 +55,6 @@ export const Layout = ({ children }: LayoutProps) => {
                 margin: 0,
                 padding: '0 0 1em 0',
                 position: 'static',
-                textAlign: 'left',
                 textShadow: 'rgba(0, 0, 0, 0.4) 2.16px 2.16px 2.16px',
                 textTransform: 'none',
               }}
@@ -67,7 +66,7 @@ export const Layout = ({ children }: LayoutProps) => {
           </div>
 
           {/* Navigation row */}
-          <nav className="flex flex-wrap gap-1 justify-center md:justify-end pb-3">
+          <nav className="flex flex-wrap items-center gap-1 justify-center md:justify-end pb-3">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -89,6 +88,9 @@ export const Layout = ({ children }: LayoutProps) => {
                 </Link>
               );
             })}
+            <div className="ml-2">
+              <ThemeToggle />
+            </div>
           </nav>
         </div>
       </header>

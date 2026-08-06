@@ -12,11 +12,13 @@ import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
 import AnalyticsTracker from "./components/AnalyticsTracker";
 import PrivacyNotice from "./components/privacy/PrivacyNotice";
+import { ThemeProvider } from "./components/theme-provider";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -35,7 +37,7 @@ const App = () => (
         <PrivacyNotice />
       </BrowserRouter>
     </TooltipProvider>
-
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
