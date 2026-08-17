@@ -8,19 +8,32 @@ import {
 } from "@/domain/pipeline/pePresets";
 import { PeInputFields, PeModulusMode, PipeMaterial } from "@/domain/pipeline/types";
 
+/** Optional positive number that tolerates an empty input (NaN) */
+const optionalPositive = z.preprocess(
+  (v) => (v === "" || v === null || (typeof v === "number" && Number.isNaN(v)) ? undefined : v),
+  z.number().positive().optional()
+);
+
+/** Optional number that tolerates an empty input (NaN) */
+const optionalNumber = z.preprocess(
+  (v) => (v === "" || v === null || (typeof v === "number" && Number.isNaN(v)) ? undefined : v),
+  z.number().optional()
+);
+
 /** Zod fields shared by every calculation form for PE (CSA B137.4) support */
 export const peSchemaFields = {
   pipeMaterial: z.enum(["STEEL", "PE"]).optional(),
   peSizeId: z.string().optional(),
   peDesignation: z.string().optional(),
-  dimensionRatio: z.number().positive().optional(),
+  dimensionRatio: optionalPositive,
   peModulusMode: z.enum(["AUTO", "SHORT_TERM", "LONG_TERM", "CUSTOM"]).optional(),
-  peModulus: z.number().positive().optional(),
-  peHDB: z.number().positive().optional(),
-  peDeflectionLimitPct: z.number().positive().optional(),
-  peStrainLimitPct: z.number().positive().optional(),
-  peServiceTempC: z.number().optional(),
+  peModulus: optionalPositive,
+  peHDB: optionalPositive,
+  peDeflectionLimitPct: optionalPositive,
+  peStrainLimitPct: optionalPositive,
+  peServiceTempC: optionalNumber,
 };
+
 
 /** Default values injected in every form */
 export const PE_FORM_DEFAULTS = {
