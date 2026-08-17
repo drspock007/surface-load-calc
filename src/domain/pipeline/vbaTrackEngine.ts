@@ -1,3 +1,4 @@
+import { isPePipe, computePeResults } from './peEngine';
 /**
  * VBA Track Vehicle Engine - Direct port from Kiefner Surface Loading Calculator
  * All calculations performed in ENGLISH units (inches, feet, psi, lb, lb/ft³)
@@ -640,6 +641,21 @@ export function calculateTrackVehicleVBA(inputs: PipelineTrackInputs): PipelineT
     });
   }
   
+  // PE (CSA B137.4) flexible pipe checks
+  if (isPePipe(inputs)) {
+    results.peResults = computePeResults(inputs, {
+      D_in: inputsEN.D_in,
+      t_in: inputsEN.t_in,
+      H_ft: inputsEN.H_ft,
+      Psoil_psi: soilPressure_psi,
+      Plive_psi: bsnqIF_psi,
+      Pint_psi: inputsEN.MOP_psi,
+      ePrime_psi,
+      Kb,
+      unitsSystem: inputs.unitsSystem,
+    });
+  }
+
   return results;
 }
 

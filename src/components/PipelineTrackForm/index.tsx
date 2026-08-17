@@ -1,3 +1,4 @@
+import { peSchemaFields, PE_FORM_DEFAULTS, extractPeInputs } from "@/components/pipe/peFormFields";
 import { useState } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { useForm } from "react-hook-form";
@@ -60,6 +61,7 @@ const pipelineSchema = z.object({
     equivLimitPct: z.number().min(0).max(100),
   }).optional(),
   enableBendRadius: z.boolean().optional(),
+  ...peSchemaFields,
 });
 
 type PipelineFormData = z.infer<typeof pipelineSchema>;
@@ -72,6 +74,7 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
   const [unitsSystem, setUnitsSystem] = useState<UnitsSystem>("SI");
   
   const defaultValues: PipelineFormData = {
+    ...PE_FORM_DEFAULTS,
     calculationName: "",
     unitsSystem: "SI",
     pipeOD: 114.3,
@@ -115,6 +118,7 @@ export const PipelineTrackForm = ({ onCalculate }: PipelineTrackFormProps) => {
 
   const onSubmit = (data: PipelineFormData) => {
     const inputs: PipelineTrackInputs = {
+      ...extractPeInputs(data),
       calculationName: data.calculationName,
       unitsSystem: data.unitsSystem,
       pipeOD: data.pipeOD,

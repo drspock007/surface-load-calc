@@ -15,6 +15,7 @@ import { UnitsSystem } from "@/domain/pipeline/types";
 import { InputParametersCard } from "@/components/InputParametersCard";
 import { SEO } from "@/components/SEO";
 import { InfoTooltip } from "@/components/InfoTooltip";
+import { PeChecksCard } from "@/components/results/PeChecksCard";
 
 // Unit labels based on system
 const getUnitLabels = (system: UnitsSystem) => ({
@@ -53,6 +54,7 @@ const Results = () => {
   const pipelineResult = isPipeline ? (run.result as PipelineTrackResults | TwoAxleResults | ThreeAxleResults | GridLoadResults) : null;
   const unitsSystem = (run.input.unitsSystem as UnitsSystem) || 'EN';
   const units = getUnitLabels(unitsSystem);
+  const peResults = pipelineResult?.peResults;
   
   const getModeLabel = (mode: string) => {
     switch (mode) {
@@ -178,6 +180,9 @@ const Results = () => {
               </CardContent>
             </Card>
 
+            {peResults && <PeChecksCard results={peResults} unitsSystem={unitsSystem} />}
+
+            {!peResults && (
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle>Stress Analysis</CardTitle>
@@ -254,6 +259,7 @@ const Results = () => {
                 </div>
               </CardContent>
             </Card>
+            )}
 
             {/* Minimum Bend Radius Card */}
             {pipelineResult.bendRadius && (
@@ -334,6 +340,7 @@ const Results = () => {
               </Card>
             )}
 
+            {!peResults && (
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle>Pass/Fail Summary</CardTitle>
@@ -444,6 +451,7 @@ const Results = () => {
                 </div>
               </CardContent>
             </Card>
+            )}
 
             <Card className="mb-6">
               <CardHeader>

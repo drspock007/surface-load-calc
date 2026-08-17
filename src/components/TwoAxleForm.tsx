@@ -1,3 +1,4 @@
+import { peSchemaFields, PE_FORM_DEFAULTS, extractPeInputs } from "@/components/pipe/peFormFields";
 import { useState, useMemo } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { useForm } from "react-hook-form";
@@ -72,6 +73,7 @@ const twoAxleSchema = z.object({
     equivLimitPct: z.number().min(0).max(100),
   }).optional(),
   enableBendRadius: z.boolean().optional(),
+  ...peSchemaFields,
 });
 
 type TwoAxleFormData = z.infer<typeof twoAxleSchema>;
@@ -84,6 +86,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
   const [unitsSystem, setUnitsSystem] = useState<UnitsSystem>("SI");
   
   const defaultValues: TwoAxleFormData = {
+    ...PE_FORM_DEFAULTS,
     calculationName: "",
     unitsSystem: "SI",
     pipeOD: 114.3,
@@ -207,6 +210,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
 
   const onSubmit = (data: TwoAxleFormData) => {
     const inputs: TwoAxleInputs = {
+      ...extractPeInputs(data),
       calculationName: data.calculationName,
       unitsSystem: data.unitsSystem,
       pipeOD: data.pipeOD,

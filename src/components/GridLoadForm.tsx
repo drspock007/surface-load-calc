@@ -1,3 +1,4 @@
+import { peSchemaFields, PE_FORM_DEFAULTS, extractPeInputs } from "@/components/pipe/peFormFields";
 import { useState } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { useForm } from "react-hook-form";
@@ -62,6 +63,7 @@ const gridLoadSchema = z.object({
     equivLimitPct: z.number().min(0).max(100),
   }).optional(),
   enableBendRadius: z.boolean().optional(),
+  ...peSchemaFields,
 });
 
 type GridLoadFormData = z.infer<typeof gridLoadSchema>;
@@ -74,6 +76,7 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
   const [unitsSystem, setUnitsSystem] = useState<UnitsSystem>("SI");
   
   const defaultValues: GridLoadFormData = {
+    ...PE_FORM_DEFAULTS,
     calculationName: "",
     unitsSystem: "SI",
     pipeOD: 114.3,
@@ -125,6 +128,7 @@ export const GridLoadForm = ({ onCalculate }: GridLoadFormProps) => {
 
   const onSubmit = (data: GridLoadFormData) => {
     const inputs: GridLoadInputs = {
+      ...extractPeInputs(data),
       calculationName: data.calculationName,
       unitsSystem: data.unitsSystem,
       pipeOD: data.pipeOD,

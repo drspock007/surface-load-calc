@@ -1,3 +1,4 @@
+import { isPePipe, computePeResults } from './peEngine';
 /**
  * VBA 3-Axle Vehicle Engine
  * Calculates stresses from a 3-axle vehicle load
@@ -355,6 +356,20 @@ export function calculate3AxleVehicleVBA(inputs: ThreeAxleInputs): ThreeAxleResu
   };
   
   // Convert all outputs to user units
+  // PE (CSA B137.4) flexible pipe checks
+  if (isPePipe(inputs)) {
+    results.peResults = computePeResults(inputs, {
+      D_in: inputsEN.D_in,
+      t_in: inputsEN.t_in,
+      H_ft: inputsEN.H_ft,
+      Psoil_psi: soilLoad.Psoil_psi,
+      Plive_psi: BsnqIF,
+      Pint_psi: inputsEN.Pint_psi,
+      ePrime_psi: ePrime.ePrime_psi,
+      Kb: bedding.Kb,
+      unitsSystem: inputs.unitsSystem,
+    });
+  }
   return {
     ...results,
     maxSurfacePressureOnPipe: convertPressureToUserUnits(results.maxSurfacePressureOnPipe, inputs.unitsSystem),
