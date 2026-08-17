@@ -1,6 +1,7 @@
 import React from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import { PeManualSection } from './PeManualSection';
 
 const styles: Record<string, React.CSSProperties> = {
   doc: { fontFamily: 'Georgia, "Times New Roman", serif', color: '#111', background: '#fff', maxWidth: 850, margin: '0 auto', padding: '40px 60px', lineHeight: 1.7, fontSize: 14 },
@@ -571,6 +572,8 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
       </table>
 
       {/* APPENDIX A */}
+      <PeManualSection />
+
       <h2 style={styles.h1}>Appendix A: Worked Example — Track Vehicle</h2>
       <p>This example follows CEPA Manual Example 2.</p>
 
