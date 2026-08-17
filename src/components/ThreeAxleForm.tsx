@@ -1,3 +1,4 @@
+import { peSchemaFields, PE_FORM_DEFAULTS, extractPeInputs } from "@/components/pipe/peFormFields";
 import { useState, useMemo } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { useForm } from "react-hook-form";
@@ -80,6 +81,7 @@ const threeAxleSchema = z.object({
     equivLimitPct: z.number().min(0).max(100),
   }).optional(),
   enableBendRadius: z.boolean().optional(),
+  ...peSchemaFields,
 });
 
 type ThreeAxleFormData = z.infer<typeof threeAxleSchema>;
@@ -92,6 +94,7 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
   const [unitsSystem, setUnitsSystem] = useState<UnitsSystem>("SI");
   
   const defaultValues: ThreeAxleFormData = {
+    ...PE_FORM_DEFAULTS,
     calculationName: "",
     unitsSystem: "SI",
     pipeOD: 114.3,
@@ -253,6 +256,7 @@ export const ThreeAxleForm = ({ onCalculate }: ThreeAxleFormProps) => {
 
   const onSubmit = (data: ThreeAxleFormData) => {
     const inputs: ThreeAxleInputs = {
+      ...extractPeInputs(data),
       calculationName: data.calculationName,
       unitsSystem: data.unitsSystem,
       pipeOD: data.pipeOD,

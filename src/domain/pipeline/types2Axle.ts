@@ -1,9 +1,9 @@
 import { UnitsSystem, BeddingAngleDeg, SoilLoadMethod, EPrimeMethod, SoilType, Compaction, EquivStressMethod, CodeCheck, PavementType, VehicleClass, TirePressureUnit } from './types';
-import { StressResults, PassFailSummary, DebugValues, LimitsUsed } from './types';
+import { StressResults, PassFailSummary, DebugValues, LimitsUsed, PeInputFields, PeResults } from './types';
 
 export type { UnitsSystem, BeddingAngleDeg, SoilLoadMethod, EPrimeMethod, SoilType, Compaction, EquivStressMethod, CodeCheck, PavementType, VehicleClass, TirePressureUnit };
 
-export interface TwoAxleInputs {
+export interface TwoAxleInputs extends PeInputFields {
   // System
   unitsSystem: UnitsSystem;
   calculationName: string;
@@ -79,6 +79,7 @@ export interface TwoAxleResults {
   ePrimeUsed: number;
   soilLoadOnPipe: number;
   deflectionRatio: number;
+  peResults?: PeResults;
   debug: DebugValues;
   bendRadius?: import('./bendRadiusCalculation').BendRadiusResults;
 }

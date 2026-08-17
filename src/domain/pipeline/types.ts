@@ -10,8 +10,50 @@ export type Compaction = 80 | 85 | 90 | 95 | 100;
 export type PavementType = 'RIGID' | 'FLEXIBLE';
 export type VehicleClass = 'HIGHWAY' | 'FARM' | 'TRACK';
 export type TirePressureUnit = 'kPa' | 'kg/m2' | 'bar' | 'psig';
+export type PipeMaterial = 'STEEL' | 'PE';
+export type PeModulusMode = 'AUTO' | 'SHORT_TERM' | 'LONG_TERM' | 'CUSTOM';
 
-export interface PipelineTrackInputs {
+/** Polyethylene (CSA B137.4) pipe fields shared by every calculation mode */
+export interface PeInputFields {
+  unitsSystem: UnitsSystem;
+  pipeMaterial?: PipeMaterial;
+  peSizeId?: string;
+  peDesignation?: string;
+  dimensionRatio?: number;
+  peModulusMode?: PeModulusMode;
+  peModulus?: number; // MPa (SI) or psi (EN), used when mode = CUSTOM
+  peHDB?: number; // MPa (SI) or psi (EN), overrides the designation default
+  peDeflectionLimitPct?: number;
+  peStrainLimitPct?: number;
+  peServiceTempC?: number;
+}
+
+export interface PeCheckDisplay {
+  value: number;
+  limit: number;
+  pass: boolean;
+  utilizationPct: number;
+}
+
+export interface PeResults {
+  designation: string;
+  dimensionRatio: number;
+  temperatureFactor: number;
+  modulusLive: number; // user pressure units (MPa / psi)
+  modulusSoil: number;
+  hdb: number;
+  designFactor: number;
+  ringDeflectionPct: PeCheckDisplay;
+  bendingStrainPct: PeCheckDisplay;
+  internalPressure: PeCheckDisplay; // kPa / psi
+  buckling: PeCheckDisplay; // kPa / psi
+  criticalBucklingPressure: number;
+  allowablePressure: number;
+  bucklingSafetyFactor: number;
+  overallPass: boolean;
+}
+
+export interface PipelineTrackInputs extends PeInputFields {
   // System
   unitsSystem: UnitsSystem;
   calculationName: string;
@@ -159,6 +201,9 @@ export interface PipelineTrackResults {
   // Debug values
   debug: DebugValues;
   
+  // PE (CSA B137.4) checks, present when pipeMaterial = 'PE'
+  peResults?: PeResults;
+
   // Optional bend radius results
   bendRadius?: import('./bendRadiusCalculation').BendRadiusResults;
 }
