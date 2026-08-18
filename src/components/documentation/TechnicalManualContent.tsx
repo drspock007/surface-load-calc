@@ -148,6 +148,10 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
         <li>Pipe self-weight is not included</li>
       </ul>
 
+      <MaterialSelectionSection />
+
+
+
       <div style={styles.siNote}>
         <strong style={{ color: '#1565c0' }}>Note for SI users:</strong> All formulas in this manual are presented in their original English unit form as defined by the CEPA methodology. Where formulas contain unit-dependent constants (e.g. 144, 1728), an SI equivalent is provided in a <span style={{ color: '#2979ff', fontWeight: 600 }}>blue box</span> below. Dimensionless formulas (Boussinesq, Spangler, Tresca, Von Mises) work identically in any consistent unit system.
       </div>
