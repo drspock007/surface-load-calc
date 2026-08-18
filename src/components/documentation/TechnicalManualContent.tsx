@@ -124,7 +124,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       {/* CHAPTER 1 */}
       <h2 style={styles.h1}>1. Introduction and Scope</h2>
-      <p>This document describes the calculation methodology implemented in the CEPA Surface Loading Stress Calculator. The tool performs screening-level stress analysis of buried steel pipelines subjected to surface vehicle loads, following the methodology defined in the <strong>CEPA Surface Loading Calculator User Manual</strong>.</p>
+      <p>This document describes the calculation methodology implemented in the CEPA Surface Loading Stress Calculator. The tool performs screening-level stress analysis of buried pipelines — steel (CSA Z245.1 / API 5L) or polyethylene (CSA B137.4) — subjected to surface vehicle loads, following the methodology defined in the <strong>CEPA Surface Loading Calculator User Manual</strong>.</p>
 
       <h2 style={styles.h2}>1.1 Purpose</h2>
       <p>The calculator determines whether a buried pipeline can safely sustain surface loads from vehicles or equipment crossing above it. It evaluates hoop, longitudinal, and equivalent stresses against allowable limits defined by applicable pipeline codes.</p>
