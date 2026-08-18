@@ -25,7 +25,7 @@ import { createEnsurePositive } from "@/hooks/useEnsurePositive";
 import { InfoTooltip } from "@/components/InfoTooltip";
 
 const twoAxleSchema = z.object({
-  calculationName: z.string().min(1, "Name is required"),
+  calculationName: z.string().optional(),
   unitsSystem: z.enum(["EN", "SI"]),
   pipeOD: z.number().positive(),
   pipeWT: z.number().positive(),
@@ -211,7 +211,7 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
   const onSubmit = (data: TwoAxleFormData) => {
     const inputs: TwoAxleInputs = {
       ...extractPeInputs(data),
-      calculationName: data.calculationName,
+      calculationName: data.calculationName?.trim() || "Untitled calculation",
       unitsSystem: data.unitsSystem,
       pipeOD: data.pipeOD,
       pipeWT: data.pipeWT,
