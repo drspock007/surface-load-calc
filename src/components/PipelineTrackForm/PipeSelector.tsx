@@ -55,12 +55,13 @@ export function PipeSelector({ register, setValue, watch, errors, unitsSystem }:
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="pipeMaterial">Pipe Material<InfoTooltip text="Steel uses the CEPA stress checks. Polyethylene (CSA B137.4) uses the flexible pipe checks: ring deflection, bending strain, allowable pressure and buckling." /></Label>
+        <Label htmlFor="pipeMaterial">Pipe Material<InfoTooltip text="Steel (CSA Z245.1 in Canada, equivalent to API 5L — same SMYS grades) uses the CEPA stress checks. Polyethylene (CSA B137.4) uses the flexible pipe checks: ring deflection, bending strain, allowable pressure and buckling." /></Label>
         <Select value={material} onValueChange={handleMaterialChange}>
           <SelectTrigger id="pipeMaterial"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="STEEL">Steel (ASME B36.10 / API 5L)</SelectItem>
+            <SelectItem value="STEEL">Steel (CSA Z245.1 / ASME B36.10 / API 5L)</SelectItem>
             <SelectItem value="PE">Polyethylene (CSA B137.4)</SelectItem>
+
           </SelectContent>
         </Select>
       </div>

@@ -160,7 +160,7 @@ export function SteelPipeFields({ register, setValue, watch, errors, unitsSystem
 
       {/* Steel Grade Selection */}
       <div className="space-y-2">
-        <Label htmlFor="selectedGrade">Steel Grade<InfoTooltip text="API 5L pipe grade (X42, X52, X60, X65, X70, X80…). Selecting a grade auto-fills SMYS." /></Label>
+        <Label htmlFor="selectedGrade">Steel Grade<InfoTooltip text="Pipe grade per API 5L with its equivalent CSA Z245.1 designation (Canadian steel line pipe standard). Both use the same SMYS. Selecting a grade auto-fills SMYS." /></Label>
         <Select value={selectedGrade} onValueChange={handleGradeChange}>
           <SelectTrigger id="selectedGrade">
             <SelectValue placeholder="Select grade..." />
@@ -169,7 +169,9 @@ export function SteelPipeFields({ register, setValue, watch, errors, unitsSystem
             {STEEL_GRADES.map((steel) => (
               <SelectItem key={steel.grade} value={steel.grade}>
                 {steel.grade}
+                {steel.csaGrade && ` / ${steel.csaGrade}`}
                 {steel.grade !== "CUSTOM" && ` (${unitsSystem === "EN" ? steel.smys_psi.toLocaleString() + ' psi' : steel.smys_mpa + ' MPa'})`}
+
               </SelectItem>
             ))}
           </SelectContent>
