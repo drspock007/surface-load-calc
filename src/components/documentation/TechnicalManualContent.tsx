@@ -2,6 +2,8 @@ import React from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { PeManualSection } from './PeManualSection';
+import { MaterialSelectionSection } from './MaterialSelectionSection';
+
 
 const styles: Record<string, React.CSSProperties> = {
   doc: { fontFamily: 'Georgia, "Times New Roman", serif', color: '#111', background: '#fff', maxWidth: 850, margin: '0 auto', padding: '40px 60px', lineHeight: 1.7, fontSize: 14 },
@@ -98,6 +100,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
         <h3 style={{ margin: '0 0 8px', fontSize: 15 }}>Table of Contents</h3>
         {[
           '1. Introduction and Scope',
+          '1.5 Pipe Material Selection — Steel vs Polyethylene',
           '2. Input Parameters',
           '3. Soil Load Calculation',
           '4. Boussinesq Surface Pressure',
@@ -109,9 +112,11 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
           '10. Tire Contact Patch Calculation',
           '11. Minimum Bend Radius',
           '12. Unit Conversions',
+          '13. Polyethylene Pipe Checks (CSA B137.4)',
           'Appendix A: Worked Example — Track Vehicle',
           'Appendix B: Worked Example — 2-Axle Vehicle',
           'Appendix C: E\' Lookup Table (CEPA Table 2-3)',
+
         ].map((item, i) => (
           <div key={i} style={styles.tocItem}>{item}</div>
         ))}
@@ -119,7 +124,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
 
       {/* CHAPTER 1 */}
       <h2 style={styles.h1}>1. Introduction and Scope</h2>
-      <p>This document describes the calculation methodology implemented in the CEPA Surface Loading Stress Calculator. The tool performs screening-level stress analysis of buried steel pipelines subjected to surface vehicle loads, following the methodology defined in the <strong>CEPA Surface Loading Calculator User Manual</strong>.</p>
+      <p>This document describes the calculation methodology implemented in the CEPA Surface Loading Stress Calculator. The tool performs screening-level stress analysis of buried pipelines — steel (CSA Z245.1 / API 5L) or polyethylene (CSA B137.4) — subjected to surface vehicle loads, following the methodology defined in the <strong>CEPA Surface Loading Calculator User Manual</strong>.</p>
 
       <h2 style={styles.h2}>1.1 Purpose</h2>
       <p>The calculator determines whether a buried pipeline can safely sustain surface loads from vehicles or equipment crossing above it. It evaluates hoop, longitudinal, and equivalent stresses against allowable limits defined by applicable pipeline codes.</p>
@@ -147,6 +152,10 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
         <li>Boussinesq elastic half-space for load dispersion</li>
         <li>Pipe self-weight is not included</li>
       </ul>
+
+      <MaterialSelectionSection />
+
+
 
       <div style={styles.siNote}>
         <strong style={{ color: '#1565c0' }}>Note for SI users:</strong> All formulas in this manual are presented in their original English unit form as defined by the CEPA methodology. Where formulas contain unit-dependent constants (e.g. 144, 1728), an SI equivalent is provided in a <span style={{ color: '#2979ff', fontWeight: 600 }}>blue box</span> below. Dimensionless formulas (Boussinesq, Spangler, Tresca, Von Mises) work identically in any consistent unit system.
