@@ -100,6 +100,7 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
         <h3 style={{ margin: '0 0 8px', fontSize: 15 }}>Table of Contents</h3>
         {[
           '1. Introduction and Scope',
+          '1.5 Pipe Material Selection — Steel vs Polyethylene',
           '2. Input Parameters',
           '3. Soil Load Calculation',
           '4. Boussinesq Surface Pressure',
@@ -111,9 +112,11 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
           '10. Tire Contact Patch Calculation',
           '11. Minimum Bend Radius',
           '12. Unit Conversions',
+          '13. Polyethylene Pipe Checks (CSA B137.4)',
           'Appendix A: Worked Example — Track Vehicle',
           'Appendix B: Worked Example — 2-Axle Vehicle',
           'Appendix C: E\' Lookup Table (CEPA Table 2-3)',
+
         ].map((item, i) => (
           <div key={i} style={styles.tocItem}>{item}</div>
         ))}
