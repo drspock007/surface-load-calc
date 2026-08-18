@@ -33,7 +33,7 @@ export const CalculationNameCard = ({
     </CardHeader>
     <CardContent className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor={`name-${mode}`}>Name *</Label>
+        <Label htmlFor={`name-${mode}`}>Name (optional)</Label>
         <Input id={`name-${mode}`} placeholder={placeholder} {...register("calculationName")} />
         {errors.calculationName && (
           <p className="text-sm text-destructive">{errors.calculationName.message as string}</p>
