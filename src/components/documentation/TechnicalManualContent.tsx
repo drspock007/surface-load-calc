@@ -178,6 +178,15 @@ export const TechnicalManualContent = React.forwardRef<HTMLDivElement>((_, ref) 
         </tbody>
       </table>
 
+      <p>
+        Steel pipe dimensions and grades follow ASME B36.10 / API 5L. In Canada, the equivalent standard is
+        CSA Z245.1 (Steel Line Pipe), whose grades are designated by their SMYS in MPa: CSA 241 (Grade B),
+        290 (X42), 317 (X46), 359 (X52), 386 (X56), 414 (X60), 448 (X65), 483 (X70) and 550 (X80).
+        Polyethylene pipe follows CSA B137.4 (see Section 13).
+      </p>
+
+
+
       <h2 style={styles.h2}>2.2 Material Constants</h2>
       <table style={styles.table}>
         <thead><tr><th style={styles.th}>Constant</th><th style={styles.th}>Symbol</th><th style={styles.th}>EN Value</th><th style={styles.th}>SI Value</th></tr></thead>
