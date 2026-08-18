@@ -335,18 +335,20 @@ export const WALL_THICKNESS_BY_NPS: Record<string, Array<{schedule: string, wt_i
 };
 
 // Steel grades with SMYS in psi and MPa (NOT kPa!)
+// csaGrade = equivalent CSA Z245.1 designation (Canadian steel line pipe standard)
 export const STEEL_GRADES = [
-  { grade: "API 5L Grade B", label: "Grade B", smys_psi: 35000, smys_mpa: 241 },
-  { grade: "API 5L X42", label: "X42", smys_psi: 42000, smys_mpa: 290 },
-  { grade: "API 5L X46", label: "X46", smys_psi: 46000, smys_mpa: 317 },
-  { grade: "API 5L X52", label: "X52", smys_psi: 52000, smys_mpa: 359 },
-  { grade: "API 5L X56", label: "X56", smys_psi: 56000, smys_mpa: 386 },
-  { grade: "API 5L X60", label: "X60", smys_psi: 60000, smys_mpa: 414 },
-  { grade: "API 5L X65", label: "X65", smys_psi: 65000, smys_mpa: 448 },
-  { grade: "API 5L X70", label: "X70", smys_psi: 70000, smys_mpa: 483 },
-  { grade: "API 5L X80", label: "X80", smys_psi: 80000, smys_mpa: 552 },
-  { grade: "CUSTOM", label: "Custom", smys_psi: null, smys_mpa: null },
+  { grade: "API 5L Grade B", label: "Grade B", csaGrade: "CSA 241", smys_psi: 35000, smys_mpa: 241 },
+  { grade: "API 5L X42", label: "X42", csaGrade: "CSA 290", smys_psi: 42000, smys_mpa: 290 },
+  { grade: "API 5L X46", label: "X46", csaGrade: "CSA 317", smys_psi: 46000, smys_mpa: 317 },
+  { grade: "API 5L X52", label: "X52", csaGrade: "CSA 359", smys_psi: 52000, smys_mpa: 359 },
+  { grade: "API 5L X56", label: "X56", csaGrade: "CSA 386", smys_psi: 56000, smys_mpa: 386 },
+  { grade: "API 5L X60", label: "X60", csaGrade: "CSA 414", smys_psi: 60000, smys_mpa: 414 },
+  { grade: "API 5L X65", label: "X65", csaGrade: "CSA 448", smys_psi: 65000, smys_mpa: 448 },
+  { grade: "API 5L X70", label: "X70", csaGrade: "CSA 483", smys_psi: 70000, smys_mpa: 483 },
+  { grade: "API 5L X80", label: "X80", csaGrade: "CSA 550", smys_psi: 80000, smys_mpa: 552 },
+  { grade: "CUSTOM", label: "Custom", csaGrade: null, smys_psi: null, smys_mpa: null },
 ];
+
 
 // Helper to get wall thickness options for a given NPS
 export function getWallThicknessOptions(nps: string) {
