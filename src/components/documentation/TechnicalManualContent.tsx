@@ -2,6 +2,8 @@ import React from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { PeManualSection } from './PeManualSection';
+import { MaterialSelectionSection } from './MaterialSelectionSection';
+
 
 const styles: Record<string, React.CSSProperties> = {
   doc: { fontFamily: 'Georgia, "Times New Roman", serif', color: '#111', background: '#fff', maxWidth: 850, margin: '0 auto', padding: '40px 60px', lineHeight: 1.7, fontSize: 14 },
