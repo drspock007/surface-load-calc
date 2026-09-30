@@ -241,7 +241,7 @@ export const CalculationResults = ({ run, onBack, onEditInputs, onHistory, embed
                 </div>
 
                 <div className="border-t pt-4">
-                  <h3 className="font-semibold mb-3">Longitudinal Stresses<InfoTooltip text="Axial stress along the pipe. Combines Poisson effect from hoop, thermal expansion (ΔT × E × α) and bending from surface load. Impact factor is applied once per VBA logic." /></h3>
+                  <h3 className="font-semibold mb-3">Longitudinal Stresses<InfoTooltip text="Axial stress along the pipe. Combines Poisson effect from hoop, thermal expansion (ΔT × E × α) and bending from surface load. Impact factor is applied once." /></h3>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="p-3 bg-muted/50 rounded">
                       <p className="text-xs text-muted-foreground mb-1">At Zero Pressure</p>
@@ -482,7 +482,7 @@ export const CalculationResults = ({ run, onBack, onEditInputs, onHistory, embed
 
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Debug / Intermediate Values (VBA Parity)</CardTitle>
+                <CardTitle>Debug / Intermediate Values</CardTitle>
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full">
