@@ -8,7 +8,7 @@ import { calculate3AxleVehicleVBA } from './vba3AxleEngine';
 import { calculateGridLoadVBA } from './vbaGridEngine';
 import { CalculationMode } from '@/types/calculation';
 
-type PipelineInputs = PipelineTrackInputs | TwoAxleInputs | ThreeAxleInputs | GridLoadInputs;
+export type PipelineInputs = PipelineTrackInputs | TwoAxleInputs | ThreeAxleInputs | GridLoadInputs;
 type PipelineResults = PipelineTrackResults | TwoAxleResults | ThreeAxleResults | GridLoadResults;
 
 /**
@@ -37,6 +37,9 @@ export function runScenario(
   overrides: Partial<PipelineInputs>,
   mode: CalculationMode
 ): SensitivityResult {
+  if (baseInputs.pipeMaterial === 'PE') {
+    throw new Error("Sensitivity stress analysis requires a steel base case; % SMYS does not apply to PE.");
+  }
   // Clone base inputs and apply overrides
   const inputs = {
     ...baseInputs,
@@ -64,18 +67,22 @@ export function runScenario(
 
   // Extract the parameter value (first override key)
   const overrideKey = Object.keys(overrides)[0];
-  const parameterValue = (inputs as any)[overrideKey] as number;
+  const parameterValue = (inputs as unknown as Record<string, number>)[overrideKey] as number;
 
-  // Normalize results (all pipeline modes have same structure)
+  // Engines return SI stresses in kPa, but SI SMYS inputs are in MPa.
+  const smys = inputs.SMYS * (inputs.unitsSystem === 'SI' ? 1000 : 1);
+  if (!Number.isFinite(smys) || smys <= 0) throw new Error("A positive SMYS is required.");
+
+  // Store fractions consistently; UI and CSV convert to percent exactly once.
   return {
     parameterValue,
-    hoopPctSmysMopHigh: result.stresses.atMOP.hoop.high / result.allowableStress,
-    longPctSmysMopHigh: result.stresses.atMOP.longitudinal.high / result.allowableStress,
-    equivPctSmysMopHigh: result.stresses.atMOP.equivalent.percentSMYS,
+    hoopPctSmysMopHigh: Math.abs(result.stresses.atMOP.hoop.high) / smys,
+    longPctSmysMopHigh: Math.abs(result.stresses.atMOP.longitudinal.high) / smys,
+    equivPctSmysMopHigh: result.stresses.atMOP.equivalent.percentSMYS / 100,
     passFail: result.passFailSummary.overallPass,
     controllingLocation: result.locationMaxLoad,
     impactFactor: result.impactFactorUsed,
-    boussinesqMax: result.debug.boussinesqMax_psi,
+    boussinesqMax: result.debug.boussinesqMax_psi / (inputs.unitsSystem === 'SI' ? 6.894757293168 : 1),
   };
 }
 
@@ -148,9 +155,9 @@ export function generateSensitivitySweep(
   calcMode: CalculationMode
 ): SensitivityResult[] {
   const results: SensitivityResult[] = [];
-  const baseValue = (baseInputs as any)[parameter] as number;
+  const baseValue = (baseInputs as unknown as Record<string, number>)[parameter] as number;
 
-  if (baseValue === undefined || baseValue === null) {
+  if (!Number.isFinite(baseValue)) {
     throw new Error(`Parameter ${parameter} not found in base inputs`);
   }
 
@@ -162,23 +169,23 @@ export function generateSensitivitySweep(
     const max = config.max ?? baseValue * 1.5;
     const step = config.step ?? (max - min) / 20;
 
-    for (let v = min; v <= max; v += step) {
-      values.push(v);
+    if (![min, max, step].every(Number.isFinite) || step <= 0 || max < min) {
+      throw new Error("Enter a finite range with max ≥ min and a positive step.");
     }
+    const count = Math.floor((max - min) / step + 1e-9) + 1;
+    if (!Number.isFinite(count) || count > 200) throw new Error("Use a larger step: maximum 200 points.");
+    values = Array.from({ length: count }, (_, i) => min + i * step);
   } else {
     // Generate percentage-based values
     const percentRange = config.percentRange ?? 20;
     const percentStep = config.percentStep ?? 5;
 
-    for (let p = -percentRange; p <= percentRange; p += percentStep) {
-      values.push(baseValue * (1 + p / 100));
+    if (![percentRange, percentStep].every(Number.isFinite) || percentRange < 0 || percentStep <= 0) {
+      throw new Error("Enter a finite non-negative range and a positive step.");
     }
-  }
-
-  // Limit to 200 points
-  if (values.length > 200) {
-    const samplingRate = Math.ceil(values.length / 200);
-    values = values.filter((_, i) => i % samplingRate === 0);
+    const count = Math.floor(2 * percentRange / percentStep + 1e-9) + 1;
+    if (!Number.isFinite(count) || count > 200) throw new Error("Use a larger step: maximum 200 points.");
+    values = Array.from({ length: count }, (_, i) => baseValue * (1 + (-percentRange + i * percentStep) / 100));
   }
 
   // Run scenarios
@@ -187,7 +194,7 @@ export function generateSensitivitySweep(
       const result = runScenario(baseInputs, { [parameter]: value }, calcMode);
       results.push(result);
     } catch (error) {
-      console.error(`Error at ${parameter}=${value}:`, error);
+      throw new Error(`${parameter}=${value}: ${error instanceof Error ? error.message : "Calculation failed"}`);
     }
   }
 
@@ -214,7 +221,7 @@ export function exportToCSV(results: SensitivityResult[], parameterLabel: string
     (r.hoopPctSmysMopHigh * 100).toFixed(2),
     (r.longPctSmysMopHigh * 100).toFixed(2),
     (r.equivPctSmysMopHigh * 100).toFixed(2),
-    r.passFail ? 'PASS' : 'FAIL',
+    r.passFail === null ? 'N/A' : r.passFail ? 'PASS' : 'FAIL',
     r.controllingLocation,
     r.impactFactor.toFixed(4),
     r.boussinesqMax.toFixed(4),

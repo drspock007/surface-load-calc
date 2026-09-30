@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import {
   generateSensitivitySweep,
   exportToCSV,
   SensitivityResult,
+  PipelineInputs,
 } from "@/domain/pipeline/sensitivity";
 
 const Sensitivity = () => {
@@ -32,9 +33,13 @@ const Sensitivity = () => {
   const [minValue, setMinValue] = useState<number>(0);
   const [maxValue, setMaxValue] = useState<number>(100);
   const [stepValue, setStepValue] = useState<number>(10);
-  const [baseInputs, setBaseInputs] = useState<any | null>(null);
+  const [baseInputs, setBaseInputs] = useState<PipelineInputs | null>(null);
   const [results, setResults] = useState<SensitivityResult[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
+
+  useEffect(() => {
+    setResults([]);
+  }, [baseInputs, selectedParameter, sweepMode, percentRange, percentStep, minValue, maxValue, stepValue]);
 
   // Filter parameters based on selected mode
   const availableParameters = useMemo(() => {
@@ -103,13 +108,6 @@ const Sensitivity = () => {
         throw new Error("No results generated");
       }
 
-      if (sweepResults.length > 200) {
-        toast({
-          title: "Too Many Points",
-          description: `Reduced from ${sweepResults.length} to 200 points`,
-        });
-      }
-
       setResults(sweepResults);
       
       toast({
@@ -117,6 +115,7 @@ const Sensitivity = () => {
         description: `Generated ${sweepResults.length} data points`,
       });
     } catch (error) {
+      setResults([]);
       toast({
         title: "Calculation Error",
         description: error instanceof Error ? error.message : "An error occurred",
@@ -224,7 +223,7 @@ const Sensitivity = () => {
                       No saved runs — run a {getModeLabel(selectedMode)} calculation first
                     </p>
                   ) : (
-                    <Select onValueChange={handleRunSelect}>
+                    <Select key={selectedMode} onValueChange={handleRunSelect}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a saved run..." />
                       </SelectTrigger>
@@ -358,7 +357,7 @@ const Sensitivity = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Stress vs {selectedParam?.label}</CardTitle>
-                    <CardDescription>Variation of stresses at MOP (High values)</CardDescription>
+                    <CardDescription>Stress magnitudes at MOP (High values), as a percentage of SMYS. PASS/FAIL includes all engine checks at zero pressure and MOP, using the base case limits.</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={400}>
@@ -369,11 +368,16 @@ const Sensitivity = () => {
                           label={{ value: `${selectedParam?.label} (${paramUnit})`, position: 'insideBottom', offset: -5 }}
                         />
                         <YAxis label={{ value: '% SMYS', angle: -90, position: 'insideLeft' }} />
-                        <Tooltip />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: 'hsl(var(--popover))', color: 'hsl(var(--popover-foreground))', borderColor: 'hsl(var(--border))', borderRadius: 8 }}
+                          labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
+                          formatter={(value, name) => [`${Number(value).toFixed(2)}% SMYS`, name]}
+                          labelFormatter={(value) => `${selectedParam?.label}: ${Number(value).toFixed(3)} ${paramUnit}`}
+                        />
                         <Legend />
-                        <Line type="monotone" dataKey="hoop" stroke="hsl(var(--chart-1))" name="Hoop" strokeWidth={2} />
-                        <Line type="monotone" dataKey="long" stroke="hsl(var(--chart-2))" name="Longitudinal" strokeWidth={2} />
-                        <Line type="monotone" dataKey="equiv" stroke="hsl(var(--chart-3))" name="Equivalent" strokeWidth={2} />
+                        <Line type="monotone" dataKey="hoop" stroke="hsl(var(--primary-strong))" name="Hoop" strokeWidth={2} />
+                        <Line type="monotone" dataKey="long" stroke="hsl(var(--success-strong))" name="Longitudinal" strokeWidth={2} />
+                        <Line type="monotone" dataKey="equiv" stroke="hsl(var(--danger-strong))" name="Equivalent" strokeWidth={2} />
                       </LineChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -406,7 +410,7 @@ const Sensitivity = () => {
                               <td className="text-right p-2">{(r.equivPctSmysMopHigh * 100).toFixed(2)}%</td>
                               <td className="text-center p-2">
                                 <span className={r.passFail ? "text-green-600" : "text-red-600"}>
-                                  {r.passFail ? 'PASS' : 'FAIL'}
+                                  {r.passFail === null ? 'N/A' : r.passFail ? 'PASS' : 'FAIL'}
                                 </span>
                               </td>
                             </tr>
