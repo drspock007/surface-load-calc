@@ -1,4 +1,5 @@
-import { usePDF } from "react-to-pdf";
+import { useRef, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,12 +32,27 @@ interface CalculationResultsProps {
   onEditInputs: () => void;
   onHistory: () => void;
   embedded?: boolean;
+  stale?: boolean;
 }
-export const CalculationResults = ({ run, onBack, onEditInputs, onHistory, embedded = false }: CalculationResultsProps) => {
-  const { toPDF, targetRef } = usePDF({
-    filename: `${run?.input?.calculationName || 'calculation'}-results.pdf`,
-    page: { margin: 20 }
-  });
+export const CalculationResults = ({ run, onBack, onEditInputs, onHistory, embedded = false, stale = false }: CalculationResultsProps) => {
+  const [exporting, setExporting] = useState(false);
+  const exportLock = useRef(false);
+  const { toast } = useToast();
+  const exportPdf = async () => {
+    if (exportLock.current) return;
+    exportLock.current = true;
+    setExporting(true);
+    try {
+      const { exportCalculationPdf } = await import("@/reports/exportCalculationPdf");
+      await exportCalculationPdf(run, { stale });
+    } catch (error) {
+      console.error("PDF export failed", error);
+      toast({ title: "PDF export failed", description: "The report could not be generated. Please try again.", variant: "destructive" });
+    } finally {
+      exportLock.current = false;
+      setExporting(false);
+    }
+  };
 
   const isPipeline = ['PIPELINE_TRACK', '2_AXLE', '3_AXLE', 'GRID'].includes(run.mode);
   const pipelineResult = isPipeline ? (run.result as PipelineTrackResults | TwoAxleResults | ThreeAxleResults | GridLoadResults) : null;
@@ -59,9 +75,32 @@ export const CalculationResults = ({ run, onBack, onEditInputs, onHistory, embed
     return value.toFixed(decimals);
   };
 
+  const exportButton = (
+    <Button variant="outline" onClick={exportPdf} disabled={exporting} aria-busy={exporting}>
+      <FileDown className="w-4 h-4 mr-2" />
+      {exporting ? "Generating PDF…" : "Export PDF"}
+    </Button>
+  );
+  const completeDetails = !isPipeline || (peResults
+    ? [peResults.ringDeflectionPct, peResults.bendingStrainPct, peResults.internalPressure, peResults.buckling].every(Boolean)
+    : run.input.pipeMaterial !== "PE" && pipelineResult?.passFailSummary &&
+      [pipelineResult?.stresses?.atZeroPressure, pipelineResult?.stresses?.atMOP]
+        .every(stress => stress?.hoop?.components && stress?.longitudinal?.components && stress?.equivalent));
+  if (!completeDetails) return (
+    <div className="max-w-4xl mx-auto space-y-4">
+      <h1 className="text-3xl font-bold">Calculation Results</h1>
+      <p>{run.input.calculationName || "Untitled calculation"}</p>
+      <p role="status">This saved calculation has incomplete details. You can export the available data; missing values are marked N/A in the report.</p>
+      <div className="flex flex-wrap gap-3">
+        <Button variant="outline" onClick={onBack}>Go back</Button>
+        {exportButton}
+      </div>
+    </div>
+  );
+
   return (
     <>
-      <div className="max-w-4xl mx-auto" ref={targetRef}>
+      <div className="max-w-4xl mx-auto">
         <div className="mb-6 flex flex-wrap items-center gap-4">
           <Button variant="ghost" size="icon" onClick={onBack} aria-label={embedded ? "Edit inputs" : "Go back to previous page"}>
             <ArrowLeft className="h-5 w-5" />
@@ -608,10 +647,7 @@ export const CalculationResults = ({ run, onBack, onEditInputs, onHistory, embed
         ) : null}
 
         <div className="flex flex-wrap justify-center gap-4 print:hidden">
-          <Button variant="outline" onClick={() => toPDF()}>
-            <FileDown className="w-4 h-4 mr-2" />
-            Export PDF
-          </Button>
+          {exportButton}
           <Button variant="outline" onClick={onEditInputs}>
             {embedded ? "Edit inputs" : "Go to Calculator"}
           </Button>

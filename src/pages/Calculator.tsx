@@ -188,7 +188,7 @@ const Calculator = () => {
                 {stale && <p role="status" className="text-sm text-amber-700 dark:text-amber-400">Recalculate required — these results reflect the previous inputs.</p>}
                 <Button variant="outline" onClick={() => changeView("inputs")}>Edit inputs</Button>
               </div>
-              <CalculationResults run={saved.run} embedded onBack={() => changeView("inputs")}
+              <CalculationResults run={saved.run} stale={!!stale} embedded onBack={() => changeView("inputs")}
                 onEditInputs={() => changeView("inputs")} onHistory={() => navigate("/runs")} />
             </>}
           </TabsContent>

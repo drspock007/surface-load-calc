@@ -71,3 +71,11 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Calculation PDF reports
+
+The results export is generated locally from the displayed saved calculation, using jsPDF and AutoTable. It does not capture HTML or rerun the engine. `src/reports/reportModel.ts` maps stored fields and their actual units; `renderReport.ts` handles A4 typography, tables and pagination. Fonts and the renderer load only when exporting. The DejaVu font license is included with the font assets. The manual keeps its existing export.
+
+Run report tests with `npm test -- src/reports/__tests__`. To produce representative PDFs for visual review, run `REPORT_QA_DIR=tmp/pdfs npm test -- src/reports/__tests__/renderReport.test.ts`, then render every page with Poppler. The fixtures are examples, not project design records.
+
+A changed draft is never substituted into a report for an older result. Such reports identify that draft changes are excluded. Missing historical values are shown as N/A. Intermediate engine outputs sometimes retain imperial field names after conversion; the explicit report unit mapping accounts for this.
