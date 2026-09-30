@@ -1,10 +1,8 @@
-import { useState, useEffect } from "react";
 import { UseFormSetValue, UseFormWatch } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UnitsSystem } from "@/domain/pipeline/types";
-import { createEnsurePositive } from "@/hooks/useEnsurePositive";
 import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface SoilDensitySelectorProps {
@@ -30,55 +28,28 @@ const SOIL_DENSITY_PRESETS_SI = [
 ];
 
 export const SoilDensitySelector = ({ setValue, watch, unitsSystem }: SoilDensitySelectorProps) => {
-  const ensurePositive = createEnsurePositive(setValue);
   const presets = unitsSystem === "EN" ? SOIL_DENSITY_PRESETS_EN : SOIL_DENSITY_PRESETS_SI;
   const unitLabel = unitsSystem === "EN" ? "lb/ft³" : "kg/m³";
   
   const currentValue = watch("soilDensity");
   
-  // Determine if current value matches a preset
   const isPresetValue = presets.some(p => p.value === currentValue);
-  const [mode, setMode] = useState<"preset" | "custom">(isPresetValue ? "preset" : "custom");
-  const [customValue, setCustomValue] = useState<number>(isPresetValue ? presets[2].value : currentValue);
-
-  // Update mode when unit system changes
-  useEffect(() => {
-    const newPresets = unitsSystem === "EN" ? SOIL_DENSITY_PRESETS_EN : SOIL_DENSITY_PRESETS_SI;
-    const matchesPreset = newPresets.some(p => p.value === currentValue);
-    if (matchesPreset) {
-      setMode("preset");
-    }
-  }, [unitsSystem, currentValue]);
+  const customSelected = watch("soilDensityMode") === "custom";
+  const isCustom = customSelected || !isPresetValue;
+  const selectValue = isCustom ? "custom" : currentValue?.toString();
 
   const handleSelectChange = (selectedValue: string) => {
-    if (selectedValue === "custom") {
-      setMode("custom");
-      setValue("soilDensity", customValue);
-    } else {
-      setMode("preset");
-      const numValue = parseFloat(selectedValue);
-      setValue("soilDensity", numValue);
-    }
+    // Radix may emit an empty value while restoring options after a unit change.
+    if (!selectedValue) return;
+    setValue("soilDensityMode", selectedValue === "custom" ? "custom" : "preset");
+    if (selectedValue !== "custom") setValue("soilDensity", Number(selectedValue));
   };
-
   const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseFloat(e.target.value);
-    setCustomValue(val);
-    if (!isNaN(val)) {
-      setValue("soilDensity", val);
-    }
+    setValue("soilDensity", e.target.value === "" ? NaN : Number(e.target.value));
   };
-
-  const handleCustomBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const val = parseFloat(e.target.value);
-    if (!isNaN(val) && val < 0) {
-      const absVal = Math.abs(val);
-      setCustomValue(absVal);
-      setValue("soilDensity", absVal);
-    }
+  const handleCustomBlur = () => {
+    if (typeof currentValue === "number" && currentValue < 0) setValue("soilDensity", Math.abs(currentValue));
   };
-
-  const selectValue = mode === "custom" ? "custom" : currentValue?.toString();
 
   return (
     <div className="space-y-2">
@@ -97,12 +68,12 @@ export const SoilDensitySelector = ({ setValue, watch, unitsSystem }: SoilDensit
         </SelectContent>
       </Select>
       
-      {mode === "custom" && (
+      {isCustom && (
         <Input
           type="number"
           step="any"
           min="0"
-          value={customValue}
+          value={typeof currentValue === "number" && !Number.isFinite(currentValue) ? "" : currentValue ?? ""}
           onChange={handleCustomChange}
           onBlur={handleCustomBlur}
           placeholder={`Enter custom density (${unitLabel})`}

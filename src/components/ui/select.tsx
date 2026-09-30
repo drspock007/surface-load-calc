@@ -4,7 +4,13 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-const Select = SelectPrimitive.Root;
+// The native select bridge can emit an empty change while controlled values or
+// options are restored. Empty values represent placeholders, never user choices.
+const Select = ({ onValueChange, ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) => (
+  <SelectPrimitive.Root {...props} onValueChange={(value) => {
+    if (value !== "") onValueChange?.(value);
+  }} />
+);
 
 const SelectGroup = SelectPrimitive.Group;
 

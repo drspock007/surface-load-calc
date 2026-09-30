@@ -25,8 +25,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Read the persisted choice after mount to stay SSR/hydration safe.
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    if (stored) setThemeState(stored);
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored === "light" || stored === "dark" || stored === "auto") setThemeState(stored);
+    } catch {
+      // Keep the application usable when browser storage is blocked.
+    }
   }, []);
 
   useEffect(() => {
@@ -39,7 +43,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   const setTheme = (t: Theme) => {
-    localStorage.setItem(STORAGE_KEY, t);
+    try {
+      localStorage.setItem(STORAGE_KEY, t);
+    } catch {
+      // The selected theme still applies for this session.
+    }
     setThemeState(t);
   };
 

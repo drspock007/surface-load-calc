@@ -1,0 +1,626 @@
+import { usePDF } from "react-to-pdf";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ArrowLeft, CheckCircle2, XCircle, FileDown, AlertTriangle } from "lucide-react";
+import { CalculationRun } from "@/types/calculation";
+import { PipelineTrackResults } from "@/domain/pipeline/types";
+import { TwoAxleResults } from "@/domain/pipeline/types2Axle";
+import { ThreeAxleResults } from "@/domain/pipeline/types3Axle";
+import { GridLoadResults } from "@/domain/pipeline/typesGrid";
+import { UnitsSystem } from "@/domain/pipeline/types";
+import { InputParametersCard } from "@/components/InputParametersCard";
+import { InfoTooltip } from "@/components/InfoTooltip";
+import { PeChecksCard } from "@/components/results/PeChecksCard";
+
+// Unit labels based on system
+const getUnitLabels = (system: UnitsSystem) => ({
+  stress: system === 'EN' ? 'psi' : 'kPa',
+  smys: system === 'EN' ? 'psi' : 'MPa',
+  pressure: system === 'EN' ? 'psi' : 'kPa',
+  contactPressure: system === 'EN' ? 'psf' : 'kPa',
+  force: system === 'EN' ? 'lb' : 'kg',
+  moment: system === 'EN' ? 'lb·in' : 'N·mm',
+  modulus: system === 'EN' ? 'psi' : 'kPa',
+});
+
+interface CalculationResultsProps {
+  run: CalculationRun;
+  onBack: () => void;
+  onEditInputs: () => void;
+  onHistory: () => void;
+  embedded?: boolean;
+}
+export const CalculationResults = ({ run, onBack, onEditInputs, onHistory, embedded = false }: CalculationResultsProps) => {
+  const { toPDF, targetRef } = usePDF({
+    filename: `${run?.input?.calculationName || 'calculation'}-results.pdf`,
+    page: { margin: 20 }
+  });
+
+  const isPipeline = ['PIPELINE_TRACK', '2_AXLE', '3_AXLE', 'GRID'].includes(run.mode);
+  const pipelineResult = isPipeline ? (run.result as PipelineTrackResults | TwoAxleResults | ThreeAxleResults | GridLoadResults) : null;
+  const unitsSystem = (run.input.unitsSystem as UnitsSystem) || 'EN';
+  const units = getUnitLabels(unitsSystem);
+  const peResults = pipelineResult?.peResults;
+  
+  const getModeLabel = (mode: string) => {
+    switch (mode) {
+      case 'PIPELINE_TRACK': return 'Pipeline Track';
+      case '2_AXLE': return '2-Axle Vehicle';
+      case '3_AXLE': return '3-Axle Vehicle';
+      case 'GRID': return 'Grid Load';
+      default: return 'Simple';
+    }
+  };
+
+  const formatValue = (value: number, decimals = 2) => {
+    if (value === undefined || value === null || isNaN(value)) return 'N/A';
+    return value.toFixed(decimals);
+  };
+
+  return (
+    <>
+      <div className="max-w-4xl mx-auto" ref={targetRef}>
+        <div className="mb-6 flex flex-wrap items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={onBack} aria-label={embedded ? "Edit inputs" : "Go back to previous page"}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-3xl font-bold text-foreground">Calculation Results</h1>
+              <Badge variant={isPipeline ? "default" : "secondary"}>
+                {getModeLabel(run.mode)}
+              </Badge>
+            </div>
+            <p className="text-muted-foreground">{run.input.calculationName}</p>
+            <p className="text-sm text-muted-foreground">
+              {new Date(run.timestamp).toLocaleString()}
+            </p>
+          </div>
+        </div>
+
+        {!isPipeline ? (
+          <>
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Input Parameters</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Load Magnitude</p>
+                    <p className="text-lg font-semibold">{run.input.loadMagnitude} kN</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Depth Below Surface</p>
+                    <p className="text-lg font-semibold">{run.input.depth} m</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Load Area</p>
+                    <p className="text-lg font-semibold">
+                      {run.input.loadLength} × {run.input.loadWidth} m
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Soil Unit Weight</p>
+                    <p className="text-lg font-semibold">{run.input.soilUnitWeight} kg/m³</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Results</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Vertical Stress</p>
+                    <p className="text-2xl font-bold">{run.result.verticalStress?.toFixed(2)} kPa</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Stress at Depth</p>
+                    <p className="text-2xl font-bold">{run.result.totalStress?.toFixed(2)} kPa</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        ) : pipelineResult ? (
+          <>
+            {/* Input Parameters Section */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Input Parameters</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <InputParametersCard mode={run.mode} input={run.input} />
+              </CardContent>
+            </Card>
+
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Units System</p>
+                    <p className="text-lg font-semibold">{run.input.unitsSystem === 'EN' ? 'English (psi, in, ft, lb)' : 'Metric (kPa, mm, m, kg)'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Impact Factor<InfoTooltip text="Dynamic amplification factor applied to the surface load. Base value depends on vehicle class (Highway ~1.10, Farm ~1.25, Track = 1.00) and is linearly reduced when cover depth exceeds 60 in." /></p>
+                    <p className="text-lg font-semibold">{formatValue(pipelineResult.impactFactorUsed)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Max Pressure Location<InfoTooltip text="Coordinate along the pipe axis (Y) where the Boussinesq surface pressure peaks. Found by scanning the pipe in 3-inch steps." /></p>
+                    <p className="text-lg font-semibold">{pipelineResult.locationMaxLoad}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Max Surface Pressure on Pipe<InfoTooltip text="Peak vertical pressure at the top of the pipe from surface loading (Boussinesq integration over the loaded patches)." /></p>
+                    <p className="text-lg font-semibold">
+                      {formatValue(pipelineResult.maxSurfacePressureOnPipe)} {units.stress}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {peResults && <PeChecksCard results={peResults} unitsSystem={unitsSystem} />}
+
+            {!peResults && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Stress Analysis</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    Hoop Stresses<InfoTooltip text="Circumferential stress in the pipe wall. High = maximum compressive (at the crown, from earth + live load). Low = minimum (at springline). Positive = tensile from internal pressure." />
+                  </h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div className="p-3 bg-muted/50 rounded">
+                      <p className="text-xs text-muted-foreground mb-1">At Zero Pressure</p>
+                      <p className="font-mono">High: {formatValue(pipelineResult.stresses.atZeroPressure.hoop.high)} {units.stress}</p>
+                      <p className="font-mono">Low: {formatValue(pipelineResult.stresses.atZeroPressure.hoop.low)} {units.stress}</p>
+                      <p className="text-xs text-muted-foreground mt-2">Components:</p>
+                      <p className="text-xs font-mono">Earth: {formatValue(pipelineResult.stresses.atZeroPressure.hoop.components.earth)}</p>
+                      <p className="text-xs font-mono">Thermal: {formatValue(pipelineResult.stresses.atZeroPressure.hoop.components.thermal)}</p>
+                    </div>
+                    <div className="p-3 bg-muted/50 rounded">
+                      <p className="text-xs text-muted-foreground mb-1">At MOP</p>
+                      <p className="font-mono">High: {formatValue(pipelineResult.stresses.atMOP.hoop.high)} {units.stress}</p>
+                      <p className="font-mono">Low: {formatValue(pipelineResult.stresses.atMOP.hoop.low)} {units.stress}</p>
+                      <p className="text-xs text-muted-foreground mt-2">Components:</p>
+                      <p className="text-xs font-mono">Pressure: {formatValue(pipelineResult.stresses.atMOP.hoop.components.pressure)}</p>
+                      <p className="text-xs font-mono">Earth: {formatValue(pipelineResult.stresses.atMOP.hoop.components.earth)}</p>
+                      <p className="text-xs font-mono">Thermal: {formatValue(pipelineResult.stresses.atMOP.hoop.components.thermal)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4">
+                  <h3 className="font-semibold mb-3">Longitudinal Stresses<InfoTooltip text="Axial stress along the pipe. Combines Poisson effect from hoop, thermal expansion (ΔT × E × α) and bending from surface load. Impact factor is applied once per VBA logic." /></h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="p-3 bg-muted/50 rounded">
+                      <p className="text-xs text-muted-foreground mb-1">At Zero Pressure</p>
+                      <p className="font-mono">High: {formatValue(pipelineResult.stresses.atZeroPressure.longitudinal.high)} {units.stress}</p>
+                      <p className="font-mono">Low: {formatValue(pipelineResult.stresses.atZeroPressure.longitudinal.low)} {units.stress}</p>
+                      <p className="text-xs text-muted-foreground mt-2">Components:</p>
+                      <p className="text-xs font-mono">Earth: {formatValue(pipelineResult.stresses.atZeroPressure.longitudinal.components.earth)}</p>
+                      <p className="text-xs font-mono">Thermal: {formatValue(pipelineResult.stresses.atZeroPressure.longitudinal.components.thermal)}</p>
+                    </div>
+                    <div className="p-3 bg-muted/50 rounded">
+                      <p className="text-xs text-muted-foreground mb-1">At MOP</p>
+                      <p className="font-mono">High: {formatValue(pipelineResult.stresses.atMOP.longitudinal.high)} {units.stress}</p>
+                      <p className="font-mono">Low: {formatValue(pipelineResult.stresses.atMOP.longitudinal.low)} {units.stress}</p>
+                      <p className="text-xs text-muted-foreground mt-2">Components:</p>
+                      <p className="text-xs font-mono">Pressure: {formatValue(pipelineResult.stresses.atMOP.longitudinal.components.pressure)}</p>
+                      <p className="text-xs font-mono">Earth: {formatValue(pipelineResult.stresses.atMOP.longitudinal.components.earth)}</p>
+                      <p className="text-xs font-mono">Thermal: {formatValue(pipelineResult.stresses.atMOP.longitudinal.components.thermal)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4">
+                  <h3 className="font-semibold mb-3">Equivalent Stresses ({run.input.equivStressMethod})<InfoTooltip text="Combined stress used against the SMYS limit. Tresca = σH − σL (max shear). Von Mises = √(σH² − σH·σL + σL²). Reported as % SMYS for code check." /></h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="p-3 bg-muted/50 rounded">
+                      <p className="text-xs text-muted-foreground mb-1">At Zero Pressure</p>
+                      <p className="font-mono">High: {formatValue(pipelineResult.stresses.atZeroPressure.equivalent.high)} {units.stress}</p>
+                      <p className="font-mono">Low: {formatValue(pipelineResult.stresses.atZeroPressure.equivalent.low)} {units.stress}</p>
+                      <p className="text-sm font-semibold mt-2">
+                        {formatValue(pipelineResult.stresses.atZeroPressure.equivalent.percentSMYS)}% SMYS
+                      </p>
+                    </div>
+                    <div className="p-3 bg-muted/50 rounded">
+                      <p className="text-xs text-muted-foreground mb-1">At MOP</p>
+                      <p className="font-mono">High: {formatValue(pipelineResult.stresses.atMOP.equivalent.high)} {units.stress}</p>
+                      <p className="font-mono">Low: {formatValue(pipelineResult.stresses.atMOP.equivalent.low)} {units.stress}</p>
+                      <p className="text-sm font-semibold mt-2">
+                        {formatValue(pipelineResult.stresses.atMOP.equivalent.percentSMYS)}% SMYS
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            )}
+
+            {/* Minimum Bend Radius Card */}
+            {pipelineResult.bendRadius && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    Minimum Bend Radius
+                    {!pipelineResult.bendRadius.hasMargin && (
+                      <AlertTriangle className="h-5 w-5 text-destructive" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {pipelineResult.bendRadius.hasMargin ? (
+                    <div className="space-y-4">
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="p-3 bg-muted/50 rounded">
+                          <p className="text-xs text-muted-foreground mb-1">Governing Condition</p>
+                          <p className="text-lg font-semibold">{pipelineResult.bendRadius.governingCondition}</p>
+                        </div>
+                        <div className="p-3 bg-muted/50 rounded">
+                          <p className="text-xs text-muted-foreground mb-1">Remaining Long. Margin</p>
+                          <p className="text-lg font-semibold font-mono">
+                            {formatValue(pipelineResult.bendRadius.sigmaRemaining)} {units.stress}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="p-3 bg-primary/5 border border-primary/20 rounded">
+                          <p className="text-xs text-muted-foreground mb-1">Min. Horizontal Radius</p>
+                          <p className="text-xl font-bold font-mono">
+                            {formatValue(pipelineResult.bendRadius.minRadius, 1)} {unitsSystem === 'EN' ? 'ft' : 'm'}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-primary/5 border border-primary/20 rounded">
+                          <p className="text-xs text-muted-foreground mb-1">Min. Vertical Radius</p>
+                          <p className="text-xl font-bold font-mono">
+                            {formatValue(pipelineResult.bendRadius.minRadius, 1)} {unitsSystem === 'EN' ? 'ft' : 'm'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2 text-sm">
+                        <div className="p-2 bg-muted/30 rounded">
+                          <p className="text-xs text-muted-foreground">Margin @ Zero Pressure</p>
+                          <p className="font-mono">{formatValue(pipelineResult.bendRadius.marginZero)} {units.stress}</p>
+                        </div>
+                        <div className="p-2 bg-muted/30 rounded">
+                          <p className="text-xs text-muted-foreground">Margin @ MOP</p>
+                          <p className="font-mono">{formatValue(pipelineResult.bendRadius.marginMOP)} {units.stress}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+                        <div>
+                          <p className="font-semibold text-destructive">No Bend Permissible</p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Pipe is already at or beyond longitudinal stress limits without any curvature.
+                            No bend is permissible under the current loading conditions.
+                          </p>
+                          <div className="grid gap-2 md:grid-cols-2 mt-3 text-sm">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Margin @ Zero Pressure</p>
+                              <p className="font-mono text-destructive">{formatValue(pipelineResult.bendRadius.marginZero)} {units.stress}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Margin @ MOP</p>
+                              <p className="font-mono text-destructive">{formatValue(pipelineResult.bendRadius.marginMOP)} {units.stress}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {!peResults && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Pass/Fail Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {(() => {
+                    const trackResult = pipelineResult as PipelineTrackResults;
+                    return trackResult.limitsUsed ? (
+                      <div className="space-y-2 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">Code Reference</span>
+                          <Badge variant="outline">{trackResult.limitsUsed.codeLabel}</Badge>
+                        </div>
+                        <div className="text-sm space-y-1">
+                          <p className="text-muted-foreground">
+                            <span className="font-medium">Limits Used (% SMYS):</span>
+                          </p>
+                          <div className="grid grid-cols-3 gap-2 mt-2">
+                            <div className="p-2 bg-background rounded">
+                              <p className="text-xs text-muted-foreground">Hoop</p>
+                              <p className="font-mono font-semibold">{formatValue(trackResult.limitsUsed.hoopLimitPct, 1)}%</p>
+                            </div>
+                            <div className="p-2 bg-background rounded">
+                              <p className="text-xs text-muted-foreground">Longitudinal</p>
+                              <p className="font-mono font-semibold">{formatValue(trackResult.limitsUsed.longLimitPct, 1)}%</p>
+                            </div>
+                            <div className="p-2 bg-background rounded">
+                              <p className="text-xs text-muted-foreground">Equivalent</p>
+                              <p className="font-mono font-semibold">{formatValue(trackResult.limitsUsed.equivLimitPct, 1)}%</p>
+                            </div>
+                          </div>
+                          {trackResult.limitsUsed.usesSustainedLongCheck && (
+                            <p className="text-xs text-amber-600 dark:text-amber-500 mt-2 flex items-start gap-1">
+                              <span>⚠️</span>
+                              <span>B31.4 sustained longitudinal check applied (internal + thermal ± earth stress components verified separately)</span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
+                  
+                  <div className="grid gap-3">
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded">
+                      <span>Hoop @ Zero Pressure</span>
+                      {pipelineResult.passFailSummary.hoopAtZero ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-destructive" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded">
+                      <span>Hoop @ MOP</span>
+                      {pipelineResult.passFailSummary.hoopAtMOP ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-destructive" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded">
+                      <span>Longitudinal @ Zero Pressure</span>
+                      {pipelineResult.passFailSummary.longitudinalAtZero ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-destructive" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded">
+                      <span>Longitudinal @ MOP</span>
+                      {pipelineResult.passFailSummary.longitudinalAtMOP ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-destructive" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded">
+                      <span>Equivalent @ Zero Pressure</span>
+                      {pipelineResult.passFailSummary.equivalentAtZero ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-destructive" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded">
+                      <span>Equivalent @ MOP</span>
+                      {pipelineResult.passFailSummary.equivalentAtMOP ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-destructive" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-primary/10 rounded border-2 border-primary/20">
+                      <span className="font-bold text-lg">Overall Result</span>
+                      {pipelineResult.passFailSummary.overallPass ? (
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-6 w-6 text-green-600" />
+                          <span className="font-bold text-green-600">PASS</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <XCircle className="h-6 w-6 text-destructive" />
+                          <span className="font-bold text-destructive">FAIL</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            )}
+
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Debug / Intermediate Values (VBA Parity)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="debug">
+                    <AccordionTrigger>View Intermediate Calculations</AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-semibold mb-2">Loading Parameters</h4>
+                          <div className="grid gap-2 text-sm font-mono">
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Soil Pressure</span>
+                              <span>{formatValue(pipelineResult.debug.soilPressure_psi)} {units.stress}</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Boussinesq Max</span>
+                              <span>{formatValue(pipelineResult.debug.boussinesqMax_psi)} {units.stress}</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Impact Factor @ Depth</span>
+                              <span>{formatValue(pipelineResult.debug.impactFactorDepth)}</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Contact Pressure</span>
+                              <span>{formatValue(pipelineResult.debug.contactPressure_psf)} {units.contactPressure}</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Influence Factor</span>
+                              <span>{formatValue(pipelineResult.debug.influenceFactor, 4)}</span>
+                            </div>
+                            {pipelineResult.debug.bsnqSUM1_psi && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Boussinesq SUM1</span>
+                                <span>{formatValue(pipelineResult.debug.bsnqSUM1_psi)} {units.stress}</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.bsnqSUM2_psi && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Boussinesq SUM2</span>
+                                <span>{formatValue(pipelineResult.debug.bsnqSUM2_psi)} {units.stress}</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.axleLoad_lb && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Axle Load</span>
+                                <span>{formatValue(pipelineResult.debug.axleLoad_lb)} {units.force}</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.pointLoad_lb && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Point Load</span>
+                                <span>{formatValue(pipelineResult.debug.pointLoad_lb)} {units.force}</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.nW && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>nW (width points)</span>
+                                <span>{pipelineResult.debug.nW}</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.nL && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>nL (length points)</span>
+                                <span>{pipelineResult.debug.nL}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="border-t pt-4">
+                          <h4 className="font-semibold mb-2">Pipe Response Coefficients</h4>
+                          <div className="grid gap-2 text-sm font-mono">
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Kb (Bedding Factor)</span>
+                              <span>{formatValue(pipelineResult.debug.Kb, 4)}</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Kz (Depth Factor)</span>
+                              <span>{formatValue(pipelineResult.debug.Kz, 4)}</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Theta (Bedding Angle)</span>
+                              <span>{formatValue(pipelineResult.debug.Theta)}°</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>E' (Soil Modulus)</span>
+                              <span>{formatValue(pipelineResult.debug.ePrime_psi)} {units.modulus}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="border-t pt-4">
+                          <h4 className="font-semibold mb-2">Stress Components ({units.stress})</h4>
+                          <div className="grid gap-2 text-sm font-mono">
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Hoop - Soil</span>
+                              <span>{formatValue(pipelineResult.debug.hoopSoil_psi)}</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Hoop - Live Load</span>
+                              <span>{formatValue(pipelineResult.debug.hoopLive_psi)}</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Hoop - Internal Pressure</span>
+                              <span>{formatValue(pipelineResult.debug.hoopInt_psi)}</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Long - Soil</span>
+                              <span>{formatValue(pipelineResult.debug.longSoil_psi)}</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Long - Live Load</span>
+                              <span>{formatValue(pipelineResult.debug.longLive_psi)}</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Long - Internal Pressure</span>
+                              <span>{formatValue(pipelineResult.debug.longInt_psi)}</span>
+                            </div>
+                            <div className="flex justify-between p-2 bg-muted/50 rounded">
+                              <span>Long - Thermal</span>
+                              <span>{formatValue(pipelineResult.debug.longTherm_psi)}</span>
+                            </div>
+                            {pipelineResult.debug.longLiveLocal_psi && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Long Live - Local Bending</span>
+                                <span>{formatValue(pipelineResult.debug.longLiveLocal_psi)}</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.longLiveBend_psi && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Long Live - Axial Bending</span>
+                                <span>{formatValue(pipelineResult.debug.longLiveBend_psi)}</span>
+                              </div>
+                            )}
+                            {pipelineResult.debug.momentMAX_lbin && (
+                              <div className="flex justify-between p-2 bg-muted/50 rounded">
+                                <span>Moment MAX</span>
+                                <span>{formatValue(pipelineResult.debug.momentMAX_lbin)} {units.moment}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Warning for invalid values */}
+                        {(isNaN(pipelineResult.debug.soilPressure_psi) || 
+                          isNaN(pipelineResult.debug.boussinesqMax_psi) ||
+                          !isFinite(pipelineResult.debug.ePrime_psi)) && (
+                          <div className="border-t pt-4">
+                            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded">
+                              <p className="text-sm font-semibold text-destructive">⚠️ Warning: Some values are NaN or Infinity</p>
+                              <p className="text-xs text-muted-foreground mt-1">Check input parameters for invalid values</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+          </>
+        ) : null}
+
+        <div className="flex flex-wrap justify-center gap-4 print:hidden">
+          <Button variant="outline" onClick={() => toPDF()}>
+            <FileDown className="w-4 h-4 mr-2" />
+            Export PDF
+          </Button>
+          <Button variant="outline" onClick={onEditInputs}>
+            {embedded ? "Edit inputs" : "Go to Calculator"}
+          </Button>
+          <Button variant="outline" onClick={onHistory}>
+            View History
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+};
+
