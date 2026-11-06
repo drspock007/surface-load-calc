@@ -36,7 +36,12 @@ export interface TwoAxleInputs extends PeInputFields {
   axle2Load: number; // rear axle load (lb or kg)
   
   // Contact patch method
-  contactPatchMode: 'MANUAL' | 'AUTO';
+  contactPatchMode: 'MANUAL' | 'AUTO' | 'GROUND_PRESSURE';
+  contactPressureReference?: string;
+  axle1GroundPressure?: number;
+  axle1GroundPressureUnit?: TirePressureUnit;
+  axle2GroundPressure?: number;
+  axle2GroundPressureUnit?: TirePressureUnit;
   
   // Axle 1 (front) tire properties
   axle1TireWidth: number; // tire contact width (in or mm)
@@ -69,6 +74,7 @@ export interface TwoAxleInputs extends PeInputFields {
 }
 
 export interface TwoAxleResults {
+  tireContacts?: import('./axleContact').AxleContact[];
   maxSurfacePressureOnPipe: number;
   locationMaxLoad: string;
   impactFactorUsed: number;

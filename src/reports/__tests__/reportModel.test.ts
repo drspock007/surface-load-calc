@@ -20,8 +20,8 @@ describe('report model', () => {
   it('uses actual debug units instead of misleading field suffixes', () => {
     const track = buildReportModel(exampleRun('PIPELINE_TRACK'));
     const axle = buildReportModel(exampleRun('2_AXLE'));
-    expect(track.appendix[0].rows.find(r => r[0] === 'Contact pressure')?.[2]).toBe('kPa');
-    expect(axle.appendix[0].rows.find(r => r[0] === 'Contact pressure')?.[2]).toBe('psf');
+    expect(track.appendix[0].rows.find(r => r[0] === 'Track contact pressure')?.[2]).toBe('kPa');
+    expect(axle.appendix[0].rows.find(r => r[0] === 'Load-envelope pressure (approx.; not tire contact)')?.[2]).toBe('psf');
     expect(axle.appendix[0].rows.find(r => r[0] === 'Soil pressure')?.[2]).toBe('kPa');
   });
   it('handles incomplete historic results with N/A rather than zeros or invented PASS', () => {

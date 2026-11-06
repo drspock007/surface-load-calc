@@ -79,3 +79,19 @@ The results export is generated locally from the displayed saved calculation, us
 Run report tests with `npm test -- src/reports/__tests__`. To produce representative PDFs for visual review, run `REPORT_QA_DIR=tmp/pdfs npm test -- src/reports/__tests__/renderReport.test.ts`, then render every page with Poppler. The fixtures are examples, not project design records.
 
 A changed draft is never substituted into a report for an older result. Such reports identify that draft changes are excluded. Missing historical values are shown as N/A. Intermediate engine outputs sometimes retain imperial field names after conversion; the explicit report unit mapping accounts for this.
+
+### Tire ground contact (2- and 3-axle vehicles)
+
+The contact method can use single-tire footprint dimensions, tire inflation pressure
+(an estimate of uniform ground pressure), or manufacturer ground pressure.
+Manufacturer pressure has separate values/units per axle and an optional catalog
+reference; use the matching tire configuration and loaded/unloaded condition.
+Both pressure methods use area = load per tire / pressure, then length = area / width.
+The tire count is 2 (single) or 4 (dual), with equal loads on each tire. Contact width
+means the width of **one tire**, including in manual mode, matching the existing engines.
+
+New calculations store the actual tire contact geometry and pressure as an optional
+`tireContacts` result snapshot in imperial units. PDF export converts that snapshot
+to report units without rerunning the engine. Historical runs without the snapshot
+show N/A for these details until recalculated. The old debug pressure based on the
+whole wheel-load envelope is labelled separately and is not tire contact pressure.

@@ -1,5 +1,5 @@
 import { peSchemaFields, PE_FORM_DEFAULTS, extractPeInputs } from "@/components/pipe/peFormFields";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,7 +19,8 @@ import { SoilLoadSection } from "./PipelineTrackForm/SoilLoadSection";
 import { AnalysisParametersSection } from "./AnalysisParametersSection";
 import { SoilDensitySelector } from "./SoilDensitySelector";
 import { convertFormValue } from "@/domain/pipeline/unitConversions";
-import { calculateContactPatch, convertTirePressureToPsi, convertTirePressureBetweenUnits } from "@/domain/pipeline/tirePatchCalculations";
+import { calculateAxleContact } from "@/domain/pipeline/axleContact";
+import { AxleContactSection } from "./AxleContactSection";
 import { TwoAxleDiagram } from "./TwoAxleDiagram";
 import { createEnsurePositive } from "@/hooks/useEnsurePositive";
 import { InfoTooltip } from "@/components/InfoTooltip";
@@ -45,17 +46,22 @@ const twoAxleSchema = z.object({
   axleSpacing: z.number().positive(),
   axle1Load: z.number().positive(),
   axle2Load: z.number().positive(),
-  contactPatchMode: z.enum(["MANUAL", "AUTO"]),
+  contactPatchMode: z.enum(["MANUAL", "AUTO", "GROUND_PRESSURE"]),
+  contactPressureReference: z.string().optional(),
+  axle1GroundPressure: z.union([z.number(), z.nan(), z.literal('')]).transform(value => value === '' ? NaN : value).optional(),
+  axle1GroundPressureUnit: z.enum(["kPa", "kg/m2", "bar", "psig"]).optional(),
+  axle2GroundPressure: z.union([z.number(), z.nan(), z.literal('')]).transform(value => value === '' ? NaN : value).optional(),
+  axle2GroundPressureUnit: z.enum(["kPa", "kg/m2", "bar", "psig"]).optional(),
   // Axle 1 tire properties
   axle1TireWidth: z.number().positive(),
-  axle1TireLength: z.number().positive(),
-  axle1TirePressure: z.number().positive().optional(),
+  axle1TireLength: z.union([z.number(), z.nan(), z.literal('')]).transform(value => value === '' ? NaN : value),
+  axle1TirePressure: z.union([z.number(), z.nan(), z.literal('')]).transform(value => value === '' ? NaN : value).optional(),
   axle1TirePressureUnit: z.enum(["kPa", "kg/m2", "bar", "psig"]).optional(),
   axle1TiresPerAxle: z.number().int().positive().optional(),
   // Axle 2 tire properties
   axle2TireWidth: z.number().positive(),
-  axle2TireLength: z.number().positive(),
-  axle2TirePressure: z.number().positive().optional(),
+  axle2TireLength: z.union([z.number(), z.nan(), z.literal('')]).transform(value => value === '' ? NaN : value),
+  axle2TirePressure: z.union([z.number(), z.nan(), z.literal('')]).transform(value => value === '' ? NaN : value).optional(),
   axle2TirePressureUnit: z.enum(["kPa", "kg/m2", "bar", "psig"]).optional(),
   axle2TiresPerAxle: z.number().int().positive().optional(),
   axleWidth: z.number().positive(),
@@ -74,6 +80,12 @@ const twoAxleSchema = z.object({
   }).optional(),
   enableBendRadius: z.boolean().optional(),
   ...peSchemaFields,
+}).superRefine((data, ctx) => {
+  for (let axle = 1; axle <= 2; axle++) {
+    try { calculateAxleContact(data, axle); } catch (error) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['contactPatchMode'], message: error instanceof Error ? error.message : 'Invalid contact inputs' });
+    }
+  }
 });
 
 type TwoAxleFormData = z.infer<typeof twoAxleSchema>;
@@ -144,70 +156,6 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
   const ePrimeMethod = watch("ePrimeMethod");
   const soilLoadMethod = watch("soilLoadMethod");
   const codeCheck = watch("codeCheck");
-  const contactPatchMode = watch("contactPatchMode");
-
-  // Watch values for real-time tire length calculation
-  const axle1Load = watch("axle1Load");
-  const axle1TireWidth = watch("axle1TireWidth");
-  const axle1TirePressure = watch("axle1TirePressure");
-  const axle1TirePressureUnit = watch("axle1TirePressureUnit") || "kg/m2";
-  const axle1TiresPerAxle = watch("axle1TiresPerAxle") || 2;
-
-  const axle2Load = watch("axle2Load");
-  const axle2TireWidth = watch("axle2TireWidth");
-  const axle2TirePressure = watch("axle2TirePressure");
-  const axle2TirePressureUnit = watch("axle2TirePressureUnit") || "kg/m2";
-  const axle2TiresPerAxle = watch("axle2TiresPerAxle") || 4;
-
-  // Real-time tire length calculation for Axle 1
-  const calculatedAxle1TireLength = useMemo(() => {
-    if (!axle1Load || !axle1TireWidth || !axle1TirePressure || !axle1TiresPerAxle) return null;
-    try {
-      const load_lb = unitsSystem === "SI" ? axle1Load * 2.2046226218 : axle1Load;
-      const width_in = unitsSystem === "SI" ? axle1TireWidth * 0.03937007874016 : axle1TireWidth;
-      const pressure_psi = convertTirePressureToPsi(axle1TirePressure, axle1TirePressureUnit as TirePressureUnit);
-      const patch = calculateContactPatch(load_lb, pressure_psi, axle1TiresPerAxle, width_in);
-      return unitsSystem === "SI" ? patch.contactLength_in * 25.4 : patch.contactLength_in;
-    } catch {
-      return null;
-    }
-  }, [axle1Load, axle1TireWidth, axle1TirePressure, axle1TirePressureUnit, axle1TiresPerAxle, unitsSystem]);
-
-  // Real-time tire length calculation for Axle 2
-  const calculatedAxle2TireLength = useMemo(() => {
-    if (!axle2Load || !axle2TireWidth || !axle2TirePressure || !axle2TiresPerAxle) return null;
-    try {
-      const load_lb = unitsSystem === "SI" ? axle2Load * 2.2046226218 : axle2Load;
-      const width_in = unitsSystem === "SI" ? axle2TireWidth * 0.03937007874016 : axle2TireWidth;
-      const pressure_psi = convertTirePressureToPsi(axle2TirePressure, axle2TirePressureUnit as TirePressureUnit);
-      const patch = calculateContactPatch(load_lb, pressure_psi, axle2TiresPerAxle, width_in);
-      return unitsSystem === "SI" ? patch.contactLength_in * 25.4 : patch.contactLength_in;
-    } catch {
-      return null;
-    }
-  }, [axle2Load, axle2TireWidth, axle2TirePressure, axle2TirePressureUnit, axle2TiresPerAxle, unitsSystem]);
-
-  // Handlers for tire pressure unit change with value conversion
-  const handleAxle1PressureUnitChange = (newUnit: TirePressureUnit) => {
-    const currentPressure = watch("axle1TirePressure");
-    const currentUnit = (watch("axle1TirePressureUnit") || "kg/m2") as TirePressureUnit;
-    if (currentPressure && currentUnit !== newUnit) {
-      const convertedValue = convertTirePressureBetweenUnits(currentPressure, currentUnit, newUnit);
-      setValue("axle1TirePressure", parseFloat(convertedValue.toFixed(2)));
-    }
-    setValue("axle1TirePressureUnit", newUnit);
-  };
-
-  const handleAxle2PressureUnitChange = (newUnit: TirePressureUnit) => {
-    const currentPressure = watch("axle2TirePressure");
-    const currentUnit = (watch("axle2TirePressureUnit") || "kg/m2") as TirePressureUnit;
-    if (currentPressure && currentUnit !== newUnit) {
-      const convertedValue = convertTirePressureBetweenUnits(currentPressure, currentUnit, newUnit);
-      setValue("axle2TirePressure", parseFloat(convertedValue.toFixed(2)));
-    }
-    setValue("axle2TirePressureUnit", newUnit);
-  };
-
   const onSubmit = (data: TwoAxleFormData) => {
     const inputs: TwoAxleInputs = {
       ...extractPeInputs(data),
@@ -233,19 +181,20 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
       axle1Load: data.axle1Load,
       axle2Load: data.axle2Load,
       contactPatchMode: data.contactPatchMode,
+      contactPressureReference: data.contactPressureReference,
+      axle1GroundPressure: data.axle1GroundPressure,
+      axle1GroundPressureUnit: data.axle1GroundPressureUnit,
+      axle2GroundPressure: data.axle2GroundPressure,
+      axle2GroundPressureUnit: data.axle2GroundPressureUnit,
       // Axle 1 tire properties
       axle1TireWidth: data.axle1TireWidth,
-      axle1TireLength: data.contactPatchMode === "AUTO" && calculatedAxle1TireLength 
-        ? calculatedAxle1TireLength 
-        : data.axle1TireLength,
+      axle1TireLength: calculateAxleContact(data, 1).length_in * (data.unitsSystem === "SI" ? 25.4 : 1),
       axle1TirePressure: data.axle1TirePressure,
       axle1TirePressureUnit: data.axle1TirePressureUnit as TirePressureUnit | undefined,
       axle1TiresPerAxle: data.axle1TiresPerAxle,
       // Axle 2 tire properties
       axle2TireWidth: data.axle2TireWidth,
-      axle2TireLength: data.contactPatchMode === "AUTO" && calculatedAxle2TireLength 
-        ? calculatedAxle2TireLength 
-        : data.axle2TireLength,
+      axle2TireLength: calculateAxleContact(data, 2).length_in * (data.unitsSystem === "SI" ? 25.4 : 1),
       axle2TirePressure: data.axle2TirePressure,
       axle2TirePressureUnit: data.axle2TirePressureUnit as TirePressureUnit | undefined,
       axle2TiresPerAxle: data.axle2TiresPerAxle,
@@ -422,159 +371,9 @@ export const TwoAxleForm = ({ onCalculate }: TwoAxleFormProps) => {
             </div>
           </div>
           
-          {/* Contact Patch Mode Toggle */}
-          <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="contact-mode" className="text-sm font-medium">Contact Patch Method<InfoTooltip text="Manual = enter tire footprint dimensions directly. Auto = compute contact length from tire pressure, load and tire width." /></Label>
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground">
-                  {contactPatchMode === "MANUAL" ? "Manual Entry" : "From Tire Pressure"}
-                </span>
-                <Switch 
-                  id="contact-mode"
-                  checked={contactPatchMode === "AUTO"} 
-                  onCheckedChange={(checked) => setValue("contactPatchMode", checked ? "AUTO" : "MANUAL")} 
-                />
-              </div>
-            </div>
-            
-            {contactPatchMode === "MANUAL" ? (
-              <>
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium">Axle 1 (Front) Contact Patch</h4>
-                    <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Contact Width per Side ({unitLabels.length})</Label>
-                      <Input type="number" step="any" min="0" {...register("axle1TireWidth", { valueAsNumber: true })} {...ensurePositive("axle1TireWidth")} />
-                      <p className="text-xs text-muted-foreground">Total width for one side of axle (single or dual tires combined)</p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Contact Length ({unitLabels.length})</Label>
-                      <Input type="number" step="any" min="0" {...register("axle1TireLength", { valueAsNumber: true })} {...ensurePositive("axle1TireLength")} />
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium">Axle 2 (Rear) Contact Patch</h4>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Contact Width per Side ({unitLabels.length})</Label>
-                      <Input type="number" step="any" min="0" {...register("axle2TireWidth", { valueAsNumber: true })} {...ensurePositive("axle2TireWidth")} />
-                      <p className="text-xs text-muted-foreground">Total width for one side of axle (single or dual tires combined)</p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Contact Length ({unitLabels.length})</Label>
-                      <Input type="number" step="any" min="0" {...register("axle2TireLength", { valueAsNumber: true })} {...ensurePositive("axle2TireLength")} />
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium">Axle 1 (Front) Contact Patch</h4>
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <div className="space-y-2">
-                      <Label>Single Tire Width ({unitLabels.length})</Label>
-                      <Input type="number" step="any" min="0" {...register("axle1TireWidth", { valueAsNumber: true })} {...ensurePositive("axle1TireWidth")} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Tire Pressure</Label>
-                      <div className="flex gap-2">
-                        <Input type="number" step="any" min="0" {...register("axle1TirePressure", { valueAsNumber: true })} {...ensurePositive("axle1TirePressure")} className="min-w-[80px]" />
-                        <Select value={watch("axle1TirePressureUnit") || "kg/m2"} onValueChange={(v) => handleAxle1PressureUnitChange(v as TirePressureUnit)}>
-                          <SelectTrigger className="w-24">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="kg/m2">kg/m²</SelectItem>
-                            <SelectItem value="kPa">kPa</SelectItem>
-                            <SelectItem value="bar">bar</SelectItem>
-                            <SelectItem value="psig">psig</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Tire Config</Label>
-                      <Select value={watch("axle1TiresPerAxle")?.toString()} onValueChange={(v) => setValue("axle1TiresPerAxle", parseInt(v))}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="2">Single</SelectItem>
-                          <SelectItem value="4">Dual</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label className="text-muted-foreground">Contact Width/Side</Label>
-                      <div className="h-10 flex items-center px-3 border rounded-md bg-primary/10 text-sm font-mono">
-                        {(axle1TireWidth * (axle1TiresPerAxle === 4 ? 2 : 1)).toFixed(0)} {unitLabels.length}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-muted-foreground">Contact Length</Label>
-                      <div className="h-10 flex items-center px-3 border rounded-md bg-muted/30 text-sm font-mono">
-                        {calculatedAxle1TireLength?.toFixed(1) || "—"} {unitLabels.length}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium">Axle 2 (Rear) Contact Patch</h4>
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <div className="space-y-2">
-                      <Label>Single Tire Width ({unitLabels.length})</Label>
-                      <Input type="number" step="any" min="0" {...register("axle2TireWidth", { valueAsNumber: true })} {...ensurePositive("axle2TireWidth")} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Tire Pressure</Label>
-                      <div className="flex gap-2">
-                        <Input type="number" step="any" min="0" {...register("axle2TirePressure", { valueAsNumber: true })} {...ensurePositive("axle2TirePressure")} className="min-w-[80px]" />
-                        <Select value={watch("axle2TirePressureUnit") || "kg/m2"} onValueChange={(v) => handleAxle2PressureUnitChange(v as TirePressureUnit)}>
-                          <SelectTrigger className="w-24">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="kg/m2">kg/m²</SelectItem>
-                            <SelectItem value="kPa">kPa</SelectItem>
-                            <SelectItem value="bar">bar</SelectItem>
-                            <SelectItem value="psig">psig</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Tire Config</Label>
-                      <Select value={watch("axle2TiresPerAxle")?.toString()} onValueChange={(v) => setValue("axle2TiresPerAxle", parseInt(v))}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="2">Single</SelectItem>
-                          <SelectItem value="4">Dual</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label className="text-muted-foreground">Contact Width/Side</Label>
-                      <div className="h-10 flex items-center px-3 border rounded-md bg-primary/10 text-sm font-mono">
-                        {(axle2TireWidth * (axle2TiresPerAxle === 4 ? 2 : 1)).toFixed(0)} {unitLabels.length}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-muted-foreground">Contact Length</Label>
-                      <div className="h-10 flex items-center px-3 border rounded-md bg-muted/30 text-sm font-mono">
-                        {calculatedAxle2TireLength?.toFixed(1) || "—"} {unitLabels.length}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-          
+          <AxleContactSection values={watch()} axleCount={2} onChange={(key, value) => setValue(key as keyof TwoAxleFormData, value as never, { shouldDirty: true })} />
+          {errors.contactPatchMode && <p role="alert" className="text-sm text-destructive">{errors.contactPatchMode.message}</p>}
+
           <div className="space-y-2">
             <Label>Axle Width ({unitLabels.length})<InfoTooltip text="Track width of the vehicle: center-to-center distance between left and right tire groups on the same axle." /></Label>
             <Input type="number" step="any" min="0" {...register("axleWidth", { valueAsNumber: true })} {...ensurePositive("axleWidth")} />

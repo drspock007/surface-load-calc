@@ -1,3 +1,4 @@
+import { calculateAxleContact } from './axleContact';
 import { isPePipe, computePeResults } from './peEngine';
 /**
  * VBA 3-Axle Vehicle Engine
@@ -142,6 +143,12 @@ export function calculate3AxleVehicleVBA(inputs: ThreeAxleInputs): ThreeAxleResu
     }
   }
   
+  if (inputs.contactPatchMode === 'GROUND_PRESSURE') {
+    axle1TireLength_in = calculateAxleContact(inputs, 1).length_in;
+    axle2TireLength_in = calculateAxleContact(inputs, 2).length_in;
+    axle3TireLength_in = calculateAxleContact(inputs, 3).length_in;
+  }
+
   // Generate point loads for all axles - separate left/right grids
   const pointLoads: PointLoad[] = [];
   const halfAxleWidth_in = inputsEN.axleWidth_in / 2;
@@ -290,6 +297,23 @@ export function calculate3AxleVehicleVBA(inputs: ThreeAxleInputs): ThreeAxleResu
   const deflectionRatio = (soilLoad.Psoil_psi + BsnqIF) * Math.pow(inputsEN.D_in / inputsEN.t_in, 3) / ePrime.ePrime_psi;
   
   const results: ThreeAxleResults = {
+    tireContacts: [
+      { axle: 1, method: inputs.contactPatchMode, tireCount: inputs.axle1TiresPerAxle || 2,
+        loadPerTire_lb: inputsEN.axle1Load_lb / (inputs.axle1TiresPerAxle || 2),
+        width_in: axle1TireWidth_in, length_in: axle1TireLength_in,
+        area_in2: axle1TireWidth_in * axle1TireLength_in,
+        pressure_psi: inputsEN.axle1Load_lb / (2 * axle1WidthPerSide * axle1TireLength_in) },
+      { axle: 2, method: inputs.contactPatchMode, tireCount: inputs.axle2TiresPerAxle || 2,
+        loadPerTire_lb: inputsEN.axle2Load_lb / (inputs.axle2TiresPerAxle || 2),
+        width_in: axle2TireWidth_in, length_in: axle2TireLength_in,
+        area_in2: axle2TireWidth_in * axle2TireLength_in,
+        pressure_psi: inputsEN.axle2Load_lb / (2 * axle2WidthPerSide * axle2TireLength_in) },
+      { axle: 3, method: inputs.contactPatchMode, tireCount: inputs.axle3TiresPerAxle || 2,
+        loadPerTire_lb: inputsEN.axle3Load_lb / (inputs.axle3TiresPerAxle || 2),
+        width_in: axle3TireWidth_in, length_in: axle3TireLength_in,
+        area_in2: axle3TireWidth_in * axle3TireLength_in,
+        pressure_psi: inputsEN.axle3Load_lb / (2 * axle3WidthPerSide * axle3TireLength_in) },
+    ],
     maxSurfacePressureOnPipe: BsnqIF,
     locationMaxLoad: formatMaxLocationLabel(boussinesq.maxY_in, inputs.unitsSystem),
     impactFactorUsed: impactResult.impactFactorDepth,

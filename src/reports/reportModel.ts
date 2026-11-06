@@ -1,3 +1,4 @@
+import { contactMethodLabels, type ContactMethod } from '@/domain/pipeline/axleContact';
 import type { CalculationRun } from '@/types/calculation';
 
 export type ReportStatus = 'PASS' | 'FAIL' | 'N/A';
@@ -72,12 +73,27 @@ export function buildReportModel(run: CalculationRun, options: ReportOptions = {
   if (run.mode === 'PIPELINE_TRACK') model.inputs.push(table('Track loading', input, [['trackLength', 'Track length', small], ['trackWidth', 'Track width', small], ['trackSeparation', 'Track separation', small], ['trackVehicleWeight', 'Vehicle weight', force]]));
   if (run.mode === '2_AXLE' || run.mode === '3_AXLE') {
     const load: Field[] = run.mode === '2_AXLE' ? [['axleSpacing', 'Axle spacing', large]] : [['axle1To2Spacing', 'Axle 1 to 2 spacing', large], ['axle2To3Spacing', 'Axle 2 to 3 spacing', large]];
-    load.push(['axleWidth', 'Axle width', small], ['laneOffset', 'Lane offset', large], ['contactPatchMode', 'Contact patch method']);
+    load.push(['axleWidth', 'Axle width', small], ['laneOffset', 'Lane offset', large], ['contactMethodLabel', 'Contact patch method']);
     for (let n = 1; n <= (run.mode === '2_AXLE' ? 2 : 3); n++) {
-      load.push([`axle${n}Load`, `Axle ${n} load`, force], [`axle${n}TireWidth`, `Axle ${n} tire width`, small], [`axle${n}TireLength`, `Axle ${n} contact length (stored)`, small]);
-      if (input.contactPatchMode === 'AUTO') load.push([`axle${n}TirePressure`, `Axle ${n} tire pressure`, formatReportValue(input[`axle${n}TirePressureUnit`]).replace('kg/m2', 'kg/m²')], [`axle${n}TiresPerAxle`, `Axle ${n} tire count`]);
+      load.push([`axle${n}Load`, `Axle ${n} load`, force], [`axle${n}TireWidth`, `Axle ${n} single tire width`, small], [`axle${n}TireLength`, `Axle ${n} contact length (stored)`, small]);
+      load.push([`axle${n}TiresPerAxle`, `Axle ${n} tire count`]);
+      if (input.contactPatchMode === 'GROUND_PRESSURE') load.push([`axle${n}GroundPressure`, `Axle ${n} manufacturer ground pressure`, formatReportValue(input[`axle${n}GroundPressureUnit`] ?? 'kPa').replace('psig', 'psi')]);
+      if (input.contactPatchMode === 'AUTO') load.push([`axle${n}TirePressure`, `Axle ${n} inflation pressure (estimate)`, formatReportValue(input[`axle${n}TirePressureUnit`]).replace('kg/m2', 'kg/m²')]);
     }
-    model.inputs.push(table('Vehicle loading', input, load));
+    if (input.contactPatchMode === 'GROUND_PRESSURE') load.push(['contactPressureReference', 'Manufacturer / catalog reference']);
+    model.inputs.push(table('Vehicle loading', { ...input, contactMethodLabel: contactMethodLabels[input.contactPatchMode as ContactMethod] }, load));
+    const contacts = Array.isArray(result.tireContacts) ? result.tireContacts.map(record) : [];
+    for (let n = 1; n <= (run.mode === '2_AXLE' ? 2 : 3); n++) {
+      const c = contacts.find(c => c.axle === n) ?? {};
+      const scaled = (key: string, factor: number) => typeof c[key] === 'number' && knownUnits ? (c[key] as number) * factor : undefined;
+      model.inputs.push(table(`Axle ${n} ground contact`, {
+        method: contactMethodLabels[c.method as ContactMethod], count: c.tireCount,
+        load: scaled('loadPerTire_lb', si ? 0.00444822161526 : 1),
+        width: scaled('width_in', si ? 25.4 : 1), length: scaled('length_in', si ? 25.4 : 1),
+        area: scaled('area_in2', si ? 0.00064516 : 1), pressure: scaled('pressure_psi', si ? 6.894757293168 : 1),
+      }, [['method', 'Method'], ['count', 'Tires per axle'], ['load', 'Load per tire', unit('kN', 'lbf')], ['width', 'Contact width per tire', small], ['length', 'Contact length', small], ['area', 'Contact area per tire', unit('m²', 'in²')], ['pressure', 'Average ground contact pressure', pressure]],
+      contacts.length ? 'Geometry and pressure used by the saved calculation. Equal load per tire; uniform rectangular contact. Inflation-based values are estimates. This is surface contact pressure, not Boussinesq pressure at pipe depth.' : 'Contact details were not stored in this older calculation. Recalculate to include them; the report does not rerun saved calculations.'));
+    }
   }
   if (run.mode === 'GRID') model.inputs.push(table('Grid loading', input, [['loadType', 'Load definition'], input.loadType === 'UNIFORM_PRESSURE' ? ['uniformPressure', 'Uniform pressure', pressure] : ['totalLoad', 'Total load', force], ['gridLength', 'Loaded area length', large], ['gridWidth', 'Loaded area width', large], ['gridOffsetX', 'Lateral offset', large], ['gridOffsetY', 'Longitudinal offset', large], ['gridDivisionsX', 'Grid divisions X'], ['gridDivisionsY', 'Grid divisions Y']]));
   const analysis: Field[] = [['pavementType', 'Pavement'], ['vehicleClass', 'Vehicle class']];
@@ -113,7 +129,7 @@ export function buildReportModel(run: CalculationRun, options: ReportOptions = {
     ['soilPressure_psi', 'Soil pressure', pressure], ['boussinesqMax_psi', 'Maximum Boussinesq pressure', pressure], ['impactFactorDepth', 'Depth impact factor'], ['Kb', 'Bending coefficient Kb'], ['Kz', 'Deflection coefficient Kz'], ['Theta', 'Bedding parameter θ', '°'], ['ePrime_psi', 'Soil reaction modulus E′', pressure],
     ['hoopSoil_psi', 'Hoop stress - soil', pressure], ['hoopLive_psi', 'Hoop stress - live load', pressure], ['hoopInt_psi', 'Hoop stress - internal pressure', pressure], ['longSoil_psi', 'Longitudinal stress - soil', pressure], ['longLive_psi', 'Longitudinal stress - live load', pressure], ['longInt_psi', 'Longitudinal stress - internal pressure', pressure], ['longTherm_psi', 'Longitudinal stress - thermal', pressure],
     // Only the track engine converts this field to kPa; other engines retain psf.
-    ['contactPressure_psf', 'Contact pressure', run.mode === 'PIPELINE_TRACK' && si ? 'kPa' : 'psf'], ['influenceFactor', 'Influence factor'],
+    ['contactPressure_psf', run.mode === 'PIPELINE_TRACK' ? 'Track contact pressure' : 'Load-envelope pressure (approx.; not tire contact)', run.mode === 'PIPELINE_TRACK' && si ? 'kPa' : 'psf'], ['influenceFactor', 'Influence factor'],
     ['bsnqSUM1_psi', 'Boussinesq sum 1', 'psi'], ['bsnqSUM2_psi', 'Boussinesq sum 2', 'psi'], ['axleLoad_lb', 'Axle load', 'lb'], ['pointLoad_lb', 'Point load', 'lb'], ['nW', 'Width subdivisions'], ['nL', 'Length subdivisions'], ['momentMAX_lbin', 'Maximum bending moment', 'lb·in'], ['longLiveLocal_psi', 'Local longitudinal live stress', 'psi'], ['longLiveBend_psi', 'Bending longitudinal live stress', 'psi'],
   ];
   if (Object.keys(debug).length) model.appendix.unshift(table('Intermediate values', debug, debugFields.filter(([key]) => key in debug), 'Stored intermediate values. Units follow each engine’s output convention; field-name suffixes do not always represent the stored units.'));

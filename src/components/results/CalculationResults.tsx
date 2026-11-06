@@ -506,8 +506,8 @@ export const CalculationResults = ({ run, onBack, onEditInputs, onHistory, embed
                               <span>{formatValue(pipelineResult.debug.impactFactorDepth)}</span>
                             </div>
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
-                              <span>Contact Pressure</span>
-                              <span>{formatValue(pipelineResult.debug.contactPressure_psf)} {units.contactPressure}</span>
+                              <span>{run.mode === "PIPELINE_TRACK" ? "Track Contact Pressure" : "Load-envelope Pressure (approx.)"}<InfoTooltip text="For wheeled vehicles, this legacy value uses the overall load envelope, including gaps between wheels. It is not the contact pressure beneath a tire. See the ground contact tables in the PDF for tire pressures." /></span>
+                              <span>{formatValue(pipelineResult.debug.contactPressure_psf)} {run.mode === "PIPELINE_TRACK" ? units.contactPressure : "psf"}</span>
                             </div>
                             <div className="flex justify-between p-2 bg-muted/50 rounded">
                               <span>Influence Factor</span>
